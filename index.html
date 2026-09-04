@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BuyurAbi | Restoran QR Menü & İşletme Kayıt Portalı</title>
-  <meta name="description" content="BuyurAbi ile restoranınızı dijitalleştirin. QR Menü, masadan sipariş ve işletme kayıt portalı.">
+  <title>BuyurAbi | Restoran & İşletme Portal Ekosistemi</title>
+  <meta name="description" content="BuyurAbi ile restoranınızı dijitalleştirin. İşletmeler için QR Menü, masadan sipariş ve kayıt portalı.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -32,22 +32,16 @@
         </div>
       </div>
 
-      <!-- Navigation Links (PUBLIC ONLY - NO ADMIN LINK HERE) -->
+      <!-- Navigation Links (PUBLIC SITE - ONLY TANITIM & KAYIT OL) -->
       <nav class="main-nav">
         <button class="nav-btn active" data-view="landing" id="nav-landing-btn">
           <i data-lucide="sparkles"></i>
           <span>Tanıtım Sayfası</span>
         </button>
 
-        <button class="nav-btn" data-view="menu" id="nav-menu-btn">
-          <i data-lucide="smartphone"></i>
-          <span>Müşteri QR Menü</span>
-          <span class="badge-live-dot"></span>
-        </button>
-
         <button class="nav-btn" data-view="register" id="nav-register-btn">
           <i data-lucide="store"></i>
-          <span>İşletme Kaydı</span>
+          <span>Kayıt Ol</span>
         </button>
       </nav>
 
@@ -67,7 +61,6 @@
   <!-- Main Content Container -->
   <main class="app-main-content">
     <section id="view-landing" class="view-section active"></section>
-    <section id="view-menu" class="view-section"></section>
     <section id="view-register" class="view-section"></section>
   </main>
 

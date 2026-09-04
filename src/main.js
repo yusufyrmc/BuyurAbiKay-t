@@ -1,18 +1,15 @@
 import { store } from './state/store.js';
 import { renderLandingPage } from './components/LandingPage.js';
-import { renderCustomerMenu } from './components/CustomerMenu.js';
 import { renderRegisterPage } from './components/RegisterPage.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const viewSections = {
     landing: document.getElementById('view-landing'),
-    menu: document.getElementById('view-menu'),
     register: document.getElementById('view-register')
   };
 
   const navButtons = {
     landing: document.getElementById('nav-landing-btn'),
-    menu: document.getElementById('nav-menu-btn'),
     register: document.getElementById('nav-register-btn')
   };
 
@@ -35,8 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (targetView === 'landing') {
       renderLandingPage(viewSections.landing);
-    } else if (targetView === 'menu') {
-      renderCustomerMenu(viewSections.menu);
     } else if (targetView === 'register') {
       renderRegisterPage(viewSections.register);
     }
