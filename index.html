@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuyurAbi | Restoran QR Menü & Sipariş Platformu | Kayıt Ol</title>
+  <meta name="description" content="BuyurAbi ile restoranınızı dijitalleştirin. QR Menü, masadan sipariş, kurye ve müşteri kayıt portalı.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <!-- Ambient Background Lights -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-logo" id="logo-btn" title="BuyurAbi Ana Sayfa">
+        <div class="logo-icon">
+          <i data-lucide="qr-code"></i>
+        </div>
+        <div class="logo-text">
+          <span class="brand-name">Buyur<span class="brand-accent">Abi</span></span>
+          <span class="brand-sub">HİZMET & SİPARİŞ PORTALI</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="main-nav">
+        <button class="nav-btn active" data-view="landing" id="nav-landing-btn">
+          <i data-lucide="sparkles"></i>
+          <span>Tanıtım Sayfası</span>
+        </button>
+
+        <button class="nav-btn nav-btn-register" data-view="register" id="nav-register-btn">
+          <i data-lucide="user-plus"></i>
+          <span>Kayıt Ol</span>
+          <span class="badge-live-pulse">Ücretsiz</span>
+        </button>
+      </nav>
+
+      <!-- Quick Action Header Button -->
+      <div class="header-actions">
+        <button class="btn-header-register" id="btn-header-cta">
+          <i data-lucide="zap"></i>
+          <span>Hemen Katıl</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Main Content Container -->
+  <main class="app-main-content">
+    <section id="view-landing" class="view-section active"></section>
+    <section id="view-register" class="view-section"></section>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <div class="logo-icon small">
+          <i data-lucide="qr-code"></i>
+        </div>
+        <span><strong>BuyurAbi</strong> Restoran QR Menü & Dijital Hizmet Ekosistemi © 2026</span>
+      </div>
+      <div class="footer-links">
+        <span><i data-lucide="shield-check"></i> 256-Bit SSL Güvenli Kayıt</span>
+        <span><i data-lucide="headphones"></i> 7/24 Destek: 0850 300 28 99</span>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
