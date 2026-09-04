@@ -6,6 +6,8 @@ export function renderRegisterPage(container) {
     businessName: '',
     fullName: '',
     businessType: 'Restoran & Lokanta',
+    plan: 'Profesyonel Paket (₺899/ay)',
+    planPrice: 899,
     phone: '',
     city: 'İstanbul',
     fullAddress: '',
@@ -53,7 +55,7 @@ export function renderRegisterPage(container) {
             </div>
           </div>
 
-          <!-- STEP 1: BUSINESS & OWNER DETAILS -->
+          <!-- STEP 1: BUSINESS DETAILS & PLAN SELECTION -->
           ${currentStep === 1 ? `
             <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
               <div style="width:40px; height:40px; background:var(--color-primary-light); color:var(--color-primary); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center;">
@@ -61,7 +63,7 @@ export function renderRegisterPage(container) {
               </div>
               <h2 class="wizard-title" style="margin:0;">Restoran & İşletme Kaydı</h2>
             </div>
-            <p class="wizard-subtitle">BuyurAbi ekosistemine katılmak için işletme bilgilerinizi doldurun.</p>
+            <p class="wizard-subtitle">İşletme bilgilerinizi girin ve dilediğiniz aylık planı seçin.</p>
 
             <div class="form-group-row">
               <div class="form-field">
@@ -83,6 +85,32 @@ export function renderRegisterPage(container) {
               </div>
             </div>
 
+            <!-- MONTHLY PLAN SELECTION CARDS -->
+            <div style="margin-bottom:1.5rem;">
+              <label class="form-label" style="margin-bottom:0.6rem;"><i data-lucide="credit-card"></i> Aylık Kullanım Planı Seçin</label>
+              
+              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.85rem;">
+                <div class="role-select-card ${formData.planPrice === 499 ? 'selected' : ''}" data-plan="Başlangıç Paketi (₺499/ay)" data-price="499" style="padding:1rem 0.6rem;">
+                  <div style="font-size:1.2rem; margin-bottom:4px;">🥉</div>
+                  <strong style="font-size:0.88rem; color:#fff; display:block;">Başlangıç</strong>
+                  <span style="font-size:0.95rem; font-weight:800; color:var(--color-primary);">₺499 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
+                </div>
+
+                <div class="role-select-card ${formData.planPrice === 899 ? 'selected' : ''}" data-plan="Profesyonel Paket (₺899/ay)" data-price="899" style="padding:1rem 0.6rem; position:relative;">
+                  <div style="position:absolute; top:-10px; right:10px; background:var(--color-primary); color:#fff; font-size:0.6rem; font-weight:800; padding:2px 6px; border-radius:10px;">POPÜLER</div>
+                  <div style="font-size:1.2rem; margin-bottom:4px;">🥈</div>
+                  <strong style="font-size:0.88rem; color:#fff; display:block;">Profesyonel</strong>
+                  <span style="font-size:0.95rem; font-weight:800; color:var(--color-accent-green);">₺899 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
+                </div>
+
+                <div class="role-select-card ${formData.planPrice === 1499 ? 'selected' : ''}" data-plan="Kurumsal Paket (₺1.499/ay)" data-price="1499" style="padding:1rem 0.6rem;">
+                  <div style="font-size:1.2rem; margin-bottom:4px;">🥇</div>
+                  <strong style="font-size:0.88rem; color:#fff; display:block;">Kurumsal</strong>
+                  <span style="font-size:0.95rem; font-weight:800; color:var(--color-accent-cyan);">₺1.499 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
+                </div>
+              </div>
+            </div>
+
             <div class="form-group-row">
               <div class="form-field">
                 <label class="form-label"><i data-lucide="user"></i> Yetkili Ad Soyad</label>
@@ -95,7 +123,7 @@ export function renderRegisterPage(container) {
               </div>
             </div>
 
-            <button class="btn-primary-hero" id="btn-step1-next" style="width:100%; justify-content:center; margin-top:1rem;">
+            <button class="btn-primary-hero" id="btn-step1-next" style="width:100%; justify-content:center; margin-top:0.5rem;">
               Adres Bilgilerine Geç <i data-lucide="arrow-right"></i>
             </button>
           ` : ''}
@@ -197,7 +225,7 @@ export function renderRegisterPage(container) {
 
               <h2 class="wizard-title" style="color:var(--color-accent-green);">Başvurunuz Alındı! 🎉</h2>
               <p class="wizard-subtitle" style="font-size:1.05rem; max-width:520px; margin:0 auto 2rem auto;">
-                <strong>${formData.businessName}</strong> işletme başvurunuz sistem yöneticisine iletildi. İncelemenin ardından hesabınız aktifleştirilecektir.
+                <strong>${formData.businessName}</strong> işletme başvurunuz (${formData.plan}) sistem yöneticisine iletildi.
               </p>
 
               <button class="btn-primary-hero" id="btn-finish-go-home" style="width:100%; justify-content:center;">
@@ -227,6 +255,7 @@ export function renderRegisterPage(container) {
             </div>
 
             <div class="badge-info-list">
+              <div><strong>Seçilen Paket:</strong> <span style="color:var(--color-accent-green); font-weight:800;" id="badge-disp-plan">${formData.plan}</span></div>
               <div><strong>Yetkili:</strong> <span id="badge-disp-fullname">${formData.fullName || 'Ad Soyad'}</span></div>
               <div><strong>Telefon:</strong> <span id="badge-disp-phone">${formData.phone || '0555 *** ** **'}</span></div>
               <div><strong>Şehir:</strong> <span id="badge-disp-city">${formData.city}</span></div>
@@ -243,8 +272,7 @@ export function renderRegisterPage(container) {
 
     if (window.lucide) window.lucide.createIcons();
 
-    // Attach Event Listeners based on current step
-
+    // Event Bindings
     if (currentStep === 1) {
       const bnInput = container.querySelector('#reg-businessname');
       const btSelect = container.querySelector('#reg-businesstype');
@@ -261,6 +289,14 @@ export function renderRegisterPage(container) {
         formData.businessType = e.target.value;
         const disp = container.querySelector('#badge-disp-type');
         if (disp) disp.textContent = '🏬 ' + formData.businessType;
+      });
+
+      container.querySelectorAll('.role-select-card[data-plan]').forEach(card => {
+        card.addEventListener('click', (e) => {
+          formData.plan = e.currentTarget.dataset.plan;
+          formData.planPrice = Number(e.currentTarget.dataset.price);
+          updateView();
+        });
       });
 
       fnInput?.addEventListener('input', (e) => {
@@ -315,7 +351,6 @@ export function renderRegisterPage(container) {
     }
 
     if (currentStep === 3) {
-      // INLINE PASSWORD EVENT LISTENER - FIXES FOCUS LOSS BUG PERFECTLY!
       const passInput = container.querySelector('#reg-password');
       
       passInput?.addEventListener('input', (e) => {
@@ -346,11 +381,12 @@ export function renderRegisterPage(container) {
 
     if (currentStep === 4) {
       container.querySelector('#btn-verify-otp')?.addEventListener('click', () => {
-        // Save registration to store so Owner Admin can view & approve!
         store.addRegistration({
           businessName: formData.businessName,
           fullName: formData.fullName,
           businessType: formData.businessType,
+          plan: formData.plan,
+          planPrice: formData.planPrice,
           phone: formData.phone,
           city: formData.city,
           fullAddress: formData.fullAddress
