@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BuyurAbi | Restoran QR Menü & Sipariş Platformu | Kayıt Ol</title>
-  <meta name="description" content="BuyurAbi ile restoranınızı dijitalleştirin. QR Menü, masadan sipariş, kurye ve müşteri kayıt portalı.">
+  <title>BuyurAbi | Restoran & İşletme Kayıt Portalı</title>
+  <meta name="description" content="BuyurAbi ile restoranınızı dijitalleştirin. QR Menü, masadan sipariş ve işletme kayıt portalı.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
         </div>
         <div class="logo-text">
           <span class="brand-name">Buyur<span class="brand-accent">Abi</span></span>
-          <span class="brand-sub">HİZMET & SİPARİŞ PORTALI</span>
+          <span class="brand-sub">RESTORAN & SİPARİŞ PORTALI</span>
         </div>
       </div>
 
@@ -39,10 +39,15 @@
           <span>Tanıtım Sayfası</span>
         </button>
 
-        <button class="nav-btn nav-btn-register" data-view="register" id="nav-register-btn">
-          <i data-lucide="user-plus"></i>
-          <span>Kayıt Ol</span>
-          <span class="badge-live-pulse">Ücretsiz</span>
+        <button class="nav-btn" data-view="register" id="nav-register-btn">
+          <i data-lucide="store"></i>
+          <span>İşletme Kaydı</span>
+        </button>
+
+        <button class="nav-btn nav-btn-admin" data-view="owner-admin" id="nav-owner-admin-btn">
+          <i data-lucide="shield-check"></i>
+          <span>Admin Onay Paneli</span>
+          <span class="admin-orders-badge" id="header-pending-badge">0</span>
         </button>
       </nav>
 
@@ -50,7 +55,7 @@
       <div class="header-actions">
         <button class="btn-header-register" id="btn-header-cta">
           <i data-lucide="zap"></i>
-          <span>Hemen Katıl</span>
+          <span>İşletmeni Kaydet</span>
         </button>
       </div>
     </div>
@@ -63,6 +68,7 @@
   <main class="app-main-content">
     <section id="view-landing" class="view-section active"></section>
     <section id="view-register" class="view-section"></section>
+    <section id="view-owner-admin" class="view-section"></section>
   </main>
 
   <!-- Global Footer -->
@@ -72,7 +78,7 @@
         <div class="logo-icon small">
           <i data-lucide="qr-code"></i>
         </div>
-        <span><strong>BuyurAbi</strong> Restoran QR Menü & Dijital Hizmet Ekosistemi © 2026</span>
+        <span><strong>BuyurAbi</strong> Restoran QR Menü & İşletme Portal Ekosistemi © 2026</span>
       </div>
       <div class="footer-links">
         <span><i data-lucide="shield-check"></i> 256-Bit SSL Güvenli Kayıt</span>

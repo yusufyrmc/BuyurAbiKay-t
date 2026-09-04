@@ -1,16 +1,19 @@
 import { store } from './state/store.js';
 import { renderLandingPage } from './components/LandingPage.js';
 import { renderRegisterPage } from './components/RegisterPage.js';
+import { renderOwnerAdminPanel } from './components/OwnerAdminPanel.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const viewSections = {
     landing: document.getElementById('view-landing'),
-    register: document.getElementById('view-register')
+    register: document.getElementById('view-register'),
+    'owner-admin': document.getElementById('view-owner-admin')
   };
 
   const navButtons = {
     landing: document.getElementById('nav-landing-btn'),
-    register: document.getElementById('nav-register-btn')
+    register: document.getElementById('nav-register-btn'),
+    'owner-admin': document.getElementById('nav-owner-admin-btn')
   };
 
   function switchView(targetView) {
@@ -34,10 +37,21 @@ document.addEventListener('DOMContentLoaded', () => {
       renderLandingPage(viewSections.landing);
     } else if (targetView === 'register') {
       renderRegisterPage(viewSections.register);
+    } else if (targetView === 'owner-admin') {
+      renderOwnerAdminPanel(viewSections['owner-admin']);
     }
 
     if (window.lucide) {
       window.lucide.createIcons();
+    }
+  }
+
+  function updateNavBadges() {
+    const pendingCount = store.getPendingCount();
+    const badge = document.getElementById('header-pending-badge');
+    if (badge) {
+      badge.textContent = pendingCount;
+      badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
     }
   }
 
@@ -60,11 +74,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Subscribe to store updates
   store.subscribe((state) => {
+    updateNavBadges();
     if (state.activeView) {
       switchView(state.activeView);
     }
   });
 
   // Initial setup
+  updateNavBadges();
   switchView(store.activeView || 'landing');
 });
