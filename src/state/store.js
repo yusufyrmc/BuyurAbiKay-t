@@ -1,8 +1,10 @@
+import { INITIAL_MENU_ITEMS, INITIAL_ORDERS, INITIAL_WAITER_REQUESTS, TABLES_LIST } from '../data/mockData.js';
+
 class AppStore {
   constructor() {
     this.listeners = [];
     
-    // Load or initialize restaurant registrations
+    // 1. Restaurant Registrations
     const savedRegs = localStorage.getItem('buyurabi_restaurant_registrations');
     this.registrations = savedRegs ? JSON.parse(savedRegs) : [
       {
@@ -13,7 +15,7 @@ class AppStore {
         phone: '0532 555 44 33',
         city: 'İstanbul / Kadıköy',
         fullAddress: 'Caferağa Mah. Moda Cad. No:84/A Kadıköy',
-        status: 'bekliyor', // bekliyor | onaylandi | reddedildi
+        status: 'bekliyor',
         createdAt: '10 dk önce',
         timestamp: Date.now() - 10 * 60 * 1000
       },
@@ -43,9 +45,22 @@ class AppStore {
       }
     ];
 
-    // Active View state: 'landing' | 'register' | 'owner-admin'
+    // 2. Orders & Kitchen Data
+    const savedOrders = localStorage.getItem('buyurabi_orders');
+    this.orders = savedOrders ? JSON.parse(savedOrders) : [...INITIAL_ORDERS];
+    
+    const savedRequests = localStorage.getItem('buyurabi_waiter_requests');
+    this.waiterRequests = savedRequests ? JSON.parse(savedRequests) : [...INITIAL_WAITER_REQUESTS];
+    
+    const savedMenu = localStorage.getItem('buyurabi_menu');
+    this.menuItems = savedMenu ? JSON.parse(savedMenu) : [...INITIAL_MENU_ITEMS];
+    
+    this.tables = [...TABLES_LIST];
+    
+    this.soundEnabled = true;
     this.activeView = 'landing';
-    this.adminUnlocked = false; // PIN Protection flag
+    this.adminUnlocked = true; // Always unlocked by default for instant access!
+    this.adminTab = 'registrations'; // 'registrations' | 'kitchen' | 'menu' | 'qr'
   }
 
   subscribe(listener) {
@@ -62,11 +77,43 @@ class AppStore {
 
   saveState() {
     localStorage.setItem('buyurabi_restaurant_registrations', JSON.stringify(this.registrations));
+    localStorage.setItem('buyurabi_orders', JSON.stringify(this.orders));
+    localStorage.setItem('buyurabi_waiter_requests', JSON.stringify(this.waiterRequests));
+    localStorage.setItem('buyurabi_menu', JSON.stringify(this.menuItems));
   }
 
   setView(viewName) {
     this.activeView = viewName;
     this.notify();
+  }
+
+  setAdminTab(tabName) {
+    this.adminTab = tabName;
+    this.notify();
+  }
+
+  // --- Sound Alert System ---
+  playAlertSound(type = 'new_order') {
+    if (!this.soundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.5);
+    } catch (e) {
+      console.warn("Audio Context error", e);
+    }
   }
 
   // --- Registration Actions ---
@@ -79,6 +126,7 @@ class AppStore {
       ...regData
     };
     this.registrations.unshift(newReg);
+    this.playAlertSound('new_order');
     this.notify();
     return newReg;
   }
@@ -106,6 +154,55 @@ class AppStore {
 
   getPendingCount() {
     return this.registrations.filter(r => r.status === 'bekliyor').length;
+  }
+
+  // --- Kitchen & Order Actions ---
+  updateOrderStatus(orderId, newStatus) {
+    const order = this.orders.find(o => o.id === orderId);
+    if (order) {
+      order.status = newStatus;
+      this.notify();
+    }
+  }
+
+  dismissWaiterRequest(reqId) {
+    this.waiterRequests = this.waiterRequests.filter(r => r.id !== reqId);
+    this.notify();
+  }
+
+  toggleItemAvailability(itemId) {
+    const item = this.menuItems.find(i => i.id === itemId);
+    if (item) {
+      item.available = !item.available;
+      this.notify();
+    }
+  }
+
+  addTestOrder() {
+    const randomTableId = Math.floor(1 + Math.random() * 6);
+    const item1 = this.menuItems[0];
+    const item2 = this.menuItems[7];
+
+    const newOrder = {
+      id: "ORD-" + Math.floor(1000 + Math.random() * 9000),
+      tableId: randomTableId,
+      tableName: `Masa ${randomTableId}`,
+      customerName: "Canlı Müşteri",
+      time: "Az önce",
+      timestamp: Date.now(),
+      status: "yeni",
+      items: [
+        { id: item1.id, name: item1.name, price: item1.price, qty: 1, note: "Bol acılı" },
+        { id: item2.id, name: item2.name, price: item2.price, qty: 2, note: "Buzlu" }
+      ],
+      totalPrice: item1.price + (item2.price * 2),
+      paymentMethod: "Masada Kredi Kartı",
+      orderNote: "Test siparişi"
+    };
+
+    this.orders.unshift(newOrder);
+    this.playAlertSound('new_order');
+    this.notify();
   }
 }
 

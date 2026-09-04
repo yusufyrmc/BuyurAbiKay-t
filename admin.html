@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuyurAbi | Gizli Admin & Yönetim Paneli</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <!-- Ambient Background Lights -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Admin Standalone Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-logo" title="BuyurAbi Admin Paneli">
+        <div class="logo-icon">
+          <i data-lucide="shield-check"></i>
+        </div>
+        <div class="logo-text">
+          <span class="brand-name">Buyur<span class="brand-accent">Abi</span></span>
+          <span class="brand-sub">GİZLİ ADMİN KONTROL MERKEZİ</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a href="/index.html" class="btn-secondary-hero" style="font-size:0.82rem; padding:0.5rem 1rem; text-decoration:none;">
+          <i data-lucide="external-link"></i> Ana Sayfaya Git
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Main Content Container for Admin Panel -->
+  <main class="app-main-content">
+    <section id="view-owner-admin" class="view-section active"></section>
+  </main>
+
+  <script type="module" src="/src/admin.js"></script>
+</body>
+</html>

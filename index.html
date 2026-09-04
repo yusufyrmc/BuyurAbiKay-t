@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BuyurAbi | Restoran & İşletme Kayıt Portalı</title>
+  <title>BuyurAbi | Restoran QR Menü & İşletme Kayıt Portalı</title>
   <meta name="description" content="BuyurAbi ile restoranınızı dijitalleştirin. QR Menü, masadan sipariş ve işletme kayıt portalı.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,22 +32,22 @@
         </div>
       </div>
 
-      <!-- Navigation Links -->
+      <!-- Navigation Links (PUBLIC ONLY - NO ADMIN LINK HERE) -->
       <nav class="main-nav">
         <button class="nav-btn active" data-view="landing" id="nav-landing-btn">
           <i data-lucide="sparkles"></i>
           <span>Tanıtım Sayfası</span>
         </button>
 
+        <button class="nav-btn" data-view="menu" id="nav-menu-btn">
+          <i data-lucide="smartphone"></i>
+          <span>Müşteri QR Menü</span>
+          <span class="badge-live-dot"></span>
+        </button>
+
         <button class="nav-btn" data-view="register" id="nav-register-btn">
           <i data-lucide="store"></i>
           <span>İşletme Kaydı</span>
-        </button>
-
-        <button class="nav-btn nav-btn-admin" data-view="owner-admin" id="nav-owner-admin-btn">
-          <i data-lucide="shield-check"></i>
-          <span>Admin Onay Paneli</span>
-          <span class="admin-orders-badge" id="header-pending-badge">0</span>
         </button>
       </nav>
 
@@ -67,8 +67,8 @@
   <!-- Main Content Container -->
   <main class="app-main-content">
     <section id="view-landing" class="view-section active"></section>
+    <section id="view-menu" class="view-section"></section>
     <section id="view-register" class="view-section"></section>
-    <section id="view-owner-admin" class="view-section"></section>
   </main>
 
   <!-- Global Footer -->
