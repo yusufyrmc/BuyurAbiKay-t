@@ -6,7 +6,7 @@ export function renderRegisterPage(container) {
     businessName: '',
     fullName: '',
     businessType: 'Restoran & Lokanta',
-    plan: 'Profesyonel Paket (₺899/ay)',
+    plan: 'Profesyonel Paket (₺1000/ay)',
     planPrice: 899,
     phone: '',
     city: 'İstanbul',
@@ -90,20 +90,20 @@ export function renderRegisterPage(container) {
               <label class="form-label" style="margin-bottom:0.6rem;"><i data-lucide="credit-card"></i> Aylık Kullanım Planı Seçin</label>
               
               <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.85rem;">
-                <div class="role-select-card ${formData.planPrice === 499 ? 'selected' : ''}" data-plan="Başlangıç Paketi (₺499/ay)" data-price="499" style="padding:1rem 0.6rem;">
+                <div class="role-select-card ${formData.planPrice === 800 ? 'selected' : ''}" data-plan="Başlangıç Paketi (₺499/ay)" data-price="499" style="padding:1rem 0.6rem;">
                   <div style="font-size:1.2rem; margin-bottom:4px;">🥉</div>
                   <strong style="font-size:0.88rem; color:#fff; display:block;">Başlangıç</strong>
                   <span style="font-size:0.95rem; font-weight:800; color:var(--color-primary);">₺499 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
                 </div>
 
-                <div class="role-select-card ${formData.planPrice === 899 ? 'selected' : ''}" data-plan="Profesyonel Paket (₺899/ay)" data-price="899" style="padding:1rem 0.6rem; position:relative;">
+                <div class="role-select-card ${formData.planPrice === 1000 ? 'selected' : ''}" data-plan="Profesyonel Paket (₺899/ay)" data-price="899" style="padding:1rem 0.6rem; position:relative;">
                   <div style="position:absolute; top:-10px; right:10px; background:var(--color-primary); color:#fff; font-size:0.6rem; font-weight:800; padding:2px 6px; border-radius:10px;">POPÜLER</div>
                   <div style="font-size:1.2rem; margin-bottom:4px;">🥈</div>
                   <strong style="font-size:0.88rem; color:#fff; display:block;">Profesyonel</strong>
                   <span style="font-size:0.95rem; font-weight:800; color:var(--color-accent-green);">₺899 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
                 </div>
 
-                <div class="role-select-card ${formData.planPrice === 1499 ? 'selected' : ''}" data-plan="Kurumsal Paket (₺1.499/ay)" data-price="1499" style="padding:1rem 0.6rem;">
+                <div class="role-select-card ${formData.planPrice === 2000 ? 'selected' : ''}" data-plan="Kurumsal Paket (₺1.499/ay)" data-price="1499" style="padding:1rem 0.6rem;">
                   <div style="font-size:1.2rem; margin-bottom:4px;">🥇</div>
                   <strong style="font-size:0.88rem; color:#fff; display:block;">Kurumsal</strong>
                   <span style="font-size:0.95rem; font-weight:800; color:var(--color-accent-cyan);">₺1.499 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
@@ -352,14 +352,14 @@ export function renderRegisterPage(container) {
 
     if (currentStep === 3) {
       const passInput = container.querySelector('#reg-password');
-      
+
       passInput?.addEventListener('input', (e) => {
         formData.password = e.target.value;
         const strength = calculatePasswordStrength(formData.password);
-        
+
         const fillEl = container.querySelector('#password-meter-fill-el');
         const textEl = container.querySelector('#password-strength-text-el');
-        
+
         if (fillEl) fillEl.className = `password-meter-fill ${strength.class}`;
         if (textEl) textEl.textContent = formData.password ? `Şifre Gücü: ${strength.text}` : '';
       });
@@ -412,13 +412,13 @@ export function renderRegisterPage(container) {
 function showToast(message, type = 'info') {
   const container = document.getElementById('toast-container');
   if (!container) return;
-  
+
   const toast = document.createElement('div');
   toast.className = 'toast-message';
   if (type === 'error') toast.style.borderLeftColor = 'var(--color-danger)';
   toast.innerHTML = message;
   container.appendChild(toast);
-  
+
   setTimeout(() => {
     toast.remove();
   }, 4000);
