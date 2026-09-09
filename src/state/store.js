@@ -234,11 +234,14 @@ class AppStore {
     this.notify();
 
     // 2. Persist to Supabase using upsert
+    console.log('addRegistration triggered:', newReg, 'supabaseConnected:', this.supabaseConnected);
     if (this.supabaseConnected && supabase) {
       try {
-        const { error } = await supabase
+        const dbRow = this.toDbRow(newReg);
+        console.log('Sending to Supabase registrations table:', dbRow);
+        const { data, error } = await supabase
           .from('registrations')
-          .upsert([this.toDbRow(newReg)]);
+          .upsert([dbRow], { onConflict: 'id' });
 
         if (error) {
           console.error('Supabase insert error:', error.message);
@@ -246,12 +249,15 @@ class AppStore {
           this.notify();
           return { success: false, reg: newReg, error: error.message };
         } else {
+          console.log('Registration successfully saved to Supabase!');
           this.lastSupabaseError = null;
         }
       } catch (err) {
         console.error('Supabase client error:', err);
         return { success: false, reg: newReg, error: err.message };
       }
+    } else {
+      console.warn('Supabase not connected. Registration saved to local storage.');
     }
 
     return { success: true, reg: newReg };

@@ -22,7 +22,10 @@ export function renderOwnerAdminPanel(container) {
           <p style="color:var(--color-text-muted); font-size:0.88rem; margin-bottom:1.8rem;">Gelen başvuruları ve aylık planları görmek için yönetim şifrenizi girin.</p>
 
           <div style="margin-bottom:1.5rem;">
-            <input type="password" id="admin-pass-input" placeholder="Yönetici Şifresi (Örn: 123456)" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); padding:1rem; border-radius:var(--radius-md); text-align:center; font-size:1.4rem; letter-spacing:6px; color:#fff; font-weight:800;">
+            <input type="password" id="admin-pass-input" placeholder="Yönetici Şifresi (Örn: 123456)" value="123456" style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); padding:1rem; border-radius:var(--radius-md); text-align:center; font-size:1.4rem; letter-spacing:6px; color:#fff; font-weight:800;">
+            <div style="font-size:0.8rem; color:var(--color-text-muted); margin-top:0.5rem;">
+              Varsayılan Yönetici Şifresi: <strong style="color:var(--color-primary);">123456</strong>
+            </div>
           </div>
 
           <button id="btn-unlock-admin" class="btn-primary-hero" style="width:100%; justify-content:center;">

@@ -1,12 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const getEnvVar = (key) => {
-  const val = import.meta.env[key];
-  return val ? val.trim().replace(/^["']|["']$/g, '') : '';
-};
-
-export const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
-export const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
+export const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim().replace(/^["']|["']$/g, '');
+export const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim().replace(/^["']|["']$/g, '');
 
 export const isSupabaseConfigured = () => {
   return (
