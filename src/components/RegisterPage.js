@@ -380,8 +380,8 @@ export function renderRegisterPage(container) {
     }
 
     if (currentStep === 4) {
-      container.querySelector('#btn-verify-otp')?.addEventListener('click', () => {
-        store.addRegistration({
+      container.querySelector('#btn-verify-otp')?.addEventListener('click', async () => {
+        await store.addRegistration({
           businessName: formData.businessName,
           fullName: formData.fullName,
           businessType: formData.businessType,
@@ -395,7 +395,7 @@ export function renderRegisterPage(container) {
         currentStep = 5;
         updateView();
         triggerConfetti();
-        showToast('🎉 İşletme başvurunuz admin paneline iletildi!', 'success');
+        showToast('🎉 İşletme başvurunuz veritabanına ve admin paneline iletildi!', 'success');
       });
     }
 

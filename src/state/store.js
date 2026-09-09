@@ -1,8 +1,11 @@
+import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
+
 class AppStore {
   constructor() {
     this.listeners = [];
+    this.supabaseConnected = isSupabaseConfigured();
     
-    // Restaurant Registrations with selected monthly plans
+    // Restaurant Registrations fallback mock/localStorage data
     const savedRegs = localStorage.getItem('buyurabi_restaurant_registrations');
     this.registrations = savedRegs ? JSON.parse(savedRegs) : [
       {
@@ -52,6 +55,68 @@ class AppStore {
     this.activeView = 'landing';
     this.adminUnlocked = sessionStorage.getItem('buyurabi_admin_session') === 'true';
     this.adminPassword = '123456';
+
+    if (this.supabaseConnected) {
+      this.initSupabase();
+    }
+  }
+
+  async initSupabase() {
+    await this.fetchRegistrations();
+    this.setupRealtimeSubscription();
+  }
+
+  async fetchRegistrations() {
+    if (!supabase) return;
+    try {
+      const { data, error } = await supabase
+        .from('registrations')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.warn('Supabase kayıtları çekilirken hata oluştu, yerel veri kullanılıyor:', error.message);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        this.registrations = data.map(item => ({
+          id: item.id,
+          businessName: item.business_name,
+          fullName: item.full_name,
+          businessType: item.business_type,
+          phone: item.phone,
+          city: item.city,
+          fullAddress: item.full_address,
+          plan: item.plan,
+          planPrice: Number(item.plan_price || 899),
+          status: item.status || 'bekliyor',
+          createdAt: item.created_at || 'Yeni',
+          timestamp: Number(item.timestamp || Date.now())
+        }));
+        this.notify();
+      }
+    } catch (err) {
+      console.error('Supabase bağlantı hatası:', err);
+    }
+  }
+
+  setupRealtimeSubscription() {
+    if (!supabase) return;
+    try {
+      supabase
+        .channel('registrations-channel')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'registrations' },
+          () => {
+            this.fetchRegistrations();
+          }
+        )
+        .subscribe();
+    } catch (err) {
+      console.warn('Supabase Realtime aboneliği başlatılamadı:', err);
+    }
   }
 
   subscribe(listener) {
@@ -92,7 +157,7 @@ class AppStore {
   }
 
   // --- Registration Actions ---
-  addRegistration(regData) {
+  async addRegistration(regData) {
     const newReg = {
       id: 'REG-' + Math.floor(1000 + Math.random() * 9000),
       status: 'bekliyor',
@@ -100,30 +165,96 @@ class AppStore {
       timestamp: Date.now(),
       ...regData
     };
+
+    // 1. Add locally first for instant UI response
     this.registrations.unshift(newReg);
     this.notify();
+
+    // 2. Persist to Supabase if configured
+    if (this.supabaseConnected && supabase) {
+      try {
+        const { error } = await supabase
+          .from('registrations')
+          .insert([
+            {
+              id: newReg.id,
+              business_name: newReg.businessName,
+              full_name: newReg.fullName,
+              business_type: newReg.businessType,
+              phone: newReg.phone,
+              city: newReg.city,
+              full_address: newReg.fullAddress,
+              plan: newReg.plan,
+              plan_price: newReg.planPrice,
+              status: newReg.status,
+              created_at: newReg.createdAt,
+              timestamp: newReg.timestamp
+            }
+          ]);
+
+        if (error) {
+          console.error('Supabase ekleme hatası:', error.message);
+        }
+      } catch (err) {
+        console.error('Supabase istemci hatası:', err);
+      }
+    }
+
     return newReg;
   }
 
-  approveRegistration(id) {
+  async approveRegistration(id) {
     const reg = this.registrations.find(r => r.id === id);
     if (reg) {
       reg.status = 'onaylandi';
       this.notify();
+
+      if (this.supabaseConnected && supabase) {
+        try {
+          await supabase
+            .from('registrations')
+            .update({ status: 'onaylandi' })
+            .eq('id', id);
+        } catch (err) {
+          console.error('Supabase güncelleme hatası:', err);
+        }
+      }
     }
   }
 
-  rejectRegistration(id) {
+  async rejectRegistration(id) {
     const reg = this.registrations.find(r => r.id === id);
     if (reg) {
       reg.status = 'reddedildi';
       this.notify();
+
+      if (this.supabaseConnected && supabase) {
+        try {
+          await supabase
+            .from('registrations')
+            .update({ status: 'reddedildi' })
+            .eq('id', id);
+        } catch (err) {
+          console.error('Supabase güncelleme hatası:', err);
+        }
+      }
     }
   }
 
-  deleteRegistration(id) {
+  async deleteRegistration(id) {
     this.registrations = this.registrations.filter(r => r.id !== id);
     this.notify();
+
+    if (this.supabaseConnected && supabase) {
+      try {
+        await supabase
+          .from('registrations')
+          .delete()
+          .eq('id', id);
+      } catch (err) {
+        console.error('Supabase silme hatası:', err);
+      }
+    }
   }
 
   getPendingCount() {
@@ -138,3 +269,4 @@ class AppStore {
 }
 
 export const store = new AppStore();
+

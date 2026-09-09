@@ -71,9 +71,20 @@ export function renderOwnerAdminPanel(container) {
                 İşletme Başvuru & Aylık Plan Yönetimi
               </h1>
             </div>
-            <p style="color:var(--color-text-muted); font-size:0.9rem; margin-left:50px;">
-              Gelen restoran başvurularını, seçtikleri paketleri inceleyin ve onaylayın.
-            </p>
+            <div style="display:flex; align-items:center; gap:0.8rem; margin-left:50px; margin-top:0.2rem;">
+              <p style="color:var(--color-text-muted); font-size:0.9rem; margin:0;">
+                Gelen restoran başvurularını, seçtikleri paketleri inceleyin ve onaylayın.
+              </p>
+              ${store.supabaseConnected ? `
+                <span title="Supabase Veritabanı Canlı Bağlı" style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-size:0.75rem; font-weight:800; padding:2px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:4px;">
+                  <span style="width:7px; height:7px; background:var(--color-accent-green); border-radius:50%; display:inline-block; box-shadow:0 0 8px var(--color-accent-green);"></span> Supabase Canlı DB
+                </span>
+              ` : `
+                <span title=".env dosyasına Supabase URL ve Key girildiğinde otomatik olarak canlı veritabanına bağlanır." style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:var(--color-accent-yellow); font-size:0.75rem; font-weight:800; padding:2px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:4px;">
+                  <span style="width:7px; height:7px; background:var(--color-accent-yellow); border-radius:50%; display:inline-block;"></span> Yerel Depolama Modu
+                </span>
+              `}
+            </div>
           </div>
 
           <button id="btn-lock-admin" class="btn-secondary-hero" style="padding:0.6rem 1.2rem; font-size:0.85rem;">
