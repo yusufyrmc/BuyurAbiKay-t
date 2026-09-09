@@ -1,7 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const getEnvVar = (key) => {
+  const val = import.meta.env[key];
+  return val ? val.trim().replace(/^["']|["']$/g, '') : '';
+};
+
+export const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
+export const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 
 export const isSupabaseConfigured = () => {
   return (
@@ -14,5 +19,10 @@ export const isSupabaseConfigured = () => {
 };
 
 export const supabase = isSupabaseConfigured()
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false
+      }
+    })
   : null;
+

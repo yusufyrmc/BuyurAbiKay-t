@@ -70,18 +70,18 @@ class AppStore {
   // Helper to format object for Supabase table row
   toDbRow(reg) {
     return {
-      id: reg.id,
-      business_name: reg.businessName,
-      full_name: reg.fullName,
-      business_type: reg.businessType,
-      phone: reg.phone,
-      city: reg.city,
-      full_address: reg.fullAddress,
-      plan: reg.plan,
-      plan_price: reg.planPrice,
-      status: reg.status,
-      created_at: reg.createdAt,
-      timestamp: reg.timestamp
+      id: String(reg.id),
+      business_name: reg.businessName || '',
+      full_name: reg.fullName || '',
+      business_type: reg.businessType || 'Restoran',
+      phone: reg.phone || '',
+      city: reg.city || '',
+      full_address: reg.fullAddress || '',
+      plan: reg.plan || 'Profesyonel Paket (₺899/ay)',
+      plan_price: Number(reg.planPrice || 899),
+      status: reg.status || 'bekliyor',
+      created_at: reg.createdAt || 'Yeni',
+      timestamp: Number(reg.timestamp || Date.now())
     };
   }
 
@@ -119,7 +119,7 @@ class AppStore {
         }));
         this.notify();
       } else {
-        // If Supabase table is empty, seed existing registrations into Supabase
+        // If Supabase table is empty, seed existing sample registrations into Supabase
         const dbRows = this.registrations.map(r => this.toDbRow(r));
         const { error: seedError } = await supabase.from('registrations').upsert(dbRows);
         if (seedError) {
@@ -127,6 +127,27 @@ class AppStore {
           this.lastSupabaseError = seedError.message;
         } else {
           console.log('Supabase initialized with sample data successfully.');
+          // Re-fetch to synchronize state
+          const { data: refetchedData } = await supabase
+            .from('registrations')
+            .select('*')
+            .order('timestamp', { ascending: false });
+          if (refetchedData && refetchedData.length > 0) {
+            this.registrations = refetchedData.map(item => ({
+              id: item.id,
+              businessName: item.business_name,
+              fullName: item.full_name,
+              businessType: item.business_type,
+              phone: item.phone,
+              city: item.city,
+              fullAddress: item.full_address,
+              plan: item.plan,
+              planPrice: Number(item.plan_price || 899),
+              status: item.status || 'bekliyor',
+              createdAt: item.created_at || 'Yeni',
+              timestamp: Number(item.timestamp || Date.now())
+            }));
+          }
         }
         this.notify();
       }
@@ -149,7 +170,13 @@ class AppStore {
             this.fetchRegistrations();
           }
         )
-        .subscribe();
+        .subscribe((status, err) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Supabase Realtime yayınına başarıyla bağlandı.');
+          } else if (err || status === 'CHANNEL_ERROR') {
+            console.warn('Supabase Realtime kanal uyarısı:', status, err);
+          }
+        });
     } catch (err) {
       console.warn('Supabase Realtime subscription error:', err);
     }

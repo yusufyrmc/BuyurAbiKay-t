@@ -381,7 +381,13 @@ export function renderRegisterPage(container) {
 
     if (currentStep === 4) {
       container.querySelector('#btn-verify-otp')?.addEventListener('click', async () => {
-        await store.addRegistration({
+        const btn = container.querySelector('#btn-verify-otp');
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '⏳ Gönderiliyor...';
+        }
+
+        const res = await store.addRegistration({
           businessName: formData.businessName,
           fullName: formData.fullName,
           businessType: formData.businessType,
@@ -391,6 +397,16 @@ export function renderRegisterPage(container) {
           city: formData.city,
           fullAddress: formData.fullAddress
         });
+
+        if (res && res.error) {
+          showToast(`⚠️ Supabase Kayıt Uyarısı: ${res.error}`, 'error');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="check-circle-2"></i> Başvuruyu Gönder';
+            if (window.lucide) window.lucide.createIcons();
+          }
+          return;
+        }
 
         currentStep = 5;
         updateView();

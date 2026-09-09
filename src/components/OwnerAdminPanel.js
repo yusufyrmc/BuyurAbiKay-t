@@ -77,7 +77,7 @@ export function renderOwnerAdminPanel(container) {
               </p>
               ${store.supabaseConnected ? `
                 <span title="Supabase Veritabanı Canlı Bağlı" style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-size:0.75rem; font-weight:800; padding:2px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:4px;">
-                  <span style="width:7px; height:7px; background:var(--color-accent-green); border-radius:50%; display:inline-block; box-shadow:0 0 8px var(--color-accent-green);"></span> Supabase Canlı DB
+                  <span style="width:7px; height:7px; background:var(--color-accent-green); border-radius:50%; display:inline-block; box-shadow:0 0 8px var(--color-accent-green);"></span> Supabase Canlı DB Bağlı
                 </span>
               ` : `
                 <span title=".env dosyasına Supabase URL ve Key girildiğinde otomatik olarak canlı veritabanına bağlanır." style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:var(--color-accent-yellow); font-size:0.75rem; font-weight:800; padding:2px 10px; border-radius:12px; display:inline-flex; align-items:center; gap:4px;">
@@ -87,26 +87,39 @@ export function renderOwnerAdminPanel(container) {
             </div>
           </div>
 
-          <button id="btn-lock-admin" class="btn-secondary-hero" style="padding:0.6rem 1.2rem; font-size:0.85rem;">
-            <i data-lucide="lock"></i> Çıkış Yap (Kilitle)
-          </button>
+          <div style="display:flex; gap:0.6rem; align-items:center;">
+            <button id="btn-refresh-db" class="btn-secondary-hero" style="padding:0.6rem 1.2rem; font-size:0.85rem;" title="Supabase verilerini tekrar çek">
+              <i data-lucide="refresh-cw"></i> Verileri Yenile
+            </button>
+            <button id="btn-lock-admin" class="btn-secondary-hero" style="padding:0.6rem 1.2rem; font-size:0.85rem;">
+              <i data-lucide="lock"></i> Çıkış Yap (Kilitle)
+            </button>
+          </div>
         </div>
 
         <!-- SUPABASE WARNING BANNER IF ERROR OCCURRED -->
         ${store.lastSupabaseError ? `
-          <div style="background:rgba(239,68,68,0.15); border:1px solid var(--color-danger); padding:1rem 1.5rem; border-radius:var(--radius-md); color:#fff; font-size:0.9rem; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
-            <div style="display:flex; align-items:center; gap:0.75rem;">
-              <i data-lucide="alert-triangle" style="color:var(--color-danger); width:24px; height:24px; flex-shrink:0;"></i>
-              <div>
-                <strong style="color:var(--color-danger); display:block; margin-bottom:2px;">Supabase Veritabanı Uyarısı</strong>
-                <span style="color:var(--color-text-muted); font-size:0.85rem;">
-                  ${store.lastSupabaseError.includes('does not exist') || store.lastSupabaseError.includes('schema')
-                    ? 'Supabase üzerinde "registrations" tablosu bulunamadı! Lütfen projedeki <strong>supabase_schema.sql</strong> dosyasındaki SQL kodlarını Supabase SQL Editor alanında çalıştırın.'
-                    : store.lastSupabaseError}
-                </span>
+          <div style="background:rgba(239,68,68,0.15); border:1px solid var(--color-danger); padding:1.2rem 1.5rem; border-radius:var(--radius-md); color:#fff; font-size:0.9rem; display:flex; flex-direction:column; gap:0.8rem;">
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;">
+              <div style="display:flex; align-items:center; gap:0.75rem;">
+                <i data-lucide="alert-triangle" style="color:var(--color-danger); width:24px; height:24px; flex-shrink:0;"></i>
+                <div>
+                  <strong style="color:var(--color-danger); font-size:1rem; display:block; margin-bottom:2px;">Supabase Veritabanı Uyarısı</strong>
+                  <span style="color:var(--color-text-muted); font-size:0.85rem;">
+                    Hata detayı: <code>${store.lastSupabaseError}</code>
+                  </span>
+                </div>
               </div>
+              <button id="btn-retry-db-fetch" class="pill-btn" style="background:rgba(255,255,255,0.1); border:var(--border-glass); white-space:nowrap; cursor:pointer;">
+                <i data-lucide="rotate-cw" style="width:14px; vertical-align:middle;"></i> Yeniden Bağlan
+              </button>
             </div>
-            <button onclick="window.location.reload()" class="pill-btn" style="background:rgba(255,255,255,0.1); border:var(--border-glass); white-space:nowrap;">Tekrar Dene</button>
+
+            ${store.lastSupabaseError.includes('does not exist') || store.lastSupabaseError.includes('schema') || store.lastSupabaseError.includes('42P01') ? `
+              <div style="background:rgba(0,0,0,0.4); padding:0.85rem 1rem; border-radius:6px; border:1px solid rgba(255,255,255,0.1); font-size:0.82rem; color:var(--color-text-muted);">
+                💡 <strong>Çözüm:</strong> Supabase projenizde <code>registrations</code> tablosu oluşturulmamış. Proje klasöründeki <strong style="color:var(--color-accent-cyan);">supabase_schema.sql</strong> dosyasının içeriğini kopyalayıp <strong>Supabase Panel -> SQL Editor</strong> alanına yapıştırın ve <strong>RUN</strong> butonuna tıklayın.
+              </div>
+            ` : ''}
           </div>
         ` : ''}
 
@@ -226,6 +239,18 @@ export function renderOwnerAdminPanel(container) {
     if (window.lucide) window.lucide.createIcons();
 
     // Event Bindings
+    container.querySelector('#btn-refresh-db')?.addEventListener('click', async () => {
+      showToast('🔄 Supabase verileri çekiliyor...', 'info');
+      await store.fetchRegistrations();
+      updateView();
+    });
+
+    container.querySelector('#btn-retry-db-fetch')?.addEventListener('click', async () => {
+      showToast('🔄 Supabase veritabanına yeniden bağlanılıyor...', 'info');
+      await store.fetchRegistrations();
+      updateView();
+    });
+
     container.querySelector('#btn-lock-admin')?.addEventListener('click', () => {
       store.lockAdmin();
       updateView();
