@@ -228,14 +228,9 @@ export function renderRegisterPage(container) {
                 <strong>${formData.businessName}</strong> işletme başvurunuz (${formData.plan}) sistem yöneticisine iletildi.
               </p>
 
-              <div style="display:flex; flex-direction:column; gap:0.75rem; width:100%;">
-                <a href="/admin.html" class="btn-primary-hero" style="justify-content:center; text-decoration:none; background:var(--color-primary-gradient);">
-                  <i data-lucide="shield-check"></i> Admin Panelinde Gör ve Onayla
-                </a>
-                <button class="btn-secondary-hero" id="btn-finish-go-home" style="justify-content:center;">
-                  <i data-lucide="home"></i> Ana Sayfaya Dön
-                </button>
-              </div>
+              <button class="btn-primary-hero" id="btn-finish-go-home" style="width:100%; justify-content:center;">
+                <i data-lucide="sparkles"></i> Ana Sayfaya Dön
+              </button>
             </div>
           ` : ''}
         </div>

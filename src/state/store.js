@@ -269,17 +269,23 @@ class AppStore {
       reg.status = 'onaylandi';
       this.notify();
 
+      console.log('approveRegistration triggered for ID:', id, 'supabaseConnected:', this.supabaseConnected);
       if (this.supabaseConnected && supabase) {
         try {
+          const dbRow = this.toDbRow(reg);
+          console.log('Upserting approved row to Supabase:', dbRow);
           const { error } = await supabase
             .from('registrations')
-            .upsert([this.toDbRow(reg)]);
+            .upsert([dbRow], { onConflict: 'id' });
 
           if (error) {
             console.error('Supabase approve error:', error.message);
             this.lastSupabaseError = error.message;
             this.notify();
             return { success: false, error: error.message };
+          } else {
+            console.log('Supabase approval saved successfully!');
+            this.lastSupabaseError = null;
           }
         } catch (err) {
           console.error('Supabase update error:', err);
@@ -296,17 +302,21 @@ class AppStore {
       reg.status = 'reddedildi';
       this.notify();
 
+      console.log('rejectRegistration triggered for ID:', id);
       if (this.supabaseConnected && supabase) {
         try {
+          const dbRow = this.toDbRow(reg);
           const { error } = await supabase
             .from('registrations')
-            .upsert([this.toDbRow(reg)]);
+            .upsert([dbRow], { onConflict: 'id' });
 
           if (error) {
             console.error('Supabase reject error:', error.message);
             this.lastSupabaseError = error.message;
             this.notify();
             return { success: false, error: error.message };
+          } else {
+            this.lastSupabaseError = null;
           }
         } catch (err) {
           console.error('Supabase update error:', err);
