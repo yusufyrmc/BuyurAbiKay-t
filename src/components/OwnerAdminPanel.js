@@ -1,4 +1,5 @@
 import { store } from '../state/store.js';
+import { supabaseUrl } from '../lib/supabase.js';
 
 export function renderOwnerAdminPanel(container) {
   let filterRegStatus = 'all';
@@ -94,6 +95,17 @@ export function renderOwnerAdminPanel(container) {
             <button id="btn-lock-admin" class="btn-secondary-hero" style="padding:0.6rem 1.2rem; font-size:0.85rem;">
               <i data-lucide="lock"></i> Çıkış Yap (Kilitle)
             </button>
+          </div>
+        </div>
+
+        <!-- SUPABASE ACTIVE ENDPOINT INFO BANNER -->
+        <div style="background:rgba(255,255,255,0.03); border:var(--border-glass); padding:0.75rem 1.2rem; border-radius:var(--radius-md); font-size:0.82rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem; color:var(--color-text-muted);">
+            <i data-lucide="database" style="width:16px; color:var(--color-primary);"></i>
+            <span>Aktif Supabase Uç Noktası: <code style="color:var(--color-accent-cyan); font-weight:700;">${supabaseUrl || 'Belirtilmedi'}</code></span>
+          </div>
+          <div style="font-size:0.78rem; color:var(--color-text-dim);">
+            Veritabanında Toplam: <strong style="color:var(--color-accent-green);">${store.registrations.length} Kayıt</strong>
           </div>
         </div>
 
