@@ -22,25 +22,25 @@ CREATE TABLE IF NOT EXISTS public.registrations (
 -- 2. Row Level Security (RLS) Aktifleştirme
 ALTER TABLE public.registrations ENABLE ROW LEVEL SECURITY;
 
--- 3. Herkese Okuma (Select) İzni Ver
-CREATE POLICY "Public Read Access"
-ON public.registrations FOR SELECT
-USING (true);
+-- 3. Mevcut Politikaları Temizle (Hata Almamak İçin)
+DROP POLICY IF EXISTS "Public Read Access" ON public.registrations;
+DROP POLICY IF EXISTS "Public Insert Access" ON public.registrations;
+DROP POLICY IF EXISTS "Public Update Access" ON public.registrations;
+DROP POLICY IF EXISTS "Public Delete Access" ON public.registrations;
 
--- 4. Herkese Yeni Başvuru Ekleme (Insert) İzni Ver
-CREATE POLICY "Public Insert Access"
-ON public.registrations FOR INSERT
-WITH CHECK (true);
+-- 4. Politikaları Tekrar Oluştur (Tüm İşlemlere İzin Ver)
+CREATE POLICY "Public Read Access" ON public.registrations FOR SELECT USING (true);
+CREATE POLICY "Public Insert Access" ON public.registrations FOR INSERT WITH CHECK (true);
+CREATE POLICY "Public Update Access" ON public.registrations FOR UPDATE USING (true);
+CREATE POLICY "Public Delete Access" ON public.registrations FOR DELETE USING (true);
 
--- 5. Herkese Güncelleme (Update) İzni Ver (Onaylama/Reddetme için)
-CREATE POLICY "Public Update Access"
-ON public.registrations FOR UPDATE
-USING (true);
-
--- 6. Herkese Silme (Delete) İzni Ver
-CREATE POLICY "Public Delete Access"
-ON public.registrations FOR DELETE
-USING (true);
-
--- 7. Realtime (Canlı Senkronizasyon) Yayınını Aktifleştir
-ALTER PUBLICATION supabase_realtime ADD TABLE public.registrations;
+-- 5. Realtime (Canlı Senkronizasyon) Yayınını Aktifleştir
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'registrations'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.registrations;
+  END IF;
+END $$;

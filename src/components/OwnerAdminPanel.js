@@ -92,6 +92,24 @@ export function renderOwnerAdminPanel(container) {
           </button>
         </div>
 
+        <!-- SUPABASE WARNING BANNER IF ERROR OCCURRED -->
+        ${store.lastSupabaseError ? `
+          <div style="background:rgba(239,68,68,0.15); border:1px solid var(--color-danger); padding:1rem 1.5rem; border-radius:var(--radius-md); color:#fff; font-size:0.9rem; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <i data-lucide="alert-triangle" style="color:var(--color-danger); width:24px; height:24px; flex-shrink:0;"></i>
+              <div>
+                <strong style="color:var(--color-danger); display:block; margin-bottom:2px;">Supabase Veritabanı Uyarısı</strong>
+                <span style="color:var(--color-text-muted); font-size:0.85rem;">
+                  ${store.lastSupabaseError.includes('does not exist') || store.lastSupabaseError.includes('schema')
+                    ? 'Supabase üzerinde "registrations" tablosu bulunamadı! Lütfen projedeki <strong>supabase_schema.sql</strong> dosyasındaki SQL kodlarını Supabase SQL Editor alanında çalıştırın.'
+                    : store.lastSupabaseError}
+                </span>
+              </div>
+            </div>
+            <button onclick="window.location.reload()" class="pill-btn" style="background:rgba(255,255,255,0.1); border:var(--border-glass); white-space:nowrap;">Tekrar Dene</button>
+          </div>
+        ` : ''}
+
         <!-- SUMMARY STATS CARDS -->
         <div class="admin-top-stats">
           <div class="stat-card-admin">
@@ -221,25 +239,37 @@ export function renderOwnerAdminPanel(container) {
     });
 
     container.querySelectorAll('.btn-approve-reg').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        store.approveRegistration(e.currentTarget.dataset.regId);
-        showToast('✅ İşletme başvurusu onaylandı!', 'success');
+      btn.addEventListener('click', async (e) => {
+        const res = await store.approveRegistration(e.currentTarget.dataset.regId);
+        if (res && res.error) {
+          showToast(`⚠️ Supabase Hatası: ${res.error}`, 'error');
+        } else {
+          showToast('✅ İşletme başvurusu onaylandı ve Supabase veritabanına kaydedildi!', 'success');
+        }
         updateView();
       });
     });
 
     container.querySelectorAll('.btn-reject-reg').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        store.rejectRegistration(e.currentTarget.dataset.regId);
-        showToast('❌ Başvuru reddedildi.', 'info');
+      btn.addEventListener('click', async (e) => {
+        const res = await store.rejectRegistration(e.currentTarget.dataset.regId);
+        if (res && res.error) {
+          showToast(`⚠️ Supabase Hatası: ${res.error}`, 'error');
+        } else {
+          showToast('❌ Başvuru reddedildi ve Supabase güncellendi.', 'info');
+        }
         updateView();
       });
     });
 
     container.querySelectorAll('.btn-delete-reg').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        store.deleteRegistration(e.currentTarget.dataset.regId);
-        showToast('🗑️ Başvuru silindi.', 'info');
+      btn.addEventListener('click', async (e) => {
+        const res = await store.deleteRegistration(e.currentTarget.dataset.regId);
+        if (res && res.error) {
+          showToast(`⚠️ Supabase Hatası: ${res.error}`, 'error');
+        } else {
+          showToast('🗑️ Başvuru silindi ve Supabase veritabanından kaldırıldı.', 'info');
+        }
         updateView();
       });
     });
