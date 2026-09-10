@@ -211,7 +211,9 @@ export function renderOwnerAdminPanel(container) {
                 </div>
 
                 <!-- Registration Details Grid -->
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; background:rgba(0,0,0,0.3); padding:0.85rem; border-radius:var(--radius-md); font-size:0.85rem;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:0.75rem; background:rgba(0,0,0,0.3); padding:0.85rem; border-radius:var(--radius-md); font-size:0.85rem;">
+                  <div><span style="color:var(--color-text-muted); display:block; font-size:0.75rem;">İşletme Kodu (ID):</span><strong style="color:var(--color-primary); font-family:monospace; font-size:1rem; letter-spacing:1px;">${reg.id}</strong></div>
+                  <div><span style="color:var(--color-text-muted); display:block; font-size:0.75rem;">Giriş Şifresi:</span><strong style="color:#fff; font-family:monospace; font-size:0.95rem;">${reg.password || '••••••'}</strong></div>
                   <div><span style="color:var(--color-text-muted); display:block; font-size:0.75rem;">Yetkili Ad Soyad:</span><strong style="color:#fff;">${reg.fullName}</strong></div>
                   <div><span style="color:var(--color-text-muted); display:block; font-size:0.75rem;">Cep Telefonu:</span><strong style="color:var(--color-accent-green);">${reg.phone}</strong></div>
                   <div><span style="color:var(--color-text-muted); display:block; font-size:0.75rem;">Başvuru Tarihi:</span><span style="color:var(--color-text-muted);">${reg.createdAt}</span></div>

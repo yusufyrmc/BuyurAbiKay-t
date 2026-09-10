@@ -15,9 +15,13 @@ CREATE TABLE IF NOT EXISTS public.registrations (
     plan TEXT,
     plan_price NUMERIC DEFAULT 899,
     status TEXT DEFAULT 'bekliyor', -- 'bekliyor', 'onaylandi', 'reddedildi'
+    password TEXT,
     created_at TEXT,
     timestamp BIGINT
 );
+
+-- Tablo mevcutsa password sütununu ekle:
+ALTER TABLE public.registrations ADD COLUMN IF NOT EXISTS password TEXT;
 
 -- 2. Row Level Security (RLS) Aktifleştirme
 ALTER TABLE public.registrations ENABLE ROW LEVEL SECURITY;

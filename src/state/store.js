@@ -68,8 +68,8 @@ class AppStore {
   }
 
   // Helper to format object for Supabase table row
-  toDbRow(reg) {
-    return {
+  toDbRow(reg, includePassword = true) {
+    const row = {
       id: String(reg.id),
       business_name: reg.businessName || '',
       full_name: reg.fullName || '',
@@ -83,6 +83,12 @@ class AppStore {
       created_at: reg.createdAt || 'Yeni',
       timestamp: Number(reg.timestamp || Date.now())
     };
+
+    if (includePassword && reg.password) {
+      row.password = reg.password;
+    }
+
+    return row;
   }
 
   async fetchRegistrations() {
@@ -114,6 +120,7 @@ class AppStore {
           plan: item.plan,
           planPrice: Number(item.plan_price || 899),
           status: item.status || 'bekliyor',
+          password: item.password || '',
           createdAt: item.created_at || 'Yeni',
           timestamp: Number(item.timestamp || Date.now())
         }));
@@ -221,8 +228,9 @@ class AppStore {
 
   // --- Registration Actions ---
   async addRegistration(regData) {
+    const generatedId = regData.id || ('BYR-' + Math.floor(1000 + Math.random() * 9000));
     const newReg = {
-      id: 'REG-' + Math.floor(1000 + Math.random() * 9000),
+      id: generatedId,
       status: 'bekliyor',
       createdAt: 'Az önce',
       timestamp: Date.now(),
@@ -237,11 +245,20 @@ class AppStore {
     console.log('addRegistration triggered:', newReg, 'supabaseConnected:', this.supabaseConnected);
     if (this.supabaseConnected && supabase) {
       try {
-        const dbRow = this.toDbRow(newReg);
-        console.log('Sending to Supabase registrations table:', dbRow);
-        const { data, error } = await supabase
+        const dbRowWithPass = this.toDbRow(newReg, true);
+        console.log('Sending to Supabase registrations table:', dbRowWithPass);
+        let { data, error } = await supabase
           .from('registrations')
-          .upsert([dbRow], { onConflict: 'id' });
+          .upsert([dbRowWithPass], { onConflict: 'id' });
+
+        if (error && (error.code === '42703' || (error.message && error.message.includes('password')))) {
+          console.warn('Password column missing on Supabase table, retrying without password column...');
+          const retryRes = await supabase
+            .from('registrations')
+            .upsert([this.toDbRow(newReg, false)], { onConflict: 'id' });
+          error = retryRes.error;
+          data = retryRes.data;
+        }
 
         if (error) {
           console.error('Supabase insert error:', error.message);
@@ -272,11 +289,19 @@ class AppStore {
       console.log('approveRegistration triggered for ID:', id, 'supabaseConnected:', this.supabaseConnected);
       if (this.supabaseConnected && supabase) {
         try {
-          const dbRow = this.toDbRow(reg);
-          console.log('Upserting approved row to Supabase:', dbRow);
-          const { error } = await supabase
+          const dbRowWithPass = this.toDbRow(reg, true);
+          console.log('Upserting approved row to Supabase:', dbRowWithPass);
+          let { error } = await supabase
             .from('registrations')
-            .upsert([dbRow], { onConflict: 'id' });
+            .upsert([dbRowWithPass], { onConflict: 'id' });
+
+          if (error && (error.code === '42703' || (error.message && error.message.includes('password')))) {
+            console.warn('Password column missing on Supabase table, retrying without password column...');
+            const retryRes = await supabase
+              .from('registrations')
+              .upsert([this.toDbRow(reg, false)], { onConflict: 'id' });
+            error = retryRes.error;
+          }
 
           if (error) {
             console.error('Supabase approve error:', error.message);
