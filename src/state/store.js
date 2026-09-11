@@ -53,6 +53,9 @@ class AppStore {
       }
     ];
 
+    const savedLastReg = localStorage.getItem('buyurabi_last_registered_business');
+    this.lastRegisteredBusiness = savedLastReg ? JSON.parse(savedLastReg) : null;
+
     this.activeView = 'landing';
     this.adminUnlocked = sessionStorage.getItem('buyurabi_admin_session') === 'true';
     this.adminPassword = '123456';
@@ -60,6 +63,32 @@ class AppStore {
     if (this.supabaseConnected) {
       this.initSupabase();
     }
+  }
+
+  getLastRegisteredBusiness() {
+    if (this.lastRegisteredBusiness) return this.lastRegisteredBusiness;
+    try {
+      const saved = localStorage.getItem('buyurabi_last_registered_business');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  setLastRegisteredBusiness(reg) {
+    this.lastRegisteredBusiness = reg;
+    if (reg) {
+      localStorage.setItem('buyurabi_last_registered_business', JSON.stringify(reg));
+    } else {
+      localStorage.removeItem('buyurabi_last_registered_business');
+    }
+    this.notify();
+  }
+
+  clearLastRegisteredBusiness() {
+    this.lastRegisteredBusiness = null;
+    localStorage.removeItem('buyurabi_last_registered_business');
+    this.notify();
   }
 
   async initSupabase() {
@@ -237,8 +266,10 @@ class AppStore {
       ...regData
     };
 
-    // 1. Add locally first
+    // 1. Add locally first and persist last registered business for the user
     this.registrations.unshift(newReg);
+    this.lastRegisteredBusiness = newReg;
+    localStorage.setItem('buyurabi_last_registered_business', JSON.stringify(newReg));
     this.notify();
 
     // 2. Persist to Supabase using upsert

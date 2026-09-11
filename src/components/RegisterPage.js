@@ -1,19 +1,20 @@
 import { store } from '../state/store.js';
 
 export function renderRegisterPage(container) {
-  let currentStep = 1;
-  let registeredBusiness = null;
+  const savedLastReg = store.getLastRegisteredBusiness();
+  let currentStep = savedLastReg ? 5 : 1;
+  let registeredBusiness = savedLastReg || null;
   let showPasswordInStep5 = false;
   let formData = {
-    businessName: '',
-    fullName: '',
-    businessType: 'Restoran & Lokanta',
-    plan: 'Profesyonel Paket (₺1000/ay)',
-    planPrice: 899,
-    phone: '',
-    city: 'İstanbul',
-    fullAddress: '',
-    password: ''
+    businessName: savedLastReg?.businessName || '',
+    fullName: savedLastReg?.fullName || '',
+    businessType: savedLastReg?.businessType || 'Restoran & Lokanta',
+    plan: savedLastReg?.plan || 'Profesyonel Paket (₺899/ay)',
+    planPrice: savedLastReg?.planPrice || 899,
+    phone: savedLastReg?.phone || '',
+    city: savedLastReg?.city || 'İstanbul / Kadıköy',
+    fullAddress: savedLastReg?.fullAddress || '',
+    password: savedLastReg?.password || ''
   };
 
   function calculatePasswordStrength(pass) {
@@ -164,7 +165,7 @@ export function renderRegisterPage(container) {
           <!-- STEP 3: SECURITY & PASSWORD -->
           ${currentStep === 3 ? `
             <h2 class="wizard-title">Şifre & Güvenlik</h2>
-            <p class="wizard-subtitle">İşletme paneli girişiniz için güvenli bir parola belirleyin.</p>
+            <p class="wizard-subtitle">İşletmeniz ve menü yönetiminiz için güvenli bir parola belirleyin.</p>
 
             <div class="form-field">
               <label class="form-label"><i data-lucide="lock"></i> Şifre Oluşturun</label>
@@ -220,82 +221,105 @@ export function renderRegisterPage(container) {
 
           <!-- STEP 5: SUCCESS EKRANI & GİRİŞ BİLGİLERİ -->
           ${currentStep === 5 ? `
-            <div style="text-align:center; padding:1rem 0;">
-              <div style="width:76px; height:76px; background:rgba(0,230,118,0.15); color:var(--color-accent-green); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.2rem auto; border:2px solid var(--color-accent-green); box-shadow:0 0 35px rgba(0,230,118,0.35);">
-                <i data-lucide="check-check" style="width:44px; height:44px;"></i>
+            <div style="text-align:center; padding:0.5rem 0;">
+              <div style="width:74px; height:74px; background:rgba(0,230,118,0.15); color:var(--color-accent-green); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; border:2px solid var(--color-accent-green); box-shadow:0 0 35px rgba(0,230,118,0.35);">
+                <i data-lucide="check-check" style="width:42px; height:42px;"></i>
               </div>
 
-              <h2 class="wizard-title" style="color:var(--color-accent-green); font-size:1.8rem; margin-bottom:0.4rem;">İşletme Kaydınız Oluşturuldu! 🎉</h2>
-              <p class="wizard-subtitle" style="max-width:540px; margin:0 auto 1.6rem auto; font-size:0.95rem;">
-                <strong>${formData.businessName}</strong> için sistem giriş kodunuz ve parolanız aşağıda tanımlanmıştır. Lütfen bu bilgileri not ediniz.
+              <h2 class="wizard-title" style="color:var(--color-accent-green); font-size:1.8rem; margin-bottom:0.3rem;">İşletme Kaydınız Oluşturuldu! 🎉</h2>
+              <p class="wizard-subtitle" style="max-width:560px; margin:0 auto 1.2rem auto; font-size:0.95rem;">
+                <strong>${formData.businessName || registeredBusiness?.businessName || 'İşletmeniz'}</strong> için sistem giriş kodunuz ve parolanız aşağıda tanımlanmıştır.
               </p>
 
+              <!-- PERSISTENT NOTICE BANNER -->
+              <div style="background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.35); border-radius:var(--radius-md); padding:0.85rem 1.2rem; margin-bottom:1.5rem; text-align:left; display:flex; align-items:center; gap:0.85rem;">
+                <i data-lucide="shield-check" style="width:28px; height:28px; color:var(--color-accent-green); flex-shrink:0;"></i>
+                <div style="font-size:0.86rem; color:var(--color-text-main); line-height:1.4;">
+                  <strong style="color:var(--color-accent-green); display:block; margin-bottom:2px;">📌 ID Ekranınız Açık Kalacak Şekilde Sabitlenmiştir</strong>
+                  Sayfayı yenileseniz veya diğer sayfalara geçip geri dönseniz bile bu ID ekranınız açık kalır. Bilgilerinizi güvenli bir yere not ediniz.
+                </div>
+              </div>
+
               <!-- CREDENTIALS DISPLAY BOX -->
-              <div style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,107,0,0.4); box-shadow:0 0 25px rgba(255,107,0,0.15); border-radius:var(--radius-lg); padding:1.5rem 1.8rem; margin-bottom:1.5rem; text-align:left; position:relative; overflow:hidden;">
+              <div style="background:rgba(0,0,0,0.55); border:1px solid rgba(255,107,0,0.45); box-shadow:0 0 30px rgba(255,107,0,0.15); border-radius:var(--radius-lg); padding:1.5rem 1.8rem; margin-bottom:1.5rem; text-align:left; position:relative; overflow:hidden;">
                 <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:var(--color-primary-gradient);"></div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:0.75rem;">
                   <div>
                     <span style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--color-text-muted); font-weight:800;">İŞLETME GİRİŞ BİLGİ KARTI</span>
-                    <h4 style="font-size:1.15rem; color:#fff; margin:2px 0 0 0; font-weight:800;">${formData.businessName}</h4>
+                    <h4 style="font-size:1.2rem; color:#fff; margin:2px 0 0 0; font-weight:800;">${formData.businessName || registeredBusiness?.businessName}</h4>
                   </div>
-                  <span style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-size:0.72rem; font-weight:800; padding:3px 10px; border-radius:12px;">
+                  <span style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-size:0.75rem; font-weight:800; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
                     ● AKTİF BAŞVURU
                   </span>
                 </div>
 
                 <!-- 1. FIELD: ISLETME KODU (ID) -->
                 <div style="margin-bottom:1.2rem;">
-                  <label style="display:block; font-size:0.8rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
-                    <i data-lucide="hash" style="width:14px; height:14px; vertical-align:middle; color:var(--color-primary);"></i> İşletme Kodu (ID):
+                  <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
+                    <i data-lucide="hash" style="width:15px; height:15px; vertical-align:middle; color:var(--color-primary);"></i> İşletme Kodu (ID) - Restoran & Menü Tanımlama Kodu:
                   </label>
-                  <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:var(--radius-md); padding:0.6rem 1rem;">
-                    <span id="display-business-id" style="font-family:monospace; font-size:1.4rem; font-weight:900; color:var(--color-primary); letter-spacing:2px; flex:1;">
+                  <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,107,0,0.5); border-radius:var(--radius-md); padding:0.75rem 1.2rem;">
+                    <span id="display-business-id" style="font-family:monospace; font-size:1.6rem; font-weight:900; color:var(--color-primary); letter-spacing:2px; flex:1;">
                       ${registeredBusiness?.id || 'BYR-0000'}
                     </span>
-                    <button id="btn-copy-id" class="pill-btn" style="background:rgba(255,107,0,0.15); border:1px solid rgba(255,107,0,0.4); color:var(--color-primary); font-weight:800; padding:0.45rem 0.9rem; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:4px;">
-                      <i data-lucide="copy" style="width:14px; height:14px;"></i> <span id="copy-id-text">Kopyala</span>
+                    <button id="btn-copy-id" class="pill-btn" style="background:rgba(255,107,0,0.2); border:1px solid rgba(255,107,0,0.5); color:var(--color-primary); font-weight:800; padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
+                      <i data-lucide="copy" style="width:15px; height:15px;"></i> <span id="copy-id-text">Kopyala</span>
                     </button>
                   </div>
                 </div>
 
                 <!-- 2. FIELD: SIFRE -->
                 <div style="margin-bottom:1.2rem;">
-                  <label style="display:block; font-size:0.8rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
-                    <i data-lucide="lock" style="width:14px; height:14px; vertical-align:middle; color:var(--color-accent-green);"></i> Giriş Şifreniz:
+                  <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
+                    <i data-lucide="lock" style="width:15px; height:15px; vertical-align:middle; color:var(--color-accent-green);"></i> Giriş Şifreniz:
                   </label>
-                  <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:var(--radius-md); padding:0.6rem 1rem;">
-                    <span id="display-password" style="font-family:monospace; font-size:1.3rem; font-weight:800; color:#fff; letter-spacing:2px; flex:1;">
-                      ${showPasswordInStep5 ? formData.password : '•'.repeat(Math.max(formData.password.length, 6))}
+                  <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:var(--radius-md); padding:0.65rem 1.2rem;">
+                    <span id="display-password" style="font-family:monospace; font-size:1.4rem; font-weight:800; color:#fff; letter-spacing:2px; flex:1;">
+                      ${showPasswordInStep5 ? (formData.password || registeredBusiness?.password || '••••••') : '•'.repeat(Math.max((formData.password || registeredBusiness?.password || '123456').length, 6))}
                     </span>
-                    <button id="btn-toggle-show-pass" class="pill-btn" style="background:rgba(255,255,255,0.08); border:var(--border-glass); color:var(--color-text-muted); padding:0.45rem 0.7rem; font-size:0.8rem; cursor:pointer;" title="${showPasswordInStep5 ? 'Gizle' : 'Göster'}">
-                      <i data-lucide="${showPasswordInStep5 ? 'eye-off' : 'eye'}" style="width:14px; height:14px;"></i>
+                    <button id="btn-toggle-show-pass" class="pill-btn" style="background:rgba(255,255,255,0.08); border:var(--border-glass); color:var(--color-text-muted); padding:0.5rem 0.8rem; font-size:0.82rem; cursor:pointer; border-radius:var(--radius-sm);" title="${showPasswordInStep5 ? 'Gizle' : 'Göster'}">
+                      <i data-lucide="${showPasswordInStep5 ? 'eye-off' : 'eye'}" style="width:15px; height:15px;"></i>
                     </button>
-                    <button id="btn-copy-pass" class="pill-btn" style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-weight:800; padding:0.45rem 0.9rem; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:4px;">
-                      <i data-lucide="copy" style="width:14px; height:14px;"></i> <span id="copy-pass-text">Kopyala</span>
+                    <button id="btn-copy-pass" class="pill-btn" style="background:rgba(0,230,118,0.18); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-weight:800; padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
+                      <i data-lucide="copy" style="width:15px; height:15px;"></i> <span id="copy-pass-text">Kopyala</span>
                     </button>
                   </div>
                 </div>
 
-                <!-- QUICK COPY ALL CREDENTIALS BUTTON -->
-                <button id="btn-copy-all" class="pill-btn" style="width:100%; justify-content:center; background:rgba(255,255,255,0.06); border:1px dashed rgba(255,255,255,0.2); color:#fff; padding:0.75rem; border-radius:var(--radius-md); font-weight:700; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
-                  <i data-lucide="clipboard-check" style="width:16px; height:16px; color:var(--color-primary);"></i>
-                  <span id="copy-all-text">Tüm Giriş Bilgilerini Panoya Kopyala</span>
-                </button>
-              </div>
+                <!-- 3. DETAILS SUMMARY TABLE -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:var(--radius-md); padding:0.85rem 1.1rem; margin-bottom:1.2rem; font-size:0.83rem;">
+                  <div><span style="color:var(--color-text-muted);">Yetkili Ad Soyad:</span> <strong style="color:#fff; display:block;">${formData.fullName || registeredBusiness?.fullName || 'Belirtilmedi'}</strong></div>
+                  <div><span style="color:var(--color-text-muted);">Telefon Numarası:</span> <strong style="color:#fff; display:block;">${formData.phone || registeredBusiness?.phone || 'Belirtilmedi'}</strong></div>
+                  <div><span style="color:var(--color-text-muted);">İşletme Türü:</span> <strong style="color:#fff; display:block;">${formData.businessType || registeredBusiness?.businessType || 'Restoran'}</strong></div>
+                  <div><span style="color:var(--color-text-muted);">Seçilen Paket:</span> <strong style="color:var(--color-accent-green); display:block;">${formData.plan || registeredBusiness?.plan || 'Profesyonel'}</strong></div>
+                  <div style="grid-column:1 / -1;"><span style="color:var(--color-text-muted);">Konum & Açık Adres:</span> <strong style="color:#fff; display:block;">${formData.city || registeredBusiness?.city || ''} - ${formData.fullAddress || registeredBusiness?.fullAddress || ''}</strong></div>
+                </div>
 
-              <!-- SECURITY REMINDER -->
-              <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); border-radius:var(--radius-md); padding:0.85rem 1.2rem; margin-bottom:1.6rem; text-align:left; display:flex; align-items:center; gap:0.75rem; font-size:0.82rem; color:var(--color-text-muted);">
-                <i data-lucide="shield-alert" style="width:22px; height:22px; color:var(--color-accent-yellow); flex-shrink:0;"></i>
-                <div>
-                  <strong style="color:#fff; display:block; margin-bottom:2px;">Önemli Güvenlik Notu</strong>
-                  İşletme kodunuz ve şifreniz masalarınızı yönetmek ve menünüzü düzenlemek için kullanılacaktır. Lütfen güvenli bir yere kaydediniz.
+                <!-- ACTION BUTTONS ROW: COPY ALL & DOWNLOAD TXT -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                  <button id="btn-copy-all" class="pill-btn" style="justify-content:center; background:rgba(255,255,255,0.06); border:1px dashed rgba(255,255,255,0.25); color:#fff; padding:0.75rem; border-radius:var(--radius-md); font-weight:700; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <i data-lucide="clipboard-check" style="width:16px; height:16px; color:var(--color-primary);"></i>
+                    <span id="copy-all-text">Tüm Bilgileri Kopyala</span>
+                  </button>
+
+                  <button id="btn-download-txt" class="pill-btn" style="justify-content:center; background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.3); color:var(--color-accent-cyan); padding:0.75rem; border-radius:var(--radius-md); font-weight:700; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <i data-lucide="download" style="width:16px; height:16px;"></i>
+                    <span>Bilgi Dosyasını İndir (.txt)</span>
+                  </button>
                 </div>
               </div>
 
-              <button class="btn-primary-hero" id="btn-finish-go-home" style="width:100%; justify-content:center;">
-                <i data-lucide="sparkles"></i> Ana Sayfaya Dön
-              </button>
+              <!-- BOTTOM NAVIGATION & ACTIONS -->
+              <div style="display:flex; gap:0.85rem; justify-content:center; flex-wrap:wrap;">
+                <button class="btn-primary-hero" id="btn-finish-go-home" style="flex:1; min-width:200px; justify-content:center;">
+                  <i data-lucide="home"></i> Tanıtım Sayfasına Git
+                </button>
+
+                <button class="btn-secondary-hero" id="btn-new-registration" style="flex:1; min-width:200px; justify-content:center; border-color:rgba(255,255,255,0.15);">
+                  <i data-lucide="user-plus"></i> Yeni İşletme Kaydı Yap
+                </button>
+              </div>
             </div>
           ` : ''}
         </div>
@@ -303,33 +327,39 @@ export function renderRegisterPage(container) {
         <!-- RIGHT: LIVE DIGITAL BADGE PREVIEW -->
         <div class="badge-preview-card">
           <div class="badge-preview-header">
-            <i data-lucide="badge-check" style="vertical-align:middle; margin-right:4px;"></i> Live İşletme Rozeti
+            <i data-lucide="badge-check" style="vertical-align:middle; margin-right:4px;"></i> ${currentStep === 5 ? 'Kayıtlı İşletme Kimliği' : 'Live İşletme Rozeti'}
           </div>
 
           <div class="digital-badge-chip">
             <div class="badge-avatar">
-              ${(formData.businessName || 'R').charAt(0).toUpperCase()}
+              ${((formData.businessName || registeredBusiness?.businessName) || 'R').charAt(0).toUpperCase()}
             </div>
             
             <div class="badge-user-name" id="badge-disp-business">
-              ${formData.businessName || 'İşletme Adı'}
+              ${formData.businessName || registeredBusiness?.businessName || 'İşletme Adı'}
             </div>
 
             <div class="badge-user-role" id="badge-disp-type">
-              🏬 ${formData.businessType}
+              🏬 ${formData.businessType || registeredBusiness?.businessType}
             </div>
 
             <div class="badge-info-list">
-              <div><strong>Seçilen Paket:</strong> <span style="color:var(--color-accent-green); font-weight:800;" id="badge-disp-plan">${formData.plan}</span></div>
-              <div><strong>Yetkili:</strong> <span id="badge-disp-fullname">${formData.fullName || 'Ad Soyad'}</span></div>
-              <div><strong>Telefon:</strong> <span id="badge-disp-phone">${formData.phone || '0555 *** ** **'}</span></div>
-              <div><strong>Şehir:</strong> <span id="badge-disp-city">${formData.city}</span></div>
-              <div><strong>Durum:</strong> <span style="color:var(--color-accent-yellow); font-weight:800;">⏳ ONAY BEKLİYOR</span></div>
+              ${(registeredBusiness?.id) ? `
+                <div style="background:rgba(255,107,0,0.15); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,107,0,0.35); margin-bottom:6px;">
+                  <span style="font-size:0.75rem; color:var(--color-text-muted); display:block;">Sistem İşletme Kodu:</span>
+                  <span style="color:var(--color-primary); font-family:monospace; font-size:1.15rem; font-weight:900; letter-spacing:1px;">${registeredBusiness.id}</span>
+                </div>
+              ` : ''}
+              <div><strong>Seçilen Paket:</strong> <span style="color:var(--color-accent-green); font-weight:800;" id="badge-disp-plan">${formData.plan || registeredBusiness?.plan}</span></div>
+              <div><strong>Yetkili:</strong> <span id="badge-disp-fullname">${formData.fullName || registeredBusiness?.fullName || 'Ad Soyad'}</span></div>
+              <div><strong>Telefon:</strong> <span id="badge-disp-phone">${formData.phone || registeredBusiness?.phone || '0555 *** ** **'}</span></div>
+              <div><strong>Şehir:</strong> <span id="badge-disp-city">${formData.city || registeredBusiness?.city}</span></div>
+              <div><strong>Durum:</strong> <span style="color:var(--color-accent-green); font-weight:800;">${currentStep === 5 ? '✓ KAYIT ALINDI' : '⏳ ONAY BEKLİYOR'}</span></div>
             </div>
           </div>
 
           <p style="font-size:0.78rem; color:var(--color-text-muted); margin-top:1.5rem; max-width:280px; text-align:center;">
-            Formu doldurdukça işletme rozetiniz canlı olarak güncellenir.
+            ${currentStep === 5 ? 'İşletme kaydınız ve kodunuz aktif durumda tutulmaktadır.' : 'Formu doldurdukça işletme rozetiniz canlı olarak güncellenir.'}
           </p>
         </div>
       </div>
@@ -478,18 +508,21 @@ export function renderRegisterPage(container) {
         currentStep = 5;
         updateView();
         triggerConfetti();
-        showToast('🎉 İşletme kaydınız ve kodunuz başarıyla oluşturuldu!', 'success');
+        showToast('🎉 İşletme kaydınız ve kodunuz başarıyla oluşturuldu! ID ekranınız açık kalacaktır.', 'success');
       });
     }
 
     if (currentStep === 5) {
+      const activeReg = registeredBusiness || store.getLastRegisteredBusiness() || {};
+      const activeId = activeReg.id || 'BYR-0000';
+      const activePass = formData.password || activeReg.password || '';
+
       // 1. Copy Business ID
       container.querySelector('#btn-copy-id')?.addEventListener('click', () => {
-        const idText = registeredBusiness?.id || '';
-        navigator.clipboard.writeText(idText).then(() => {
+        navigator.clipboard.writeText(activeId).then(() => {
           const btnText = container.querySelector('#copy-id-text');
           if (btnText) btnText.textContent = 'Kopyalandı! ✓';
-          showToast('📋 İşletme Kodu panoya kopyalandı!', 'success');
+          showToast(`📋 İşletme Kodu (${activeId}) panoya kopyalandı!`, 'success');
           setTimeout(() => {
             if (btnText) btnText.textContent = 'Kopyala';
           }, 2500);
@@ -504,7 +537,7 @@ export function renderRegisterPage(container) {
 
       // 3. Copy Password
       container.querySelector('#btn-copy-pass')?.addEventListener('click', () => {
-        navigator.clipboard.writeText(formData.password).then(() => {
+        navigator.clipboard.writeText(activePass).then(() => {
           const btnText = container.querySelector('#copy-pass-text');
           if (btnText) btnText.textContent = 'Kopyalandı! ✓';
           showToast('🔑 Şifreniz panoya kopyalandı!', 'success');
@@ -516,19 +549,86 @@ export function renderRegisterPage(container) {
 
       // 4. Copy All Credentials
       container.querySelector('#btn-copy-all')?.addEventListener('click', () => {
-        const allInfo = `=== BuyurAbi İşletme Giriş Bilgileri ===\nİşletme Adı: ${formData.businessName}\nİşletme Kodu (ID): ${registeredBusiness?.id || ''}\nGiriş Şifresi: ${formData.password}\nYetkili: ${formData.fullName}\nTelefon: ${formData.phone}\nSeçilen Paket: ${formData.plan}`;
+        const allInfo = `=== BUYURABİ İŞLETME GİRİŞ BİLGİLERİ ===
+İşletme Adı: ${formData.businessName || activeReg.businessName || ''}
+İşletme Kodu (ID): ${activeId}
+Giriş Şifresi: ${activePass}
+Yetkili: ${formData.fullName || activeReg.fullName || ''}
+Telefon: ${formData.phone || activeReg.phone || ''}
+İşletme Türü: ${formData.businessType || activeReg.businessType || ''}
+Paket: ${formData.plan || activeReg.plan || ''}
+Konum: ${formData.city || activeReg.city || ''} - ${formData.fullAddress || activeReg.fullAddress || ''}
+Durum: Aktif Kayıt Alındı`;
+
         navigator.clipboard.writeText(allInfo).then(() => {
           const copyAllText = container.querySelector('#copy-all-text');
           if (copyAllText) copyAllText.textContent = 'Tüm Bilgiler Kopyalandı! ✓';
           showToast('✅ Tüm işletme giriş bilgileri panoya kopyalandı!', 'success');
           setTimeout(() => {
-            if (copyAllText) copyAllText.textContent = 'Tüm Giriş Bilgilerini Panoya Kopyala';
+            if (copyAllText) copyAllText.textContent = 'Tüm Bilgileri Kopyala';
           }, 3000);
         });
       });
 
+      // 5. Download TXT File
+      container.querySelector('#btn-download-txt')?.addEventListener('click', () => {
+        const txtContent = `=====================================================
+BUYURABİ RESTORAN & İŞLETME GİRİŞ BİLGİ KARTI
+=====================================================
+İşletme Adı      : ${formData.businessName || activeReg.businessName || ''}
+İşletme Kodu (ID): ${activeId}
+Giriş Parolası   : ${activePass}
+Yetkili Kişi     : ${formData.fullName || activeReg.fullName || ''}
+Telefon No       : ${formData.phone || activeReg.phone || ''}
+İşletme Türü     : ${formData.businessType || activeReg.businessType || ''}
+Seçilen Paket    : ${formData.plan || activeReg.plan || ''}
+Açık Adres       : ${formData.city || activeReg.city || ''} / ${formData.fullAddress || activeReg.fullAddress || ''}
+Başvuru Durumu   : Aktif Başvuru Alındı
+Kayıt Tarihi     : ${new Date().toLocaleString('tr-TR')}
+=====================================================
+ÖNEMLİ NOT:
+Bu işletme kodu (ID) ve şifre masalarınızı yönetmek,
+QR menünüzü düzenlemek ve işletme işlemlerinizi yürütmek
+için kullanılacaktır. Lütfen bu dosyayı güvenli saklayınız.
+=====================================================`;
+
+        const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `BuyurAbi_${activeId}_Giris_Bilgileri.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('💾 Giriş bilgileri dosya olarak indirildi!', 'success');
+      });
+
+      // 6. Go to Home (Keep ID screen saved)
       container.querySelector('#btn-finish-go-home')?.addEventListener('click', () => {
         store.setView('landing');
+      });
+
+      // 7. Start New Registration (Clears saved registration)
+      container.querySelector('#btn-new-registration')?.addEventListener('click', () => {
+        if (confirm('Farklı bir işletme kaydı yapmak istiyor musunuz? (Mevcut işletme ID kartınız bu ekrandan kaldırılacaktır)')) {
+          store.clearLastRegisteredBusiness();
+          registeredBusiness = null;
+          formData = {
+            businessName: '',
+            fullName: '',
+            businessType: 'Restoran & Lokanta',
+            plan: 'Profesyonel Paket (₺899/ay)',
+            planPrice: 899,
+            phone: '',
+            city: 'İstanbul / Kadıköy',
+            fullAddress: '',
+            password: ''
+          };
+          currentStep = 1;
+          updateView();
+          showToast('Yeni işletme kayıt formu açıldı.', 'info');
+        }
       });
     }
   }

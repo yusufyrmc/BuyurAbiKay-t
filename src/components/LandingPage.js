@@ -1,7 +1,28 @@
 import { store } from '../state/store.js';
 
 export function renderLandingPage(container) {
+  const lastReg = store.getLastRegisteredBusiness();
+
   container.innerHTML = `
+    <!-- REGISTERED USER ID BANNER (IF REGISTERED) -->
+    ${lastReg && lastReg.id ? `
+      <div style="background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.35); border-radius:var(--radius-md); padding:0.9rem 1.4rem; margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+        <div style="display:flex; align-items:center; gap:0.85rem;">
+          <div style="width:40px; height:40px; border-radius:50%; background:rgba(0,230,118,0.2); color:var(--color-accent-green); display:flex; align-items:center; justify-content:center;">
+            <i data-lucide="badge-check" style="width:22px; height:22px;"></i>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; color:var(--color-text-muted);">Sistemde Kayıtlı İşletmeniz:</div>
+            <strong style="font-size:1.05rem; color:#fff;">${lastReg.businessName}</strong>
+            <span style="font-family:monospace; background:rgba(255,107,0,0.2); color:var(--color-primary); font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.92rem;">ID: ${lastReg.id}</span>
+          </div>
+        </div>
+        <button id="btn-banner-view-id" class="pill-btn" style="background:var(--color-primary-gradient); color:#fff; font-weight:800; padding:0.6rem 1.2rem; border:none; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm); box-shadow:var(--shadow-glow);">
+          <i data-lucide="id-card" style="width:16px; height:16px;"></i> ID Kartımı Aç
+        </button>
+      </div>
+    ` : ''}
+
     <!-- HERO SECTION -->
     <div class="landing-hero">
       <div class="hero-text-content">
@@ -20,8 +41,8 @@ export function renderLandingPage(container) {
 
         <div class="hero-btn-group">
           <button class="btn-primary-hero" id="landing-btn-register-now">
-            <i data-lucide="user-plus"></i>
-            <span>Ücretsiz Kayıt Ol</span>
+            <i data-lucide="${lastReg ? 'id-card' : 'user-plus'}"></i>
+            <span>${lastReg ? 'İşletme / ID Kartımı Aç' : 'Ücretsiz Kayıt Ol'}</span>
           </button>
 
           <button class="btn-secondary-hero" id="landing-btn-learn-more">
@@ -122,6 +143,10 @@ export function renderLandingPage(container) {
   if (window.lucide) window.lucide.createIcons();
 
   document.getElementById('landing-btn-register-now')?.addEventListener('click', () => {
+    store.setView('register');
+  });
+
+  document.getElementById('btn-banner-view-id')?.addEventListener('click', () => {
     store.setView('register');
   });
 
