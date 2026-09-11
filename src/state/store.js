@@ -548,6 +548,27 @@ class AppStore {
     return false;
   }
 
+  deleteOrder(orderId) {
+    this.orders = this.orders.filter(o => o.id !== orderId);
+    this.saveOrders();
+    this.notify();
+    return true;
+  }
+
+  clearCompletedOrders() {
+    this.orders = this.orders.filter(o => o.status !== 'tamamlandi' && o.status !== 'iptal');
+    this.saveOrders();
+    this.notify();
+    return true;
+  }
+
+  deleteSupportNote(noteId) {
+    this.supportNotes = this.supportNotes.filter(n => n.id !== noteId);
+    this.saveSupportNotes();
+    this.notify();
+    return true;
+  }
+
   createTestOrderForBusiness(businessId) {
     const business = this.registrations.find(r => r.id === businessId) || {
       id: businessId,

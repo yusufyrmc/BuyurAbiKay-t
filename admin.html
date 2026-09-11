@@ -17,34 +17,11 @@
   <div class="ambient-glow glow-1"></div>
   <div class="ambient-glow glow-2"></div>
 
-  <!-- Admin Standalone Header -->
-  <header class="app-header">
-    <div class="header-container">
-      <div class="brand-logo" title="BuyurAbi Admin Paneli">
-        <div class="logo-icon">
-          <i data-lucide="shield-check"></i>
-        </div>
-        <div class="logo-text">
-          <span class="brand-name">Buyur<span class="brand-accent">Abi</span></span>
-          <span class="brand-sub">GİZLİ ADMİN KONTROL MERKEZİ</span>
-        </div>
-      </div>
-
-      <div class="header-actions">
-        <a href="/index.html" class="btn-secondary-hero" style="font-size:0.82rem; padding:0.5rem 1rem; text-decoration:none;">
-          <i data-lucide="external-link"></i> Ana Sayfaya Git
-        </a>
-      </div>
-    </div>
-  </header>
-
   <!-- Notification Toast Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Main Content Container for Admin Panel -->
-  <main class="app-main-content">
-    <section id="view-owner-admin" class="view-section active"></section>
-  </main>
+  <!-- Main Full-Screen Container for Admin Panel -->
+  <div id="view-owner-admin" style="min-height:100vh; position:relative; z-index:1;"></div>
 
   <script type="module" src="/src/admin.js"></script>
 </body>
