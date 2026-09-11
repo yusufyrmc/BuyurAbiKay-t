@@ -56,6 +56,99 @@ class AppStore {
     const savedLastReg = localStorage.getItem('buyurabi_last_registered_business');
     this.lastRegisteredBusiness = savedLastReg ? JSON.parse(savedLastReg) : null;
 
+    // Live Orders per business
+    const savedOrders = localStorage.getItem('buyurabi_restaurant_orders');
+    this.orders = savedOrders ? JSON.parse(savedOrders) : [
+      {
+        id: 'SIP-1081',
+        businessId: 'REG-1001',
+        businessName: 'Gaziantep Lezzet Sofrası',
+        tableName: 'Masa 4',
+        customerName: 'Kemal Arslan',
+        items: [
+          { name: 'Zırh Kıyma Adana Kebap', qty: 2, price: 340, note: 'Az acılı, bol sumaklı soğan' },
+          { name: 'Bol Köpüklü Yayık Ayran', qty: 2, price: 45 }
+        ],
+        totalPrice: 770,
+        status: 'yeni',
+        paymentMethod: 'Masada Kredi Kartı',
+        createdAt: '2 dk önce',
+        timestamp: Date.now() - 2 * 60 * 1000
+      },
+      {
+        id: 'SIP-1080',
+        businessId: 'REG-1002',
+        businessName: 'Moda Artisan Kafe',
+        tableName: 'Bahçe Masa 2',
+        customerName: 'Zeynep Demir',
+        items: [
+          { name: 'Flat White & Çikolatalı Kruvasan', qty: 1, price: 185 },
+          { name: 'San Sebastian Cheesecake', qty: 1, price: 195 }
+        ],
+        totalPrice: 380,
+        status: 'hazirlaniyor',
+        paymentMethod: 'Online Kart ile Ödendi',
+        createdAt: '8 dk önce',
+        timestamp: Date.now() - 8 * 60 * 1000
+      },
+      {
+        id: 'SIP-1079',
+        businessId: 'REG-1003',
+        businessName: 'Çıtır Taş Fırın Pide',
+        tableName: 'Masa 8',
+        customerName: 'Burak Şahin',
+        items: [
+          { name: 'Taş Fırın Kuşbaşılı Kaşarlı Pide', qty: 2, price: 290 },
+          { name: 'Kutu Kola', qty: 2, price: 50 }
+        ],
+        totalPrice: 680,
+        status: 'masada',
+        paymentMethod: 'Nakit',
+        createdAt: '15 dk önce',
+        timestamp: Date.now() - 15 * 60 * 1000
+      },
+      {
+        id: 'SIP-1078',
+        businessId: 'REG-1001',
+        businessName: 'Gaziantep Lezzet Sofrası',
+        tableName: 'Masa 1',
+        customerName: 'Mustafa Kaya',
+        items: [
+          { name: 'Tereyağlı İskender Kebap', qty: 1, price: 380 },
+          { name: 'Künefe', qty: 1, price: 160 }
+        ],
+        totalPrice: 540,
+        status: 'tamamlandi',
+        paymentMethod: 'Kredi Kartı',
+        createdAt: '35 dk önce',
+        timestamp: Date.now() - 35 * 60 * 1000
+      }
+    ];
+
+    // Live Support Call Logs & Notes per business
+    const savedNotes = localStorage.getItem('buyurabi_support_call_notes');
+    this.supportNotes = savedNotes ? JSON.parse(savedNotes) : [
+      {
+        id: 'NOTE-1',
+        businessId: 'REG-1001',
+        agent: 'Destek Temsilcisi (Yusuf)',
+        category: 'Masa / QR Kontrolü',
+        text: 'Ahmet Bey aradı. Masa 4 QR etiketinin okutulmasıyla ilgili müşteri kamera izin sorunu kontrol edildi. Canlı test siparişi ile sistem teyit edildi.',
+        createdAt: 'Bugün 11:20',
+        timestamp: Date.now() - 120 * 60 * 1000
+      },
+      {
+        id: 'NOTE-2',
+        businessId: 'REG-1002',
+        agent: 'Destek Ekibi',
+        category: 'Menü & Fiyat Güncelleme',
+        text: 'Selin Hanım aradı, yeni sezon tatlı menüsü ekleme adımları telefonda tarif edildi. Mutfak bildirim zili test edildi.',
+        createdAt: 'Dün 16:45',
+        timestamp: Date.now() - 24 * 60 * 60 * 1000
+      }
+    ];
+
+    this.soundEnabled = true;
     this.activeView = 'landing';
     this.adminUnlocked = sessionStorage.getItem('buyurabi_admin_session') === 'true';
     this.adminPassword = '123456';
@@ -416,6 +509,165 @@ class AppStore {
     return this.registrations
       .filter(r => r.status === 'onaylandi')
       .reduce((sum, r) => sum + (r.planPrice || 899), 0);
+  }
+
+  // --- Live Orders Management ---
+  saveOrders() {
+    localStorage.setItem('buyurabi_restaurant_orders', JSON.stringify(this.orders));
+  }
+
+  getOrders(businessId = 'all') {
+    if (!businessId || businessId === 'all') return this.orders;
+    return this.orders.filter(o => o.businessId === businessId);
+  }
+
+  getOrdersForBusiness(businessId) {
+    return this.orders.filter(o => o.businessId === businessId);
+  }
+
+  updateOrderStatus(orderId, newStatus) {
+    const order = this.orders.find(o => o.id === orderId);
+    if (order) {
+      order.status = newStatus;
+      this.saveOrders();
+      this.notify();
+      return true;
+    }
+    return false;
+  }
+
+  cancelOrder(orderId, reason = 'Destek ekibi tarafından iptal edildi') {
+    const order = this.orders.find(o => o.id === orderId);
+    if (order) {
+      order.status = 'iptal';
+      order.cancelReason = reason;
+      this.saveOrders();
+      this.notify();
+      return true;
+    }
+    return false;
+  }
+
+  createTestOrderForBusiness(businessId) {
+    const business = this.registrations.find(r => r.id === businessId) || {
+      id: businessId,
+      businessName: 'Test Restoranı'
+    };
+
+    const sampleDishes = [
+      { name: 'Zırh Kıyma Adana Kebap', price: 340, note: 'Orta acılı' },
+      { name: 'Taş Fırın Lahmacun', price: 95, note: 'Bol limon & yeşillik' },
+      { name: 'Tereyağlı İskender Kebap', price: 380, note: 'Duble tereyağlı' },
+      { name: 'Künefe', price: 160, note: 'Dondurmalı' },
+      { name: 'Bol Köpüklü Yayık Ayran', price: 45, note: 'Soğuk' },
+      { name: 'San Sebastian Cheesecake', price: 195, note: 'Çikolata soslu' }
+    ];
+
+    const pick1 = sampleDishes[Math.floor(Math.random() * sampleDishes.length)];
+    const pick2 = sampleDishes[Math.floor(Math.random() * sampleDishes.length)];
+    const items = [
+      { name: pick1.name, qty: 1, price: pick1.price, note: pick1.note },
+      { name: pick2.name, qty: 2, price: pick2.price, note: pick2.note }
+    ];
+    const totalPrice = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+    const testOrder = {
+      id: 'SIP-' + Math.floor(1000 + Math.random() * 9000),
+      businessId: business.id,
+      businessName: business.businessName,
+      tableName: 'Masa ' + Math.floor(1 + Math.random() * 12),
+      customerName: 'Canlı Destek Testi (Temsilci)',
+      items,
+      totalPrice,
+      status: 'yeni',
+      paymentMethod: 'Masada Kart / Nakit',
+      createdAt: 'Az önce',
+      timestamp: Date.now()
+    };
+
+    this.orders.unshift(testOrder);
+    this.saveOrders();
+    this.playChime();
+    this.notify();
+    return testOrder;
+  }
+
+  // --- Live Support & Call Logs Management ---
+  saveSupportNotes() {
+    localStorage.setItem('buyurabi_support_call_notes', JSON.stringify(this.supportNotes));
+  }
+
+  getSupportNotes(businessId = 'all') {
+    if (!businessId || businessId === 'all') return this.supportNotes;
+    return this.supportNotes.filter(n => n.businessId === businessId);
+  }
+
+  addSupportNote(businessId, { category, text, agent = 'Destek Temsilcisi' }) {
+    const newNote = {
+      id: 'NOTE-' + Date.now(),
+      businessId,
+      agent,
+      category: category || 'Genel Destek',
+      text: text || '',
+      createdAt: 'Az önce',
+      timestamp: Date.now()
+    };
+
+    this.supportNotes.unshift(newNote);
+    this.saveSupportNotes();
+    this.notify();
+    return newNote;
+  }
+
+  // --- Diagnostics Helper ---
+  getBusinessDiagnostics(businessId) {
+    const business = this.registrations.find(r => r.id === businessId);
+    if (!business) return null;
+
+    const bOrders = this.orders.filter(o => o.businessId === businessId);
+    const activeOrders = bOrders.filter(o => o.status === 'yeni' || o.status === 'hazirlaniyor' || o.status === 'masada');
+    const totalOrderRevenue = bOrders.filter(o => o.status !== 'iptal').reduce((sum, o) => sum + o.totalPrice, 0);
+
+    return {
+      business,
+      qrUrl: `https://buyurabi.com/menu/${business.id}`,
+      systemStatus: business.status === 'onaylandi' ? '🟢 Aktif & Siparişe Açık' : '⏳ Onay Bekliyor',
+      latency: Math.floor(18 + Math.random() * 14) + ' ms',
+      kitchenStatus: '🟢 Çevrimiçi (Sinyal: Mükemmel)',
+      activeOrdersCount: activeOrders.length,
+      totalOrdersCount: bOrders.length,
+      totalOrderRevenue,
+      lastPing: '15 saniye önce'
+    };
+  }
+
+  // Pleasant Web Audio Two-tone chime for incoming orders & tests
+  playChime() {
+    if (!this.soundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+
+      const playTone = (freq, time, duration) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + time);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime + time);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + time + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + time);
+        osc.stop(ctx.currentTime + time + duration);
+      };
+
+      // Two-tone chime: 587.33 Hz (D5) -> 880 Hz (A5)
+      playTone(587.33, 0, 0.25);
+      playTone(880.00, 0.15, 0.4);
+    } catch (e) {
+      console.warn('Audio chime notice:', e);
+    }
   }
 }
 
