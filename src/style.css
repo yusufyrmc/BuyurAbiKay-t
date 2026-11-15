@@ -988,3 +988,250 @@ body {
     padding: 1.5rem 1rem;
   }
 }
+
+/* ==========================================================================
+   DİJİTAL ADİSYON & KASA SİMÜLATÖRÜ & SHOWCASE GELİŞMİŞ STİLLER
+   ========================================================================== */
+.kasa-mockup-wrapper {
+  background: #0B0F19;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 107, 0, 0.35);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(255, 107, 0, 0.12);
+  overflow: hidden;
+  position: relative;
+}
+
+.kasa-mockup-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--color-primary-gradient);
+  z-index: 2;
+}
+
+.kasa-mockup-topbar {
+  background: rgba(14, 19, 31, 0.95);
+  padding: 0.9rem 1.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.kasa-ciro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+}
+
+.kasa-interactive-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  min-height: 380px;
+}
+
+@media (max-width: 900px) {
+  .kasa-interactive-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kasa-tables-col {
+  padding: 1.2rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 15, 25, 0.7);
+}
+
+.kasa-tables-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.kasa-table-item {
+  background: var(--color-bg-card);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.65rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: left;
+  position: relative;
+}
+
+.kasa-table-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 107, 0, 0.5);
+}
+
+.kasa-table-item.active {
+  border-color: var(--color-primary);
+  background: rgba(255, 107, 0, 0.12);
+  box-shadow: 0 0 16px rgba(255, 107, 0, 0.25);
+}
+
+.kasa-table-item.empty {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.kasa-side-panel {
+  padding: 1.2rem;
+  background: rgba(18, 24, 38, 0.85);
+  display: flex;
+  flex-direction: column;
+}
+
+.kasa-side-header {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kasa-orders-scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.85rem 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.kasa-order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.kasa-action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-kasa-pay-cash {
+  background: rgba(0, 230, 118, 0.18);
+  border: 1px solid rgba(0, 230, 118, 0.4);
+  color: var(--color-accent-green);
+  padding: 0.65rem;
+  font-weight: 800;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--transition-fast);
+}
+
+.btn-kasa-pay-cash:hover {
+  background: rgba(0, 230, 118, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-kasa-pay-card {
+  background: rgba(0, 229, 255, 0.18);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  color: var(--color-accent-cyan);
+  padding: 0.65rem;
+  font-weight: 800;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--transition-fast);
+}
+
+.btn-kasa-pay-card:hover {
+  background: rgba(0, 229, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-kasa-print-receipt {
+  grid-column: 1 / -1;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 0.55rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--transition-fast);
+}
+
+.btn-kasa-print-receipt:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* WORKFLOW 4-STEP GRID */
+.workflow-step-card {
+  background: var(--color-bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.6rem;
+  position: relative;
+  transition: var(--transition-smooth);
+}
+
+.workflow-step-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 107, 0, 0.4);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.workflow-num-pill {
+  position: absolute;
+  top: -14px;
+  left: 20px;
+  background: var(--color-primary-gradient);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.85rem;
+  padding: 2px 14px;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Feature Number Badges */
+.feat-item-badge {
+  display: inline-block;
+  background: rgba(255, 107, 0, 0.15);
+  border: 1px solid rgba(255, 107, 0, 0.35);
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-family: monospace;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+}

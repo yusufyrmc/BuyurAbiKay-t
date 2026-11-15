@@ -9,7 +9,7 @@ export function renderRegisterPage(container) {
     businessName: savedLastReg?.businessName || '',
     fullName: savedLastReg?.fullName || '',
     businessType: savedLastReg?.businessType || 'Restoran & Lokanta',
-    plan: savedLastReg?.plan || 'Profesyonel Paket (₺899/ay)',
+    plan: savedLastReg?.plan || 'Profesyonel Paket (25 Masa - ₺899/ay)',
     planPrice: savedLastReg?.planPrice || 899,
     phone: savedLastReg?.phone || '',
     city: savedLastReg?.city || 'İstanbul / Kadıköy',
@@ -62,11 +62,11 @@ export function renderRegisterPage(container) {
           ${currentStep === 1 ? `
             <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
               <div style="width:40px; height:40px; background:var(--color-primary-light); color:var(--color-primary); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center;">
-                <i data-lucide="store" style="width:24px; height:24px;"></i>
+                <i data-lucide="receipt" style="width:24px; height:24px;"></i>
               </div>
-              <h2 class="wizard-title" style="margin:0;">Restoran & İşletme Kaydı</h2>
+              <h2 class="wizard-title" style="margin:0;">Restoran & Dijital Adisyon Sistemi Kaydı</h2>
             </div>
-            <p class="wizard-subtitle">İşletme bilgilerinizi girin ve dilediğiniz aylık planı seçin.</p>
+            <p class="wizard-subtitle">İşletme bilgilerinizi girin ve salonunuzun masa kapasitesine uygun planı seçin (Madde 1.3).</p>
 
             <div class="form-group-row">
               <div class="form-field">
@@ -88,27 +88,30 @@ export function renderRegisterPage(container) {
               </div>
             </div>
 
-            <!-- MONTHLY PLAN SELECTION CARDS -->
+            <!-- MASA EKLEME İÇİN PLAN SEÇİMİ (MADDE 1.3) -->
             <div style="margin-bottom:1.5rem;">
-              <label class="form-label" style="margin-bottom:0.6rem;"><i data-lucide="credit-card"></i> Aylık Kullanım Planı Seçin</label>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+                <label class="form-label" style="margin:0;"><i data-lucide="credit-card"></i> Masa Eklemek İçin Kullanım Planı Seçin (1.3)</label>
+                <span style="font-size:0.75rem; color:var(--color-accent-green); font-weight:700;">Esnek Masa Kapasitesi</span>
+              </div>
               
               <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.85rem;">
-                <div class="role-select-card ${formData.planPrice === 800 ? 'selected' : ''}" data-plan="Başlangıç Paketi (₺499/ay)" data-price="499" style="padding:1rem 0.6rem;">
+                <div class="role-select-card ${formData.planPrice === 499 ? 'selected' : ''}" data-plan="Başlangıç Paketi (10 Masa - ₺499/ay)" data-price="499" style="padding:1rem 0.6rem;">
                   <div style="font-size:1.2rem; margin-bottom:4px;">🥉</div>
-                  <strong style="font-size:0.88rem; color:#fff; display:block;">Başlangıç</strong>
+                  <strong style="font-size:0.88rem; color:#fff; display:block;">Başlangıç (10 Masa)</strong>
                   <span style="font-size:0.95rem; font-weight:800; color:var(--color-primary);">₺499 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
                 </div>
 
-                <div class="role-select-card ${formData.planPrice === 1000 ? 'selected' : ''}" data-plan="Profesyonel Paket (₺899/ay)" data-price="899" style="padding:1rem 0.6rem; position:relative;">
+                <div class="role-select-card ${formData.planPrice === 899 ? 'selected' : ''}" data-plan="Profesyonel Paket (25 Masa - ₺899/ay)" data-price="899" style="padding:1rem 0.6rem; position:relative;">
                   <div style="position:absolute; top:-10px; right:10px; background:var(--color-primary); color:#fff; font-size:0.6rem; font-weight:800; padding:2px 6px; border-radius:10px;">POPÜLER</div>
                   <div style="font-size:1.2rem; margin-bottom:4px;">🥈</div>
-                  <strong style="font-size:0.88rem; color:#fff; display:block;">Profesyonel</strong>
+                  <strong style="font-size:0.88rem; color:#fff; display:block;">Profesyonel (25 Masa)</strong>
                   <span style="font-size:0.95rem; font-weight:800; color:var(--color-accent-green);">₺899 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
                 </div>
 
-                <div class="role-select-card ${formData.planPrice === 2000 ? 'selected' : ''}" data-plan="Kurumsal Paket (₺1.499/ay)" data-price="1499" style="padding:1rem 0.6rem;">
+                <div class="role-select-card ${formData.planPrice === 1499 ? 'selected' : ''}" data-plan="Kurumsal Paket (Sınırsız Masa - ₺1.499/ay)" data-price="1499" style="padding:1rem 0.6rem;">
                   <div style="font-size:1.2rem; margin-bottom:4px;">🥇</div>
-                  <strong style="font-size:0.88rem; color:#fff; display:block;">Kurumsal</strong>
+                  <strong style="font-size:0.88rem; color:#fff; display:block;">Kurumsal (Sınırsız)</strong>
                   <span style="font-size:0.95rem; font-weight:800; color:var(--color-accent-cyan);">₺1.499 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
                 </div>
               </div>
@@ -164,11 +167,11 @@ export function renderRegisterPage(container) {
 
           <!-- STEP 3: SECURITY & PASSWORD -->
           ${currentStep === 3 ? `
-            <h2 class="wizard-title">Şifre & Güvenlik</h2>
-            <p class="wizard-subtitle">İşletmeniz ve menü yönetiminiz için güvenli bir parola belirleyin.</p>
+            <h2 class="wizard-title">Kasa & Giriş Şifresi Belirleme</h2>
+            <p class="wizard-subtitle">Kasa ekranınız, garson girişleri ve dijital adisyon yönetimi için güvenli bir parola belirleyin.</p>
 
             <div class="form-field">
-              <label class="form-label"><i data-lucide="lock"></i> Şifre Oluşturun</label>
+              <label class="form-label"><i data-lucide="lock"></i> Kasa & Sistem Giriş Şifresi</label>
               <input type="password" id="reg-password" class="form-input" placeholder="En az 6 karakter, harf ve rakam" value="${formData.password}">
               
               <div class="password-meter" style="margin-top:0.6rem;">
@@ -182,7 +185,7 @@ export function renderRegisterPage(container) {
             <div style="background:rgba(255,255,255,0.04); padding:1rem; border-radius:var(--radius-md); border:var(--border-glass); margin-bottom:1.5rem;">
               <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; color:var(--color-text-muted); cursor:pointer;">
                 <input type="checkbox" id="reg-terms" checked style="accent-color:var(--color-primary); width:18px; height:18px;">
-                <span><strong style="color:#fff;">BuyurAbi İşletme Sözleşmesini</strong> okudum ve onaylıyorum.</span>
+                <span><strong style="color:#fff;">BuyurAbi Dijital Adisyon & Kasa Otomasyon Sözleşmesini</strong> okudum ve onaylıyorum.</span>
               </label>
             </div>
 
@@ -226,17 +229,17 @@ export function renderRegisterPage(container) {
                 <i data-lucide="check-check" style="width:42px; height:42px;"></i>
               </div>
 
-              <h2 class="wizard-title" style="color:var(--color-accent-green); font-size:1.8rem; margin-bottom:0.3rem;">İşletme Kaydınız Oluşturuldu! 🎉</h2>
+              <h2 class="wizard-title" style="color:var(--color-accent-green); font-size:1.8rem; margin-bottom:0.3rem;">Dijital Adisyon & Kasa Kaydınız Oluşturuldu! 🎉</h2>
               <p class="wizard-subtitle" style="max-width:560px; margin:0 auto 1.2rem auto; font-size:0.95rem;">
-                <strong>${formData.businessName || registeredBusiness?.businessName || 'İşletmeniz'}</strong> için sistem giriş kodunuz ve parolanız aşağıda tanımlanmıştır.
+                <strong>${formData.businessName || registeredBusiness?.businessName || 'İşletmeniz'}</strong> için dijital adisyon sistemi kasa kodu ve şifreniz tanımlanmıştır.
               </p>
 
               <!-- PERSISTENT NOTICE BANNER -->
               <div style="background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.35); border-radius:var(--radius-md); padding:0.85rem 1.2rem; margin-bottom:1.5rem; text-align:left; display:flex; align-items:center; gap:0.85rem;">
                 <i data-lucide="shield-check" style="width:28px; height:28px; color:var(--color-accent-green); flex-shrink:0;"></i>
                 <div style="font-size:0.86rem; color:var(--color-text-main); line-height:1.4;">
-                  <strong style="color:var(--color-accent-green); display:block; margin-bottom:2px;">📌 ID Ekranınız Açık Kalacak Şekilde Sabitlenmiştir</strong>
-                  Sayfayı yenileseniz veya diğer sayfalara geçip geri dönseniz bile bu ID ekranınız açık kalır. Bilgilerinizi güvenli bir yere not ediniz.
+                  <strong style="color:var(--color-accent-green); display:block; margin-bottom:2px;">📌 Dijital Adisyon Bilgi Kartınız Sabitlenmiştir</strong>
+                  Bu işletme kodu ve şifre ile kasanızı, salon masalarınızı, garson telefon girişlerini ve mutfak sıcak ekranınızı yönetebilirsiniz.
                 </div>
               </div>
 
@@ -246,18 +249,18 @@ export function renderRegisterPage(container) {
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:0.75rem;">
                   <div>
-                    <span style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--color-text-muted); font-weight:800;">İŞLETME GİRİŞ BİLGİ KARTI</span>
+                    <span style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--color-text-muted); font-weight:800;">DİJİTAL ADİSYON GİRİŞ KARTI</span>
                     <h4 style="font-size:1.2rem; color:#fff; margin:2px 0 0 0; font-weight:800;">${formData.businessName || registeredBusiness?.businessName}</h4>
                   </div>
                   <span style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-size:0.75rem; font-weight:800; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
-                    ● AKTİF BAŞVURU
+                    ● AKTİF LİSANS ALINDI
                   </span>
                 </div>
 
                 <!-- 1. FIELD: ISLETME KODU (ID) -->
                 <div style="margin-bottom:1.2rem;">
                   <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
-                    <i data-lucide="hash" style="width:15px; height:15px; vertical-align:middle; color:var(--color-primary);"></i> İşletme Kodu (ID) - Restoran & Menü Tanımlama Kodu:
+                    <i data-lucide="hash" style="width:15px; height:15px; vertical-align:middle; color:var(--color-primary);"></i> İşletme Kodu (ID) - Kasa, Masa ve Garson Tanımlama Kodu:
                   </label>
                   <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,107,0,0.5); border-radius:var(--radius-md); padding:0.75rem 1.2rem;">
                     <span id="display-business-id" style="font-family:monospace; font-size:1.6rem; font-weight:900; color:var(--color-primary); letter-spacing:2px; flex:1;">
@@ -272,7 +275,7 @@ export function renderRegisterPage(container) {
                 <!-- 2. FIELD: SIFRE -->
                 <div style="margin-bottom:1.2rem;">
                   <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
-                    <i data-lucide="lock" style="width:15px; height:15px; vertical-align:middle; color:var(--color-accent-green);"></i> Giriş Şifreniz:
+                    <i data-lucide="lock" style="width:15px; height:15px; vertical-align:middle; color:var(--color-accent-green);"></i> Kasa & Sistem Giriş Şifreniz:
                   </label>
                   <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:var(--radius-md); padding:0.65rem 1.2rem;">
                     <span id="display-password" style="font-family:monospace; font-size:1.4rem; font-weight:800; color:#fff; letter-spacing:2px; flex:1;">
@@ -327,7 +330,7 @@ export function renderRegisterPage(container) {
         <!-- RIGHT: LIVE DIGITAL BADGE PREVIEW -->
         <div class="badge-preview-card">
           <div class="badge-preview-header">
-            <i data-lucide="badge-check" style="vertical-align:middle; margin-right:4px;"></i> ${currentStep === 5 ? 'Kayıtlı İşletme Kimliği' : 'Live İşletme Rozeti'}
+            <i data-lucide="badge-check" style="vertical-align:middle; margin-right:4px;"></i> ${currentStep === 5 ? 'Dijital Adisyon Lisans Kartı' : 'Canlı Adisyon Lisans Önizlemesi'}
           </div>
 
           <div class="digital-badge-chip">
@@ -346,20 +349,20 @@ export function renderRegisterPage(container) {
             <div class="badge-info-list">
               ${(registeredBusiness?.id) ? `
                 <div style="background:rgba(255,107,0,0.15); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,107,0,0.35); margin-bottom:6px;">
-                  <span style="font-size:0.75rem; color:var(--color-text-muted); display:block;">Sistem İşletme Kodu:</span>
+                  <span style="font-size:0.75rem; color:var(--color-text-muted); display:block;">Kasa & Giriş Kodu:</span>
                   <span style="color:var(--color-primary); font-family:monospace; font-size:1.15rem; font-weight:900; letter-spacing:1px;">${registeredBusiness.id}</span>
                 </div>
               ` : ''}
-              <div><strong>Seçilen Paket:</strong> <span style="color:var(--color-accent-green); font-weight:800;" id="badge-disp-plan">${formData.plan || registeredBusiness?.plan}</span></div>
+              <div><strong>Masa Kapasite Planı:</strong> <span style="color:var(--color-accent-green); font-weight:800;" id="badge-disp-plan">${formData.plan || registeredBusiness?.plan}</span></div>
               <div><strong>Yetkili:</strong> <span id="badge-disp-fullname">${formData.fullName || registeredBusiness?.fullName || 'Ad Soyad'}</span></div>
               <div><strong>Telefon:</strong> <span id="badge-disp-phone">${formData.phone || registeredBusiness?.phone || '0555 *** ** **'}</span></div>
               <div><strong>Şehir:</strong> <span id="badge-disp-city">${formData.city || registeredBusiness?.city}</span></div>
-              <div><strong>Durum:</strong> <span style="color:var(--color-accent-green); font-weight:800;">${currentStep === 5 ? '✓ KAYIT ALINDI' : '⏳ ONAY BEKLİYOR'}</span></div>
+              <div><strong>Durum:</strong> <span style="color:var(--color-accent-green); font-weight:800;">${currentStep === 5 ? '✓ AKTİF LİSANS' : '⏳ ONAY BEKLİYOR'}</span></div>
             </div>
           </div>
 
           <p style="font-size:0.78rem; color:var(--color-text-muted); margin-top:1.5rem; max-width:280px; text-align:center;">
-            ${currentStep === 5 ? 'İşletme kaydınız ve kodunuz aktif durumda tutulmaktadır.' : 'Formu doldurdukça işletme rozetiniz canlı olarak güncellenir.'}
+            ${currentStep === 5 ? 'Dijital adisyon lisans kaydınız ve kodunuz aktif durumda tutulmaktadır.' : 'Formu doldurdukça adisyon lisans kartınız canlı olarak güncellenir.'}
           </p>
         </div>
       </div>
@@ -549,21 +552,21 @@ export function renderRegisterPage(container) {
 
       // 4. Copy All Credentials
       container.querySelector('#btn-copy-all')?.addEventListener('click', () => {
-        const allInfo = `=== BUYURABİ İŞLETME GİRİŞ BİLGİLERİ ===
+        const allInfo = `=== BUYURABİ DİJİTAL ADİSYON GİRİŞ BİLGİLERİ ===
 İşletme Adı: ${formData.businessName || activeReg.businessName || ''}
 İşletme Kodu (ID): ${activeId}
-Giriş Şifresi: ${activePass}
+Kasa Giriş Şifresi: ${activePass}
 Yetkili: ${formData.fullName || activeReg.fullName || ''}
 Telefon: ${formData.phone || activeReg.phone || ''}
 İşletme Türü: ${formData.businessType || activeReg.businessType || ''}
-Paket: ${formData.plan || activeReg.plan || ''}
+Masa Kapasite Planı: ${formData.plan || activeReg.plan || ''}
 Konum: ${formData.city || activeReg.city || ''} - ${formData.fullAddress || activeReg.fullAddress || ''}
-Durum: Aktif Kayıt Alındı`;
+Durum: Aktif Dijital Adisyon Lisansı Alındı`;
 
         navigator.clipboard.writeText(allInfo).then(() => {
           const copyAllText = container.querySelector('#copy-all-text');
           if (copyAllText) copyAllText.textContent = 'Tüm Bilgiler Kopyalandı! ✓';
-          showToast('✅ Tüm işletme giriş bilgileri panoya kopyalandı!', 'success');
+          showToast('✅ Tüm dijital adisyon işletme giriş bilgileri panoya kopyalandı!', 'success');
           setTimeout(() => {
             if (copyAllText) copyAllText.textContent = 'Tüm Bilgileri Kopyala';
           }, 3000);
@@ -573,23 +576,25 @@ Durum: Aktif Kayıt Alındı`;
       // 5. Download TXT File
       container.querySelector('#btn-download-txt')?.addEventListener('click', () => {
         const txtContent = `=====================================================
-BUYURABİ RESTORAN & İŞLETME GİRİŞ BİLGİ KARTI
+BUYURABİ DİJİTAL ADİSYON & RESTORAN KASA BİLGİ KARTI
 =====================================================
-İşletme Adı      : ${formData.businessName || activeReg.businessName || ''}
-İşletme Kodu (ID): ${activeId}
-Giriş Parolası   : ${activePass}
-Yetkili Kişi     : ${formData.fullName || activeReg.fullName || ''}
-Telefon No       : ${formData.phone || activeReg.phone || ''}
-İşletme Türü     : ${formData.businessType || activeReg.businessType || ''}
-Seçilen Paket    : ${formData.plan || activeReg.plan || ''}
-Açık Adres       : ${formData.city || activeReg.city || ''} / ${formData.fullAddress || activeReg.fullAddress || ''}
-Başvuru Durumu   : Aktif Başvuru Alındı
-Kayıt Tarihi     : ${new Date().toLocaleString('tr-TR')}
+İşletme Adı        : ${formData.businessName || activeReg.businessName || ''}
+İşletme Kodu (ID)  : ${activeId}
+Kasa Giriş Parolası: ${activePass}
+Yetkili Kişi       : ${formData.fullName || activeReg.fullName || ''}
+Telefon No         : ${formData.phone || activeReg.phone || ''}
+İşletme Türü       : ${formData.businessType || activeReg.businessType || ''}
+Masa Kapasite Planı: ${formData.plan || activeReg.plan || ''}
+Açık Adres         : ${formData.city || activeReg.city || ''} / ${formData.fullAddress || activeReg.fullAddress || ''}
+Lisans Durumu      : Aktif Dijital Adisyon Lisansı
+Kayıt Tarihi       : ${new Date().toLocaleString('tr-TR')}
 =====================================================
 ÖNEMLİ NOT:
-Bu işletme kodu (ID) ve şifre masalarınızı yönetmek,
-QR menünüzü düzenlemek ve işletme işlemlerinizi yürütmek
-için kullanılacaktır. Lütfen bu dosyayı güvenli saklayınız.
+Bu işletme kodu (ID) ve şifre; kasanızı, salon masalarınızı
+yönetmek, garsonların QR ile telefonlarından sisteme giriş
+yapmasını sağlamak, mutfak (sıcak) ekranını açmak ve kasa
+tahsilatlarını (nakit/kart) yürütmek için kullanılacaktır.
+Lütfen bu dosyayı güvenli bir yerde saklayınız.
 =====================================================`;
 
         const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
@@ -618,7 +623,7 @@ için kullanılacaktır. Lütfen bu dosyayı güvenli saklayınız.
             businessName: '',
             fullName: '',
             businessType: 'Restoran & Lokanta',
-            plan: 'Profesyonel Paket (₺899/ay)',
+            plan: 'Profesyonel Paket (25 Masa - ₺899/ay)',
             planPrice: 899,
             phone: '',
             city: 'İstanbul / Kadıköy',

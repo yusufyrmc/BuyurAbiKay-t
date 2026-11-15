@@ -639,12 +639,12 @@ export function renderOwnerAdminPanel(container) {
 
                   <div style="display:flex; flex-direction:column; gap:0.65rem; font-size:0.82rem; margin-bottom:1.2rem;">
                     <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.25); padding:0.6rem 0.8rem; border-radius:6px; border:1px solid rgba(255,255,255,0.04);">
-                      <span>🌐 QR Menü Yanıt Süresi:</span>
+                      <span>🌐 Kasa & Adisyon Yanıt Süresi:</span>
                       <strong style="color:var(--color-accent-green);">${businessDiagnostics?.latency}</strong>
                     </div>
 
                     <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.25); padding:0.6rem 0.8rem; border-radius:6px; border:1px solid rgba(255,255,255,0.04);">
-                      <span>📱 Masadan Sipariş Alma:</span>
+                      <span>📱 Garson Çağırma & Sipariş Alma:</span>
                       <strong style="color:var(--color-accent-green);">${businessDiagnostics?.systemStatus}</strong>
                     </div>
 
@@ -1229,7 +1229,7 @@ export function renderOwnerAdminPanel(container) {
 
     // Support Clear Cache
     container.querySelector('#btn-support-clear-cache')?.addEventListener('click', () => {
-      showToast(`🧹 ${selectedSupportBusiness?.businessName} QR menü önbelleği sıfırlandı ve yenilendi.`, 'success');
+      showToast(`🧹 ${selectedSupportBusiness?.businessName} adisyon ve masa önbelleği sıfırlandı ve yenilendi.`, 'success');
     });
 
     // Save Support Note
