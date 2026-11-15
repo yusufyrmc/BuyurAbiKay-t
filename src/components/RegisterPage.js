@@ -66,7 +66,7 @@ export function renderRegisterPage(container) {
               </div>
               <h2 class="wizard-title" style="margin:0;">Restoran & Dijital Adisyon Sistemi Kaydı</h2>
             </div>
-            <p class="wizard-subtitle">İşletme bilgilerinizi girin ve salonunuzun masa kapasitesine uygun planı seçin (Madde 1.3).</p>
+            <p class="wizard-subtitle">İşletme bilgilerinizi girin ve salonunuzun masa kapasitesine uygun kullanım planını seçin.</p>
 
             <div class="form-group-row">
               <div class="form-field">
@@ -88,10 +88,10 @@ export function renderRegisterPage(container) {
               </div>
             </div>
 
-            <!-- MASA EKLEME İÇİN PLAN SEÇİMİ (MADDE 1.3) -->
+            <!-- MASA EKLEME İÇİN PLAN SEÇİMİ -->
             <div style="margin-bottom:1.5rem;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
-                <label class="form-label" style="margin:0;"><i data-lucide="credit-card"></i> Masa Eklemek İçin Kullanım Planı Seçin (1.3)</label>
+                <label class="form-label" style="margin:0;"><i data-lucide="credit-card"></i> Masa Eklemek İçin Kullanım Planı Seçin</label>
                 <span style="font-size:0.75rem; color:var(--color-accent-green); font-weight:700;">Esnek Masa Kapasitesi</span>
               </div>
               
