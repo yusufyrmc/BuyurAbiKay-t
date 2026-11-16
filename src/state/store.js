@@ -378,18 +378,9 @@ class AppStore {
         return;
       }
 
-      if (data && data.length > 0) {
+      if (data) {
         this.profiles = data.map(r => this.fromProfileDbRow(r));
         this.notify();
-      } else {
-        // Seed default profiles to Supabase
-        const dbRows = this.profiles.map(p => this.toProfileDbRow(p));
-        const { error: seedError } = await supabase.from('profiles').upsert(dbRows);
-        if (seedError) {
-          console.warn('Supabase profiles seed error:', seedError.message);
-        } else {
-          console.log('Supabase profiles seeded successfully.');
-        }
       }
     } catch (err) {
       console.warn('fetchProfiles error:', err);
@@ -624,18 +615,9 @@ class AppStore {
 
       this.lastSupabaseError = null;
 
-      if (data && data.length > 0) {
+      if (data) {
         this.registrations = data.map(item => this.fromDbRow(item));
         this.notify();
-      } else {
-        // If table is empty, seed existing sample registrations
-        const dbRows = this.registrations.map(r => this.toDbRow(r));
-        const { error: seedError } = await supabase.from('registrations').upsert(dbRows);
-        if (seedError) {
-          console.warn('Supabase registrations seed error:', seedError.message);
-        } else {
-          console.log('Supabase registrations seeded successfully.');
-        }
       }
     } catch (err) {
       console.error('Supabase registrations connection error:', err);
@@ -847,18 +829,9 @@ class AppStore {
         return;
       }
 
-      if (data && data.length > 0) {
+      if (data) {
         this.orders = data.map(item => this.fromOrderDbRow(item));
         this.notify();
-      } else {
-        // Seed default orders to Supabase
-        const dbRows = this.orders.map(o => this.toOrderDbRow(o));
-        const { error: seedError } = await supabase.from('orders').upsert(dbRows);
-        if (seedError) {
-          console.warn('Supabase orders seed error:', seedError.message);
-        } else {
-          console.log('Supabase orders seeded successfully.');
-        }
       }
     } catch (err) {
       console.warn('fetchOrders error:', err);
@@ -1041,18 +1014,9 @@ class AppStore {
         return;
       }
 
-      if (data && data.length > 0) {
+      if (data) {
         this.supportNotes = data.map(item => this.fromNoteDbRow(item));
         this.notify();
-      } else {
-        // Seed default support notes to Supabase
-        const dbRows = this.supportNotes.map(n => this.toNoteDbRow(n));
-        const { error: seedError } = await supabase.from('support_notes').upsert(dbRows);
-        if (seedError) {
-          console.warn('Supabase support_notes seed error:', seedError.message);
-        } else {
-          console.log('Supabase support_notes seeded successfully.');
-        }
       }
     } catch (err) {
       console.warn('fetchSupportNotes error:', err);
