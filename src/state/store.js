@@ -397,8 +397,9 @@ class AppStore {
   }
 
   async saveUserProfile(profileData) {
+    // Build a profile object without an ID; let Supabase generate a UUID via default.
     const profile = {
-      id: profileData.id || ('PRF-' + Math.floor(1000 + Math.random() * 9000)),
+      // id will be filled after successful DB insert
       fullName: profileData.fullName,
       email: profileData.email || '',
       phone: profileData.phone,
@@ -408,34 +409,57 @@ class AppStore {
       timestamp: profileData.timestamp || Date.now()
     };
 
-    // Save locally
+    // Save locally (temporarily without id)
     this.userProfile = profile;
-    const existingIdx = this.profiles.findIndex(p => p.id === profile.id || (profile.email && p.email === profile.email) || (profile.phone && p.phone === profile.phone));
-    if (existingIdx >= 0) {
-      this.profiles[existingIdx] = profile;
-    } else {
-      this.profiles.unshift(profile);
-    }
-    this.notify();
-
-    // Persist to Supabase profiles table
+    // Insert or upsert into Supabase without explicit id
     if (this.supabaseConnected && supabase) {
       try {
-        const dbRow = this.toProfileDbRow(profile);
-        const { error } = await supabase.from('profiles').upsert([dbRow], { onConflict: 'id' });
+        // Convert to DB row (no id field)
+        const dbRow = {
+          full_name: profile.fullName,
+          email: profile.email,
+          phone: profile.phone,
+          role: profile.role,
+          password: profile.password,
+          created_at: profile.createdAt,
+          timestamp: profile.timestamp
+        };
+        const { data, error } = await supabase
+          .from('profiles')
+          .upsert([dbRow], { returning: 'representation' });
         if (error) {
           console.error('Supabase profile save error:', error.message);
           this.lastSupabaseError = error.message;
           return { success: false, profile, error: error.message };
-        } else {
-          console.log('Profile successfully saved to Supabase profiles table!');
         }
+        // Supabase returns the inserted row with generated id
+        const saved = data && data.length > 0 ? data[0] : null;
+        if (saved) {
+          profile.id = saved.id;
+          // Update local collection: replace if exists, else add
+          const existingIdx = this.profiles.findIndex(p => p.id === saved.id);
+          if (existingIdx >= 0) {
+            this.profiles[existingIdx] = this.fromProfileDbRow(saved);
+          } else {
+            this.profiles.unshift(this.fromProfileDbRow(saved));
+          }
+        }
+        console.log('Profile successfully saved to Supabase profiles table!');
       } catch (err) {
         console.error('saveUserProfile Supabase exception:', err);
         return { success: false, profile, error: err.message };
       }
+    } else {
+      // Fallback: generate a temporary ID locally (for offline mode)
+      profile.id = 'PRF-' + Math.floor(1000 + Math.random() * 9000);
+      const existingIdx = this.profiles.findIndex(p => p.id === profile.id || (profile.email && p.email === profile.email) || (profile.phone && p.phone === profile.phone));
+      if (existingIdx >= 0) {
+        this.profiles[existingIdx] = profile;
+      } else {
+        this.profiles.unshift(profile);
+      }
     }
-
+    this.notify();
     return { success: true, profile };
   }
 

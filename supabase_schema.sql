@@ -9,8 +9,10 @@
 -- ========================================================
 
 -- 1. YETKİLİ PROFİLLERİ (profiles) TABLOSU
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE IF NOT EXISTS public.profiles (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     full_name TEXT NOT NULL,
     email TEXT,
     phone TEXT NOT NULL,
