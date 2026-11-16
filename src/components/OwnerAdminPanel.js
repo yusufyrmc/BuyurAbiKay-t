@@ -108,6 +108,10 @@ export function renderOwnerAdminPanel(container) {
     }
 
     // 2. MAIN FOCUSED ADMIN SIDEBAR DASHBOARD
+    function getFilteredProfiles() {
+      return store.profiles; // no filters for now
+    }
+
     const regs = getFilteredRegistrations();
     const orders = getFilteredOrders();
     const pendingCount = store.getPendingCount();
