@@ -922,6 +922,50 @@ export function renderOwnerAdminPanel(container) {
             </div>
           ` : ''}
 
+          <!-- ==================== TAB: PROFİLLER ==================== -->
+          ${activeTab === 'profiles' ? `
+            <div style="background:var(--color-bg-card); padding:2rem; border-radius:var(--radius-lg); border:var(--border-glass); box-shadow:var(--shadow-card);">
+              <h3 style="font-family:var(--font-heading); font-size:1.45rem; font-weight:900; color:#fff; margin-bottom:1.4rem; display:flex; align-items:center; gap:0.6rem;">
+                <i data-lucide="users" style="color:var(--color-accent-purple);"></i> Kayıtlı Kullanıcı Profilleri
+                <span style="background:rgba(168,85,247,0.15); color:var(--color-accent-purple); font-size:0.75rem; font-weight:800; padding:3px 10px; border-radius:12px; margin-left:auto;">${getFilteredProfiles().length} Profil</span>
+              </h3>
+
+              ${getFilteredProfiles().length === 0 ? `
+                <div style="text-align:center; padding:3rem; color:var(--color-text-muted);">
+                  <i data-lucide="user-x" style="width:48px; height:48px; margin-bottom:1rem; opacity:0.4;"></i>
+                  <p style="font-size:1rem; font-weight:700;">Henüz kayıtlı profil bulunmuyor</p>
+                  <p style="font-size:0.85rem;">Kullanıcılar profil oluşturduğunda burada görünecektir.</p>
+                </div>
+              ` : `
+                <div style="display:flex; flex-direction:column; gap:0.85rem;">
+                  ${getFilteredProfiles().map(p => `
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-md); padding:1.2rem 1.4rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                      <div style="width:44px; height:44px; border-radius:50%; background:var(--color-primary-gradient); color:#fff; font-size:1.1rem; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        ${(p.fullName || 'P').charAt(0).toUpperCase()}
+                      </div>
+                      <div style="flex:1; min-width:180px;">
+                        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                          <strong style="color:#fff; font-size:0.95rem;">${p.fullName || 'İsimsiz'}</strong>
+                          <span style="background:rgba(0,230,118,0.15); color:var(--color-accent-green); font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:10px;">${p.role || 'İşletme Sahibi'}</span>
+                        </div>
+                        <div style="font-size:0.8rem; color:var(--color-text-muted); margin-top:3px;">
+                          ✉️ ${p.email || 'E-posta yok'} &nbsp;•&nbsp; 📞 ${p.phone || 'Telefon yok'}
+                        </div>
+                      </div>
+                      <div style="text-align:right; min-width:120px;">
+                        <div style="font-size:0.72rem; color:var(--color-text-dim);">ID: <span style="font-family:monospace; color:var(--color-primary); font-weight:800;">${String(p.id || '').substring(0, 12)}</span></div>
+                        <div style="font-size:0.72rem; color:var(--color-text-dim);">${p.createdAt || 'Yeni'}</div>
+                      </div>
+                      <button class="btn-delete-profile" data-profile-id="${p.id}" style="background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); color:var(--color-danger); padding:0.45rem; border-radius:var(--radius-sm); cursor:pointer;" title="Profili Sil">
+                        <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
+                      </button>
+                    </div>
+                  `).join('')}
+                </div>
+              `}
+            </div>
+          ` : ''}
+
           <!-- ==================== TAB 4: SİSTEM & SUNUCU SAĞLIĞI ==================== -->
           ${activeTab === 'health' ? `
             <div style="background:var(--color-bg-card); padding:2rem; border-radius:var(--radius-lg); border:var(--border-glass); box-shadow:var(--shadow-card);">
@@ -1323,6 +1367,20 @@ export function renderOwnerAdminPanel(container) {
           showToast(`⚠️ Supabase Hatası: ${res.error}`, 'error');
         } else {
           showToast('🗑️ Başvuru silindi ve Supabase veritabanından kaldırıldı.', 'info');
+        }
+        updateView();
+      });
+    });
+
+    // Profile delete buttons
+    container.querySelectorAll('.btn-delete-profile').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const profileId = e.currentTarget.dataset.profileId;
+        const res = await store.deleteProfile(profileId);
+        if (res && res.error) {
+          showToast(`⚠️ Profil silme hatası: ${res.error}`, 'error');
+        } else {
+          showToast('🗑️ Profil silindi.', 'info');
         }
         updateView();
       });

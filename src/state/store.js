@@ -463,6 +463,13 @@ class AppStore {
     return { success: true, profile };
   }
 
+  logoutUser() {
+    this.userProfile = null;
+    localStorage.removeItem('buyurabi_user_profile');
+    this.notify();
+    console.log('✅ Kullanıcı oturumu kapatıldı (logout)');
+  }
+
   async deleteProfile(profileId) {
     this.profiles = this.profiles.filter(p => p.id !== profileId);
     if (this.userProfile?.id === profileId) {

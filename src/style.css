@@ -805,6 +805,105 @@ body {
   to { transform: translateX(0); opacity: 1; }
 }
 
+/* ===== HEADER PROFILE BUTTON & DROPDOWN ===== */
+.header-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-primary);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.header-profile-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--color-primary);
+}
+
+.header-profile-btn.logged-in {
+  background: rgba(0, 230, 118, 0.12);
+  border-color: rgba(0, 230, 118, 0.4);
+  color: var(--color-accent-green);
+}
+
+.header-profile-btn .profile-avatar-mini-header {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-primary-gradient);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  background: var(--color-bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+  z-index: 2000;
+  overflow: hidden;
+  animation: slideUpFade 0.2s ease;
+}
+
+.dropdown-profile-info {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.dropdown-profile-info strong {
+  color: #fff;
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text-main);
+  font-family: var(--font-primary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dropdown-item-danger {
+  color: var(--color-danger);
+}
+
+.dropdown-item-danger:hover {
+  background: rgba(239, 68, 68, 0.12);
+}
+
 /* Footer */
 .app-footer {
   margin-top: 5rem;

@@ -51,11 +51,29 @@
       </nav>
 
       <!-- Quick Action Header Button -->
-      <div class="header-actions">
+      <div class="header-actions" style="display:flex; align-items:center; gap:0.75rem;">
         <button class="btn-header-register" id="btn-header-cta">
           <i data-lucide="zap"></i>
           <span>İşletmeni Kaydet</span>
         </button>
+
+        <!-- Profil Butonu -->
+        <div id="header-profile-area" style="position:relative;">
+          <button id="btn-header-profile" class="header-profile-btn" title="Profil">
+            <i data-lucide="user-circle" id="header-profile-icon" style="width:22px; height:22px;"></i>
+            <span id="header-profile-label">Profil Aç</span>
+          </button>
+          <!-- Dropdown -->
+          <div id="header-profile-dropdown" class="header-profile-dropdown" style="display:none;">
+            <div id="dropdown-profile-info" class="dropdown-profile-info"></div>
+            <button id="btn-dropdown-edit-profile" class="dropdown-item">
+              <i data-lucide="user-pen" style="width:15px; height:15px;"></i> Profili Düzenle
+            </button>
+            <button id="btn-dropdown-logout" class="dropdown-item dropdown-item-danger">
+              <i data-lucide="log-out" style="width:15px; height:15px;"></i> Çıkış Yap
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </header>

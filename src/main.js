@@ -94,9 +94,96 @@ document.addEventListener('DOMContentLoaded', () => {
     store.setView('register');
   });
 
+  // ===== PROFILE BUTTON & DROPDOWN =====
+  const profileBtn = document.getElementById('btn-header-profile');
+  const profileDropdown = document.getElementById('header-profile-dropdown');
+  const profileLabel = document.getElementById('header-profile-label');
+  const profileIcon = document.getElementById('header-profile-icon');
+  const dropdownInfo = document.getElementById('dropdown-profile-info');
+
+  function updateProfileButton() {
+    const profile = store.getUserProfile();
+    if (profile && profile.fullName) {
+      // Logged in state
+      const initial = profile.fullName.charAt(0).toUpperCase();
+      profileBtn.classList.add('logged-in');
+      profileBtn.innerHTML = `
+        <div class="profile-avatar-mini-header">${initial}</div>
+        <span>${profile.fullName.split(' ')[0]}</span>
+      `;
+      if (dropdownInfo) {
+        dropdownInfo.innerHTML = `
+          <strong>${profile.fullName}</strong>
+          <span>${profile.email || profile.phone || ''}</span><br>
+          <span style="color:var(--color-primary); font-weight:700; font-size:0.78rem;">${profile.role || 'İşletme Sahibi'}</span>
+        `;
+      }
+    } else {
+      // Not logged in
+      profileBtn.classList.remove('logged-in');
+      profileBtn.innerHTML = `
+        <i data-lucide="user-circle" style="width:22px; height:22px;"></i>
+        <span>Profil Aç</span>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  // Toggle dropdown
+  profileBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const profile = store.getUserProfile();
+    if (!profile) {
+      // No profile yet - go to register page (step 0: profile creation)
+      store.setView('register');
+      return;
+    }
+    // Toggle dropdown visibility
+    if (profileDropdown.style.display === 'none' || !profileDropdown.style.display) {
+      profileDropdown.style.display = 'block';
+    } else {
+      profileDropdown.style.display = 'none';
+    }
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (profileDropdown && !profileDropdown.contains(e.target) && e.target !== profileBtn) {
+      profileDropdown.style.display = 'none';
+    }
+  });
+
+  // Edit profile button
+  document.getElementById('btn-dropdown-edit-profile')?.addEventListener('click', () => {
+    profileDropdown.style.display = 'none';
+    store.setView('register');
+  });
+
+  // LOGOUT button
+  document.getElementById('btn-dropdown-logout')?.addEventListener('click', () => {
+    profileDropdown.style.display = 'none';
+    store.logoutUser();
+    updateProfileButton();
+    store.setView('landing');
+    // Show toast
+    const toastContainer = document.getElementById('toast-container');
+    if (toastContainer) {
+      const toast = document.createElement('div');
+      toast.className = 'toast-message';
+      toast.style.borderLeftColor = 'var(--color-accent-green)';
+      toast.innerHTML = '✅ Başarıyla çıkış yapıldı!';
+      toastContainer.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  });
+
+  // Initial profile button state
+  updateProfileButton();
+
   // Subscribe to store updates
   store.subscribe((state) => {
     updateNavLabels();
+    updateProfileButton();
     if (state.activeView && state.activeView !== currentActiveView) {
       switchView(state.activeView);
     }
