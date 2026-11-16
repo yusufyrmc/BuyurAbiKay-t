@@ -490,6 +490,21 @@ class AppStore {
     return { success: true, profile };
   }
 
+  async queryProfileByLogin(loginIdentifier) {
+    if (!this.supabaseConnected || !supabase) return { data: [], error: 'Supabase offline' };
+    try {
+      const clean = loginIdentifier.trim();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .or(`email.ilike.${clean},phone.ilike.%${clean}%,id.eq.${clean}`)
+        .limit(1);
+      return { data, error };
+    } catch (err) {
+      return { data: [], error: err.message };
+    }
+  }
+
   logoutUser() {
     this.userProfile = null;
     this.lastRegisteredBusiness = null;

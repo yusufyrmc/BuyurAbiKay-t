@@ -610,7 +610,14 @@ export function renderRegisterPage(container) {
           // Save Profile to store & Supabase
           const res = await store.saveUserProfile(profileData);
           if (res?.error) {
-            console.warn('Profile Supabase notice:', res.error);
+            console.error('Profile Supabase error:', res.error);
+            showToast(`⚠️ Supabase Hatası: ${res.error}. Lütfen Supabase SQL editöründe tabloların kurulu olduğundan emin olun!`, 'error');
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = 'Profili Kaydet & İşletme Kaydına Geç <i data-lucide="arrow-right"></i>';
+              if (window.lucide) window.lucide.createIcons();
+            }
+            return;
           }
           formData.fullName = profileData.fullName;
           formData.phone = profileData.phone;
@@ -621,7 +628,7 @@ export function renderRegisterPage(container) {
           showToast('🎉 Profiliniz başarıyla oluşturuldu ve veritabanına kaydedildi! Şimdi işletmenizi kaydedebilirsiniz.', 'success');
         });
       } else {
-        // LOGIN MODE
+        // LOGIN MODE (AUTHENTICATED ONLY)
         container.querySelector('#btn-login-profile-next')?.addEventListener('click', async () => {
           const idInput = container.querySelector('#login-profile-id')?.value.trim();
           const passInput = container.querySelector('#login-profile-pass')?.value;
@@ -638,30 +645,61 @@ export function renderRegisterPage(container) {
           const btn = container.querySelector('#btn-login-profile-next');
           if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '⏳ Giriş Yapılıyor...';
+            btn.innerHTML = '⏳ Kontrol Ediliyor...';
           }
 
-          // Search existing profiles in store / Supabase
+          // 1. Search existing profiles locally
           const cleanId = idInput.toLowerCase();
+          const cleanPhone = idInput.replace(/\s+/g, '').replace(/[^0-9]/g, '');
           let matchedProfile = (store.profiles || []).find(p => 
             (p.email && p.email.toLowerCase() === cleanId) || 
-            (p.phone && p.phone.replace(/\s+/g, '') === idInput.replace(/\s+/g, '')) ||
+            (p.phone && p.phone.replace(/[^0-9]/g, '') === cleanPhone) ||
             (p.id && p.id.toLowerCase() === cleanId)
           );
 
-          if (matchedProfile) {
-            profileData = { ...matchedProfile };
-            await store.saveUserProfile(profileData);
-          } else {
-            profileData = {
-              fullName: idInput.includes('@') ? idInput.split('@')[0] : 'Yetkili Kullanıcı',
-              email: idInput.includes('@') ? idInput : '',
-              phone: idInput.includes('@') ? '0555 123 45 67' : idInput,
-              password: passInput,
-              role: 'İşletme Sahibi'
-            };
-            await store.saveUserProfile(profileData);
+          // 2. If not found locally, query directly from Supabase profiles table
+          if (!matchedProfile && store.supabaseConnected) {
+            try {
+              const { data, error } = await store.queryProfileByLogin(idInput);
+              if (data && data.length > 0) {
+                matchedProfile = store.fromProfileDbRow(data[0]);
+                // Add to local profiles list if not exists
+                if (!store.profiles.some(p => p.id === matchedProfile.id)) {
+                  store.profiles.unshift(matchedProfile);
+                }
+              }
+            } catch (err) {
+              console.warn('Supabase profile query err:', err);
+            }
           }
+
+          // If no matching profile exists in system, REJECT LOGIN!
+          if (!matchedProfile) {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = 'Giriş Yap & İşletme Kaydına Devam Et <i data-lucide="arrow-right"></i>';
+              if (window.lucide) window.lucide.createIcons();
+            }
+            showToast('❌ Bu e-posta veya telefon ile kayıtlı bir profil bulunamadı! Lütfen önce "Yeni Profil Oluştur" sekmesinden kayıt olun.', 'error');
+            return;
+          }
+
+          // Check Password
+          if (matchedProfile.password && matchedProfile.password !== passInput) {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = 'Giriş Yap & İşletme Kaydına Devam Et <i data-lucide="arrow-right"></i>';
+              if (window.lucide) window.lucide.createIcons();
+            }
+            showToast('❌ Girdiğiniz profil şifresi hatalı! Lütfen şifrenizi kontrol edin.', 'error');
+            return;
+          }
+
+          // Successful Login
+          profileData = { ...matchedProfile };
+          store.userProfile = profileData;
+          store.saveState();
+          store.notify();
 
           formData.fullName = profileData.fullName;
           formData.phone = profileData.phone;
@@ -669,7 +707,7 @@ export function renderRegisterPage(container) {
 
           currentStep = 1;
           updateView();
-          showToast('👋 Profilinize giriş yapıldı! İşletme kaydınıza devam edebilirsiniz.', 'success');
+          showToast(`👋 Hoş geldiniz ${profileData.fullName}! Profilinize giriş yapıldı.`, 'success');
         });
       }
     }
