@@ -1155,9 +1155,9 @@ export function renderOwnerAdminPanel(container) {
     });
 
     // Clear Completed Orders
-    container.querySelector('#btn-clear-completed-orders')?.addEventListener('click', () => {
+    container.querySelector('#btn-clear-completed-orders')?.addEventListener('click', async () => {
       if (confirm('Tamamlanmış ve iptal edilmiş siparişleri listeden temizlemek istiyor musunuz?')) {
-        store.clearCompletedOrders();
+        await store.clearCompletedOrders();
         showToast('🧹 Tamamlanan siparişler arşivlendi ve temizlendi.', 'info');
         updateView();
       }
@@ -1165,10 +1165,10 @@ export function renderOwnerAdminPanel(container) {
 
     // Change Order Status
     container.querySelectorAll('.btn-change-order-status').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const ordId = e.currentTarget.dataset.orderId;
         const newStat = e.currentTarget.dataset.newStatus;
-        store.updateOrderStatus(ordId, newStat);
+        await store.updateOrderStatus(ordId, newStat);
         showToast(`Sipariş durumu güncellendi: ${newStat}`, 'success');
         updateView();
       });
@@ -1176,10 +1176,10 @@ export function renderOwnerAdminPanel(container) {
 
     // DELETE ORDER EVENT (User requested: "siparişler silinebilsin")
     container.querySelectorAll('.btn-delete-order').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const ordId = e.currentTarget.dataset.orderId;
         if (confirm(`${ordId} numaralı siparişi kalıcı olarak silmek istiyor musunuz?`)) {
-          store.deleteOrder(ordId);
+          await store.deleteOrder(ordId);
           if (activeDetailOrder && activeDetailOrder.id === ordId) {
             activeDetailOrder = null;
           }
@@ -1211,10 +1211,10 @@ export function renderOwnerAdminPanel(container) {
     });
 
     // Modal Delete Order
-    container.querySelector('#btn-modal-delete-order')?.addEventListener('click', () => {
+    container.querySelector('#btn-modal-delete-order')?.addEventListener('click', async () => {
       if (activeDetailOrder && confirm(`${activeDetailOrder.id} numaralı siparişi silmek istiyor musunuz?`)) {
-        store.deleteOrder(activeDetailOrder.id);
-        showToast(`🗑️ Sipariş silindi.`, 'info');
+        await store.deleteOrder(activeDetailOrder.id);
+        showToast(`🗑️ Sipariş silindi ve Supabase'den kaldırıldı.`, 'info');
         activeDetailOrder = null;
         updateView();
       }
@@ -1293,11 +1293,11 @@ export function renderOwnerAdminPanel(container) {
     });
 
     // Save Support Note
-    container.querySelector('#btn-save-support-note')?.addEventListener('click', () => {
+    container.querySelector('#btn-save-support-note')?.addEventListener('click', async () => {
       const catSelect = container.querySelector('#select-note-category');
       const noteInput = container.querySelector('#text-support-note');
       if (noteInput && noteInput.value.trim() && selectedSupportBusiness) {
-        store.addSupportNote(selectedSupportBusiness.id, {
+        await store.addSupportNote(selectedSupportBusiness.id, {
           category: catSelect ? catSelect.value : 'Genel Danışma',
           text: noteInput.value.trim(),
           agent: 'Destek Temsilcisi'
@@ -1311,9 +1311,9 @@ export function renderOwnerAdminPanel(container) {
 
     // Delete Support Note
     container.querySelectorAll('.btn-delete-note').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const noteId = e.currentTarget.dataset.noteId;
-        store.deleteSupportNote(noteId);
+        await store.deleteSupportNote(noteId);
         showToast('Not silindi.', 'info');
         updateView();
       });

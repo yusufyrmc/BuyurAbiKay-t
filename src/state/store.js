@@ -397,9 +397,12 @@ class AppStore {
   }
 
   async saveUserProfile(profileData) {
-    // Build a profile object without an ID; let Supabase generate a UUID via default.
+    // Generate or retain unique profile ID (UUID preferred)
+    const generatedId = profileData.id || 
+      (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ('prf-' + Date.now()));
+
     const profile = {
-      // id will be filled after successful DB insert
+      id: generatedId,
       fullName: profileData.fullName,
       email: profileData.email || '',
       phone: profileData.phone,
@@ -409,79 +412,112 @@ class AppStore {
       timestamp: profileData.timestamp || Date.now()
     };
 
-    // Save locally (temporarily without id)
+    // Save locally
     this.userProfile = profile;
-    // Insert or upsert into Supabase without explicit id
+    const existingIdx = this.profiles.findIndex(p => 
+      p.id === profile.id || 
+      (profile.email && p.email && p.email.toLowerCase() === profile.email.toLowerCase()) || 
+      (profile.phone && p.phone && p.phone === profile.phone)
+    );
+    if (existingIdx >= 0) {
+      this.profiles[existingIdx] = profile;
+    } else {
+      this.profiles.unshift(profile);
+    }
+    this.notify();
+
+    // Persist to Supabase profiles table
     if (this.supabaseConnected && supabase) {
       try {
-        // Convert to DB row (no id field)
         const dbRow = {
+          id: String(profile.id),
           full_name: profile.fullName,
           email: profile.email,
           phone: profile.phone,
           role: profile.role,
           password: profile.password,
           created_at: profile.createdAt,
-          timestamp: profile.timestamp
+          timestamp: Number(profile.timestamp)
         };
-        const { data, error } = await supabase
+
+        let { data, error } = await supabase
           .from('profiles')
-          .upsert([dbRow], { returning: 'representation' });
+          .upsert([dbRow], { onConflict: 'id' })
+          .select();
+
+        // If UUID mismatch or column conflict occurs, retry without client id so DB generates it
+        if (error) {
+          console.warn('Upsert with ID notice, trying insert:', error.message);
+          const rowWithoutId = {
+            full_name: profile.fullName,
+            email: profile.email,
+            phone: profile.phone,
+            role: profile.role,
+            password: profile.password,
+            created_at: profile.createdAt,
+            timestamp: Number(profile.timestamp)
+          };
+          const retryRes = await supabase.from('profiles').insert([rowWithoutId]).select();
+          data = retryRes.data;
+          error = retryRes.error;
+        }
+
         if (error) {
           console.error('Supabase profile save error:', error.message);
           this.lastSupabaseError = error.message;
           return { success: false, profile, error: error.message };
         }
-        // Supabase returns the inserted row with generated id
-        const saved = data && data.length > 0 ? data[0] : null;
-        if (saved) {
-          profile.id = saved.id;
-          // Update local collection: replace if exists, else add
-          const existingIdx = this.profiles.findIndex(p => p.id === saved.id);
-          if (existingIdx >= 0) {
-            this.profiles[existingIdx] = this.fromProfileDbRow(saved);
-          } else {
-            this.profiles.unshift(this.fromProfileDbRow(saved));
+
+        if (data && data.length > 0) {
+          const savedRow = data[0];
+          profile.id = String(savedRow.id);
+          this.userProfile.id = String(savedRow.id);
+          const idx = this.profiles.findIndex(p => p.email === profile.email || p.id === profile.id);
+          if (idx >= 0) {
+            this.profiles[idx] = this.fromProfileDbRow(savedRow);
           }
+          this.notify();
         }
-        console.log('Profile successfully saved to Supabase profiles table!');
+
+        console.log('✅ Profil Supabase profiles tablosuna başarıyla kaydedildi!');
+        this.lastSupabaseError = null;
       } catch (err) {
         console.error('saveUserProfile Supabase exception:', err);
         return { success: false, profile, error: err.message };
       }
-    } else {
-      // Fallback: generate a temporary ID locally (for offline mode)
-      profile.id = 'PRF-' + Math.floor(1000 + Math.random() * 9000);
-      const existingIdx = this.profiles.findIndex(p => p.id === profile.id || (profile.email && p.email === profile.email) || (profile.phone && p.phone === profile.phone));
-      if (existingIdx >= 0) {
-        this.profiles[existingIdx] = profile;
-      } else {
-        this.profiles.unshift(profile);
-      }
     }
-    this.notify();
+
     return { success: true, profile };
   }
 
   logoutUser() {
     this.userProfile = null;
+    this.lastRegisteredBusiness = null;
     localStorage.removeItem('buyurabi_user_profile');
+    localStorage.removeItem('buyurabi_last_registered_business');
+    this.saveState();
     this.notify();
-    console.log('✅ Kullanıcı oturumu kapatıldı (logout)');
+    console.log('✅ Kullanıcı oturumu ve işletme bilgileri tamamen sıfırlandı (logout)');
   }
 
   async deleteProfile(profileId) {
     this.profiles = this.profiles.filter(p => p.id !== profileId);
     if (this.userProfile?.id === profileId) {
-      this.userProfile = null;
+      this.logoutUser();
+    } else {
+      this.notify();
     }
-    this.notify();
 
     if (this.supabaseConnected && supabase) {
       try {
-        await supabase.from('profiles').delete().eq('id', profileId);
+        const { error } = await supabase.from('profiles').delete().eq('id', profileId);
+        if (error) {
+          console.error('Supabase deleteProfile error:', error.message);
+          return { success: false, error: error.message };
+        }
       } catch (err) {
         console.warn('deleteProfile Supabase error:', err);
+        return { success: false, error: err.message };
       }
     }
     return { success: true };
@@ -660,17 +696,24 @@ class AppStore {
     const reg = this.registrations.find(r => r.id === id);
     if (reg) {
       reg.status = 'onaylandi';
+      if (this.lastRegisteredBusiness?.id === id) {
+        this.lastRegisteredBusiness.status = 'onaylandi';
+      }
       this.notify();
 
       if (this.supabaseConnected && supabase) {
         try {
-          const dbRow = this.toDbRow(reg, true);
-          let { error } = await supabase.from('registrations').upsert([dbRow], { onConflict: 'id' });
+          const { error } = await supabase
+            .from('registrations')
+            .update({ status: 'onaylandi' })
+            .eq('id', id);
           if (error) {
-            console.error('Supabase approve error:', error.message);
-            return { success: false, error: error.message };
+            console.warn('Update registrations status notice, trying upsert:', error.message);
+            const dbRow = this.toDbRow(reg, true);
+            await supabase.from('registrations').upsert([dbRow], { onConflict: 'id' });
           }
         } catch (err) {
+          console.error('approveRegistration Supabase error:', err);
           return { success: false, error: err.message };
         }
       }
@@ -682,17 +725,24 @@ class AppStore {
     const reg = this.registrations.find(r => r.id === id);
     if (reg) {
       reg.status = 'reddedildi';
+      if (this.lastRegisteredBusiness?.id === id) {
+        this.lastRegisteredBusiness.status = 'reddedildi';
+      }
       this.notify();
 
       if (this.supabaseConnected && supabase) {
         try {
-          const dbRow = this.toDbRow(reg, true);
-          let { error } = await supabase.from('registrations').upsert([dbRow], { onConflict: 'id' });
+          const { error } = await supabase
+            .from('registrations')
+            .update({ status: 'reddedildi' })
+            .eq('id', id);
           if (error) {
-            console.error('Supabase reject error:', error.message);
-            return { success: false, error: error.message };
+            console.warn('Update registrations status notice, trying upsert:', error.message);
+            const dbRow = this.toDbRow(reg, true);
+            await supabase.from('registrations').upsert([dbRow], { onConflict: 'id' });
           }
         } catch (err) {
+          console.error('rejectRegistration Supabase error:', err);
           return { success: false, error: err.message };
         }
       }
@@ -702,6 +752,10 @@ class AppStore {
 
   async deleteRegistration(id) {
     this.registrations = this.registrations.filter(r => r.id !== id);
+    if (this.lastRegisteredBusiness?.id === id) {
+      this.lastRegisteredBusiness = null;
+      localStorage.removeItem('buyurabi_last_registered_business');
+    }
     this.notify();
 
     if (this.supabaseConnected && supabase) {

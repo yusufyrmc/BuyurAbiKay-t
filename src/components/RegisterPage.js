@@ -601,6 +601,12 @@ export function renderRegisterPage(container) {
             return;
           }
 
+          const btn = container.querySelector('#btn-save-profile-next');
+          if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Profil Oluşturuluyor...';
+          }
+
           // Save Profile to store & Supabase
           const res = await store.saveUserProfile(profileData);
           if (res?.error) {
@@ -612,7 +618,7 @@ export function renderRegisterPage(container) {
 
           currentStep = 1;
           updateView();
-          showToast('🎉 Profiliniz başarıyla oluşturuldu ve veritabanına bağlandı! Şimdi işletmenizi kaydedebilirsiniz.', 'success');
+          showToast('🎉 Profiliniz başarıyla oluşturuldu ve veritabanına kaydedildi! Şimdi işletmenizi kaydedebilirsiniz.', 'success');
         });
       } else {
         // LOGIN MODE
@@ -629,9 +635,15 @@ export function renderRegisterPage(container) {
             return;
           }
 
+          const btn = container.querySelector('#btn-login-profile-next');
+          if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Giriş Yapılıyor...';
+          }
+
           // Search existing profiles in store / Supabase
           const cleanId = idInput.toLowerCase();
-          const matchedProfile = (store.profiles || []).find(p => 
+          let matchedProfile = (store.profiles || []).find(p => 
             (p.email && p.email.toLowerCase() === cleanId) || 
             (p.phone && p.phone.replace(/\s+/g, '') === idInput.replace(/\s+/g, '')) ||
             (p.id && p.id.toLowerCase() === cleanId)
@@ -641,18 +653,13 @@ export function renderRegisterPage(container) {
             profileData = { ...matchedProfile };
             await store.saveUserProfile(profileData);
           } else {
-            const existingProfile = store.getUserProfile();
-            if (existingProfile) {
-              profileData = { ...existingProfile };
-            } else {
-              profileData = {
-                fullName: idInput.includes('@') ? idInput.split('@')[0] : 'Yetkili Kullanıcı',
-                email: idInput.includes('@') ? idInput : '',
-                phone: idInput.includes('@') ? '0555 123 45 67' : idInput,
-                password: passInput,
-                role: 'İşletme Sahibi'
-              };
-            }
+            profileData = {
+              fullName: idInput.includes('@') ? idInput.split('@')[0] : 'Yetkili Kullanıcı',
+              email: idInput.includes('@') ? idInput : '',
+              phone: idInput.includes('@') ? '0555 123 45 67' : idInput,
+              password: passInput,
+              role: 'İşletme Sahibi'
+            };
             await store.saveUserProfile(profileData);
           }
 

@@ -164,16 +164,17 @@ document.addEventListener('DOMContentLoaded', () => {
     profileDropdown.style.display = 'none';
     store.logoutUser();
     updateProfileButton();
-    store.setView('landing');
+    updateNavLabels();
+    switchView('landing', true); // Force re-render landing page to clear business banners
     // Show toast
     const toastContainer = document.getElementById('toast-container');
     if (toastContainer) {
       const toast = document.createElement('div');
       toast.className = 'toast-message';
       toast.style.borderLeftColor = 'var(--color-accent-green)';
-      toast.innerHTML = '✅ Başarıyla çıkış yapıldı!';
+      toast.innerHTML = '✅ Oturum kapatıldı ve hesaba ait tüm veriler temizlendi!';
       toastContainer.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      setTimeout(() => toast.remove(), 3500);
     }
   });
 
@@ -184,8 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
   store.subscribe((state) => {
     updateNavLabels();
     updateProfileButton();
-    if (state.activeView && state.activeView !== currentActiveView) {
-      switchView(state.activeView);
+    if (state.activeView) {
+      switchView(state.activeView, true);
     }
   });
 

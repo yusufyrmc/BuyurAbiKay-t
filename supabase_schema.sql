@@ -12,7 +12,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS public.profiles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id TEXT PRIMARY KEY DEFAULT uuid_generate_v4()::text,
     full_name TEXT NOT NULL,
     email TEXT,
     phone TEXT NOT NULL,
@@ -21,6 +21,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     created_at TEXT,
     timestamp BIGINT
 );
+
+-- Tablo zaten UUID ile açılmışsa TEXT'e esnet (tüm ID tiplerini desteklemesi için)
+DO $$
+BEGIN
+  ALTER TABLE public.profiles ALTER COLUMN id TYPE TEXT;
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END $$;
 
 -- 2. İŞLETME KAYITLARI & LİSANSLAR (registrations) TABLOSU
 CREATE TABLE IF NOT EXISTS public.registrations (
