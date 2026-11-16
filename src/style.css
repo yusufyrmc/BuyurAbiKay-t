@@ -1075,30 +1075,3 @@ body {
   border-color: rgba(255, 107, 0, 0.4);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
-
-.workflow-num-pill {
-  position: absolute;
-  top: -14px;
-  left: 20px;
-  background: var(--color-primary-gradient);
-  color: #fff;
-  font-weight: 900;
-  font-size: 0.85rem;
-  padding: 2px 14px;
-  border-radius: var(--radius-full);
-  box-shadow: var(--shadow-glow);
-}
-
-/* Feature Number Badges */
-.feat-item-badge {
-  display: inline-block;
-  background: rgba(255, 107, 0, 0.15);
-  border: 1px solid rgba(255, 107, 0, 0.35);
-  color: var(--color-primary);
-  font-size: 0.72rem;
-  font-weight: 800;
-  font-family: monospace;
-  padding: 2px 8px;
-  border-radius: 6px;
-  margin-bottom: 0.6rem;
-}

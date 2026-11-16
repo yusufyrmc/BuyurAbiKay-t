@@ -183,10 +183,9 @@ export function renderLandingPage(container) {
       </div>
     </div>
 
-    <!-- SİSTEM NASIL ÇALIŞIR? 4 ADIMLI DİJİTAL ADİSYON AKIŞI -->
+    <!-- SİSTEM NASIL ÇALIŞIR? DİJİTAL ADİSYON AKIŞI -->
     <div style="margin:4.5rem 0 2rem 0;">
       <div style="text-align:center; max-width:700px; margin:0 auto 2.5rem auto;">
-        <span class="feat-item-badge">DİJİTAL ADİSYON & SERVİS AKIŞI</span>
         <h2 style="font-family:var(--font-heading); font-size:2.2rem; font-weight:900; color:#fff; margin-bottom:0.6rem;">
           BuyurAbi Dijital Adisyon Nasıl Çalışır?
         </h2>
@@ -196,10 +195,8 @@ export function renderLandingPage(container) {
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1.5rem;">
-        <!-- ADIM 1 -->
         <div class="workflow-step-card">
-          <div class="workflow-num-pill">ADIM 1</div>
-          <div class="feat-icon-box" style="margin-top:0.4rem;">
+          <div class="feat-icon-box">
             <i data-lucide="bell-ring" style="width:28px; height:28px;"></i>
           </div>
           <h3 style="font-family:var(--font-heading); font-size:1.2rem; font-weight:800; margin-bottom:0.5rem; color:#fff;">
@@ -210,10 +207,8 @@ export function renderLandingPage(container) {
           </p>
         </div>
 
-        <!-- ADIM 2 -->
         <div class="workflow-step-card">
-          <div class="workflow-num-pill">ADIM 2</div>
-          <div class="feat-icon-box" style="background:rgba(0,230,118,0.15); color:var(--color-accent-green); margin-top:0.4rem;">
+          <div class="feat-icon-box" style="background:rgba(0,230,118,0.15); color:var(--color-accent-green);">
             <i data-lucide="smartphone" style="width:28px; height:28px;"></i>
           </div>
           <h3 style="font-family:var(--font-heading); font-size:1.2rem; font-weight:800; margin-bottom:0.5rem; color:#fff;">
@@ -224,10 +219,8 @@ export function renderLandingPage(container) {
           </p>
         </div>
 
-        <!-- ADIM 3 -->
         <div class="workflow-step-card">
-          <div class="workflow-num-pill">ADIM 3</div>
-          <div class="feat-icon-box" style="background:rgba(255,107,0,0.15); color:var(--color-primary); margin-top:0.4rem;">
+          <div class="feat-icon-box" style="background:rgba(255,107,0,0.15); color:var(--color-primary);">
             <i data-lucide="flame" style="width:28px; height:28px;"></i>
           </div>
           <h3 style="font-family:var(--font-heading); font-size:1.2rem; font-weight:800; margin-bottom:0.5rem; color:#fff;">
@@ -238,10 +231,8 @@ export function renderLandingPage(container) {
           </p>
         </div>
 
-        <!-- ADIM 4 -->
         <div class="workflow-step-card">
-          <div class="workflow-num-pill">ADIM 4</div>
-          <div class="feat-icon-box" style="background:rgba(0,229,255,0.15); color:var(--color-accent-cyan); margin-top:0.4rem;">
+          <div class="feat-icon-box" style="background:rgba(0,229,255,0.15); color:var(--color-accent-cyan);">
             <i data-lucide="calculator" style="width:28px; height:28px;"></i>
           </div>
           <h3 style="font-family:var(--font-heading); font-size:1.2rem; font-weight:800; margin-bottom:0.5rem; color:#fff;">
@@ -257,7 +248,6 @@ export function renderLandingPage(container) {
     <!-- DİJİTAL ADİSYON & KASA ÖZELLİKLERİ GRID -->
     <div style="margin:4rem 0;" id="features-section">
       <div style="text-align:center; max-width:720px; margin:0 auto 2.8rem auto;">
-        <span class="feat-item-badge">KASA SAYFASI & ADİSYON FONKSİYONLARI</span>
         <h2 style="font-family:var(--font-heading); font-size:2.4rem; font-weight:900; color:#fff; margin-bottom:0.7rem;">
           Tüm İşletme İhtiyaçlarınız Tek Bir Programda
         </h2>
@@ -267,9 +257,7 @@ export function renderLandingPage(container) {
       </div>
 
       <div class="landing-grid-features" style="margin-top:1.5rem;">
-        <!-- 1. KASA & MASA YÖNETİMİ -->
         <div class="landing-feat-card">
-          <span class="feat-item-badge">KASA & MASA YÖNETİMİ</span>
           <div class="feat-icon-box">
             <i data-lucide="layout-grid" style="width:28px; height:28px;"></i>
           </div>
@@ -277,9 +265,7 @@ export function renderLandingPage(container) {
           <p>Tüm salon masaları ve anlık hesap tutarları kasa ekranında net olarak gözükür. Masa seçildiğinde yan tarafta açılan panelde <strong>masada yenilen ve içilen tüm siparişler</strong> ayrıntılı listelenir.</p>
         </div>
 
-        <!-- 2. NAKİT AL / KARTLA AL -->
         <div class="landing-feat-card">
-          <span class="feat-item-badge">HIZLI TAHSİLAT</span>
           <div class="feat-icon-box" style="background:rgba(0,230,118,0.15); color:var(--color-accent-green);">
             <i data-lucide="banknote" style="width:28px; height:28px;"></i>
           </div>
@@ -287,9 +273,7 @@ export function renderLandingPage(container) {
           <p>Masa hesabı alınırken tek dokunuşla <strong>"Nakit Al"</strong> veya <strong>"Kartla Al"</strong> seçenekleriyle saniyeler içinde ödeme tahsil edilir, kasa adisyonu otomatik kapatılır.</p>
         </div>
 
-        <!-- 3. CİRO GİZLEME -->
         <div class="landing-feat-card">
-          <span class="feat-item-badge">GİZLİLİK & GÜVENLİK</span>
           <div class="feat-icon-box" style="background:rgba(239,68,68,0.15); color:var(--color-danger);">
             <i data-lucide="eye-off" style="width:28px; height:28px;"></i>
           </div>
@@ -297,9 +281,7 @@ export function renderLandingPage(container) {
           <p>Kasa ekranında bulunan tek tıkla <strong>Ciro Gizleme</strong> butonu sayesinde işletme hasılatı ve günlük toplam tutarlar gizlenir. Kasa başında garsonlar veya müşteriler varken tam gizlilik sağlanır.</p>
         </div>
 
-        <!-- 4. MENÜ FİYAT AYARLAMA & ÖZEL MASALAR -->
         <div class="landing-feat-card">
-          <span class="feat-item-badge">ESNEK FİYATLANDIRMA</span>
           <div class="feat-icon-box" style="background:rgba(255,107,0,0.15); color:var(--color-primary);">
             <i data-lucide="sliders" style="width:28px; height:28px;"></i>
           </div>
@@ -307,9 +289,7 @@ export function renderLandingPage(container) {
           <p>Tüm menü kalemlerinin fiyatlarını anında güncelleyin. Ayrıca <strong>VIP masalar, teras veya özel localar için farklı fiyat ayarlaması</strong> yapabilir, masaya özel tarife belirleyebilirsiniz.</p>
         </div>
 
-        <!-- 5. MASA EKLEMEK İÇİN PLAN SATIN ALMA -->
         <div class="landing-feat-card">
-          <span class="feat-item-badge">KAPASİTE YÖNETİMİ</span>
           <div class="feat-icon-box" style="background:rgba(0,229,255,0.15); color:var(--color-accent-cyan);">
             <i data-lucide="plus-circle" style="width:28px; height:28px;"></i>
           </div>
@@ -317,9 +297,7 @@ export function renderLandingPage(container) {
           <p>İşletmenizin masa sayısına göre dilediğiniz kapasite planını seçin. Restoranınız büyüdükçe plan satın alarak <strong>sisteme anında yeni masalar ekleyebilirsiniz</strong>.</p>
         </div>
 
-        <!-- 6. SİPARİŞ GÖRME & MUTFAK SICAK EKRANI -->
         <div class="landing-feat-card">
-          <span class="feat-item-badge">MUTFAK OTOMASYONU</span>
           <div class="feat-icon-box" style="background:rgba(255,193,7,0.15); color:#FFC107;">
             <i data-lucide="chef-hat" style="width:28px; height:28px;"></i>
           </div>
@@ -327,9 +305,7 @@ export function renderLandingPage(container) {
           <p>Sipariş görme <strong>açma/kapama tuşu</strong> bulunur. İsteğe bağlı olarak sadece masaların siparişleri görülüp silinebilir. Alınan siparişler mutfaktaki <strong>sıcak sayfasında görünür ve aşçı hazırlamaya başlar</strong>.</p>
         </div>
 
-        <!-- 7. GARSON EKLEME & QR İLE GİRİŞ -->
         <div class="landing-feat-card">
-          <span class="feat-item-badge">PERSONEL GİRİŞİ</span>
           <div class="feat-icon-box" style="background:rgba(168,85,247,0.15); color:var(--color-accent-purple);">
             <i data-lucide="user-check" style="width:28px; height:28px;"></i>
           </div>
@@ -337,9 +313,7 @@ export function renderLandingPage(container) {
           <p>Sisteme dilediğiniz kadar garson tanımlanabilir. Garsonlar işletme QR kodunu telefonlarıyla okutarak <strong>anında sisteme giriş yapar</strong> ve cepten masaların hesabına siparişleri işler.</p>
         </div>
 
-        <!-- 8. GÜNLÜK KASA & HAFTALIK CİRO RAPORU -->
         <div class="landing-feat-card">
-          <span class="feat-item-badge">KASA & CİRO RAPORLARI</span>
           <div class="feat-icon-box" style="background:rgba(0,230,118,0.15); color:var(--color-accent-green);">
             <i data-lucide="trending-up" style="width:28px; height:28px;"></i>
           </div>
@@ -347,9 +321,7 @@ export function renderLandingPage(container) {
           <p>Günün sonunda <strong>Günlük Kasa Raporu</strong> ile net nakit ve kartlı kasa kapanışınızı alın. <strong>Haftalık Ciro Raporu</strong> grafikleri ile işletmenizin gelir eğrisini analiz edin.</p>
         </div>
 
-        <!-- 9. GÜNLÜK EN ÇOK SATILANLAR & ALINAN ÜCRETLER -->
         <div class="landing-feat-card">
-          <span class="feat-item-badge">SATIŞ ANALİZLERİ</span>
           <div class="feat-icon-box" style="background:rgba(0,229,255,0.15); color:var(--color-accent-cyan);">
             <i data-lucide="bar-chart-3" style="width:28px; height:28px;"></i>
           </div>
@@ -357,9 +329,7 @@ export function renderLandingPage(container) {
           <p>Günün en popüler yemek ve içecek adetlerini <strong>Günlük En Çok Satılanlar</strong> listesinde görün. <strong>Alınan Ücretler</strong> menüsünden tüm nakit ve kartlı tahsilatların dökümünü inceleyin.</p>
         </div>
 
-        <!-- 10. FATURA / FİŞ ÇIKARMA -->
         <div class="landing-feat-card">
-          <span class="feat-item-badge">FİŞ & FATURA DÖKÜMÜ</span>
           <div class="feat-icon-box" style="background:rgba(255,107,0,0.15); color:var(--color-primary);">
             <i data-lucide="receipt-text" style="width:28px; height:28px;"></i>
           </div>
@@ -372,7 +342,6 @@ export function renderLandingPage(container) {
     <!-- MASA EKLEME İÇİN KULLANIM VE KAPASİTE PLANLARI -->
     <div style="margin:5rem 0 3rem 0;">
       <div style="text-align:center; max-width:650px; margin:0 auto 2.5rem auto;">
-        <span class="feat-item-badge">MASA KAPASİTE PLANLARI</span>
         <h2 style="font-family:var(--font-heading); font-size:2.2rem; font-weight:900; color:#fff; margin-bottom:0.6rem;">
           İşletmenizin Masa Sayısına Göre Plan Satın Alın
         </h2>
