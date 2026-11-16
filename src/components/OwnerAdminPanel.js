@@ -198,6 +198,16 @@ export function renderOwnerAdminPanel(container) {
                 `}
               </button>
 
+              <button class="admin-nav-item ${activeTab === 'profiles' ? 'active' : ''}" data-sidebar-tab="profiles">
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                  <i data-lucide="users" style="width:18px; height:18px; color:var(--color-primary);"></i>
+                  <span>Yetkili Profilleri</span>
+                </div>
+                <span style="background:rgba(255,107,0,0.15); color:var(--color-primary); border-radius:10px; padding:1px 7px; font-size:0.72rem; font-weight:800;">
+                  ${(store.profiles || []).length}
+                </span>
+              </button>
+
               <button class="admin-nav-item ${activeTab === 'health' ? 'active' : ''}" data-sidebar-tab="health">
                 <div style="display:flex; align-items:center; gap:0.75rem;">
                   <i data-lucide="activity" style="width:18px; height:18px; color:var(--color-accent-purple);"></i>
@@ -267,6 +277,7 @@ export function renderOwnerAdminPanel(container) {
                   activeTab === 'orders' ? '⚡ Canlı Sipariş Masası & Sipariş Yönetimi' :
                   activeTab === 'support' ? '🎧 Canlı Destek & Müşteri Çağrı Konsolu' :
                   activeTab === 'registrations' ? '🏢 İşletme Kayıt Başvuruları & Paketler' :
+                  activeTab === 'profiles' ? '👤 Kayıtlı Yetkili Profilleri (Supabase)' :
                   '📊 Bulut Sunucu & Sistem Altyapı Sağlığı'
                 }
               </h2>
@@ -275,6 +286,7 @@ export function renderOwnerAdminPanel(container) {
                   activeTab === 'orders' ? 'İşletmelerin masalarından anlık gelen siparişler, hazırlık süreleri ve sipariş silme/müdahale merkezi' :
                   activeTab === 'support' ? 'Destek arayan restoranların anında teşhisi, parola hatırlatması ve canlı test siparişi' :
                   activeTab === 'registrations' ? 'Gelen restoran başvurularını inceleyin, seçtikleri aylık paketleri onaylayın' :
+                  activeTab === 'profiles' ? 'Supabase veritabanında saklanan restoran sahibi ve yetkili profilleri listesi' :
                   'Postgres veritabanı, Realtime web soket ve platform uptime istatistikleri'
                 }
               </p>

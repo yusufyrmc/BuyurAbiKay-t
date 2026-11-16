@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateNavLabels() {
     const lastReg = store.getLastRegisteredBusiness();
+    const profile = store.getUserProfile();
     const regBtnSpan = document.querySelector('#nav-register-btn span');
     const headerCtaSpan = document.querySelector('#btn-header-cta span');
     if (lastReg && lastReg.id) {
@@ -25,6 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (headerCtaSpan) {
         headerCtaSpan.innerHTML = `İşletme ID: <strong style="color:var(--color-accent-green); font-family:monospace;">${lastReg.id}</strong>`;
+      }
+    } else if (profile && profile.fullName) {
+      const firstName = profile.fullName.split(' ')[0];
+      if (regBtnSpan) {
+        regBtnSpan.innerHTML = `İşletme Kaydı <span style="background:rgba(0,229,255,0.18); color:var(--color-accent-cyan); padding:1px 6px; border-radius:6px; font-size:0.75rem; font-weight:800; margin-left:4px;">👤 ${firstName}</span>`;
+      }
+      if (headerCtaSpan) {
+        headerCtaSpan.innerHTML = `İşletmeni Kaydet (${firstName})`;
       }
     } else {
       if (regBtnSpan) regBtnSpan.textContent = 'Kayıt Ol';

@@ -2,19 +2,30 @@ import { store } from '../state/store.js';
 
 export function renderRegisterPage(container) {
   const savedLastReg = store.getLastRegisteredBusiness();
-  let currentStep = savedLastReg ? 5 : 1;
+  const savedProfile = store.getUserProfile();
+
+  // If business already registered: step 5. If profile exists: step 1. Else: step 0 (profile creation).
+  let currentStep = savedLastReg ? 5 : (savedProfile ? 1 : 0);
   let registeredBusiness = savedLastReg || null;
   let showPasswordInStep5 = false;
+  let profileMode = 'create'; // 'create' | 'login'
+
+  let profileData = {
+    fullName: savedProfile?.fullName || '',
+    email: savedProfile?.email || '',
+    phone: savedProfile?.phone || '',
+    password: savedProfile?.password || '',
+    role: savedProfile?.role || 'İşletme Sahibi'
+  };
+
   let formData = {
     businessName: savedLastReg?.businessName || '',
-    fullName: savedLastReg?.fullName || '',
     businessType: savedLastReg?.businessType || 'Restoran & Lokanta',
     plan: savedLastReg?.plan || 'Profesyonel Paket (25 Masa - ₺899/ay)',
     planPrice: savedLastReg?.planPrice || 899,
-    phone: savedLastReg?.phone || '',
     city: savedLastReg?.city || 'İstanbul / Kadıköy',
     fullAddress: savedLastReg?.fullAddress || '',
-    password: savedLastReg?.password || ''
+    password: savedLastReg?.password || savedProfile?.password || ''
   };
 
   function calculatePasswordStrength(pass) {
@@ -35,38 +46,167 @@ export function renderRegisterPage(container) {
     }
   }
 
+  function getStepProgressPercent() {
+    if (currentStep === 0) return 0;
+    if (currentStep === 1) return 25;
+    if (currentStep === 2) return 50;
+    if (currentStep === 3) return 75;
+    return 100;
+  }
+
   function updateView() {
+    const activeProfile = store.getUserProfile();
+
     container.innerHTML = `
       <div class="register-container-layout">
         <!-- LEFT: WIZARD FORM -->
         <div class="register-wizard-card">
-          <!-- Step Progress Node Header -->
+          <!-- Step Progress Node Header (5 Steps: Profil, İşletme, Adres, Şifre, Doğrulama) -->
           <div class="step-indicator-bar">
-            <div class="step-progress-line" style="width: ${(currentStep - 1) * 33.3}%;"></div>
+            <div class="step-progress-line" style="width: ${getStepProgressPercent()}%;"></div>
             
-            <div class="step-node ${currentStep >= 1 ? (currentStep > 1 ? 'completed' : 'active') : ''}">
-              ${currentStep > 1 ? '✓' : '1'}
+            <div class="step-node ${currentStep === 0 ? 'active' : (currentStep > 0 ? 'completed' : '')}" title="1. Yetkili Profili">
+              ${currentStep > 0 ? '✓' : '1'}
             </div>
-            <div class="step-node ${currentStep >= 2 ? (currentStep > 2 ? 'completed' : 'active') : ''}">
-              ${currentStep > 2 ? '✓' : '2'}
+            <div class="step-node ${currentStep === 1 ? 'active' : (currentStep > 1 ? 'completed' : '')}" title="2. İşletme & Plan">
+              ${currentStep > 1 ? '✓' : '2'}
             </div>
-            <div class="step-node ${currentStep >= 3 ? (currentStep > 3 ? 'completed' : 'active') : ''}">
-              ${currentStep > 3 ? '✓' : '3'}
+            <div class="step-node ${currentStep === 2 ? 'active' : (currentStep > 2 ? 'completed' : '')}" title="3. Konum & Adres">
+              ${currentStep > 2 ? '✓' : '3'}
             </div>
-            <div class="step-node ${currentStep >= 4 ? 'completed' : ''}">
-              ${currentStep === 4 ? '✓' : '4'}
+            <div class="step-node ${currentStep === 3 ? 'active' : (currentStep > 3 ? 'completed' : '')}" title="4. Kasa Şifresi">
+              ${currentStep > 3 ? '✓' : '4'}
+            </div>
+            <div class="step-node ${currentStep >= 4 ? 'completed' : ''}" title="5. Doğrulama">
+              ${currentStep >= 4 ? '✓' : '5'}
             </div>
           </div>
+
+          <!-- ACTIVE PROFILE BANNER (WHEN PROFILE EXISTS & IN BUSINESS STEPS 1-4) -->
+          ${activeProfile && currentStep >= 1 && currentStep < 5 ? `
+            <div class="active-profile-banner">
+              <div style="display:flex; align-items:center; gap:0.75rem;">
+                <div class="profile-avatar-mini">
+                  ${(activeProfile.fullName || 'P').charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div style="display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
+                    <span style="font-size:0.75rem; color:var(--color-text-muted);">Aktif Yetkili Profili:</span>
+                    <strong style="color:#fff; font-size:0.92rem;">${activeProfile.fullName}</strong>
+                    <span class="profile-role-tag">${activeProfile.role || 'İşletme Sahibi'}</span>
+                  </div>
+                  <div style="font-size:0.75rem; color:var(--color-text-muted);">
+                    ✉️ ${activeProfile.email || 'E-posta belirtilmedi'} • 📞 ${activeProfile.phone}
+                  </div>
+                </div>
+              </div>
+              <button id="btn-edit-profile-trigger" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#fff; padding:0.4rem 0.8rem; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                <i data-lucide="user" style="width:13px; height:13px;"></i> Profili Düzenle
+              </button>
+            </div>
+          ` : ''}
+
+          <!-- STEP 0: YETKİLİ PROFİLİ OLUŞTUR / GİRİŞ YAP -->
+          ${currentStep === 0 ? `
+            <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
+              <div style="width:40px; height:40px; background:var(--color-primary-light); color:var(--color-primary); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center;">
+                <i data-lucide="user-plus" style="width:24px; height:24px;"></i>
+              </div>
+              <h2 class="wizard-title" style="margin:0;">Yetkili Profilinizi Oluşturun</h2>
+            </div>
+            <p class="wizard-subtitle">İşletmenizi kaydetmeden önce sistemi yönetecek yetkili profilinizi oluşturun. Profilinizi kaydettikten sonra işletme bilgilerinize geçeceksiniz.</p>
+
+            <!-- PROFILE MODE TABS (YENİ PROFİL / MEVCUT HESABA GİRİŞ) -->
+            <div class="profile-mode-tabs">
+              <button class="profile-tab-btn ${profileMode === 'create' ? 'active' : ''}" id="tab-profile-create">
+                <i data-lucide="user-plus" style="width:16px; height:16px;"></i> Yeni Profil Oluştur
+              </button>
+              <button class="profile-tab-btn ${profileMode === 'login' ? 'active' : ''}" id="tab-profile-login">
+                <i data-lucide="log-in" style="width:16px; height:16px;"></i> Mevcut Hesaba Giriş Yap
+              </button>
+            </div>
+
+            ${profileMode === 'create' ? `
+              <div class="form-group-row">
+                <div class="form-field">
+                  <label class="form-label"><i data-lucide="user"></i> Yetkili Ad Soyad</label>
+                  <input type="text" id="reg-profile-fullname" class="form-input" placeholder="Örn: Ahmet Yılmaz" value="${profileData.fullName}">
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label"><i data-lucide="mail"></i> E-posta Adresi</label>
+                  <input type="email" id="reg-profile-email" class="form-input" placeholder="ahmet@gmail.com" value="${profileData.email}">
+                </div>
+              </div>
+
+              <div class="form-group-row">
+                <div class="form-field">
+                  <label class="form-label"><i data-lucide="phone"></i> Cep Telefonu Numarası</label>
+                  <input type="tel" id="reg-profile-phone" class="form-input" placeholder="0555 123 45 67" value="${profileData.phone}">
+                </div>
+
+                <div class="form-field">
+                  <label class="form-label"><i data-lucide="briefcase"></i> İşletmedeki Rolünüz / Ünvanınız</label>
+                  <select id="reg-profile-role" class="form-input">
+                    <option value="İşletme Sahibi" ${profileData.role === 'İşletme Sahibi' ? 'selected' : ''}>👑 İşletme Sahibi</option>
+                    <option value="Restoran Müdürü" ${profileData.role === 'Restoran Müdürü' ? 'selected' : ''}>👔 Restoran Müdürü</option>
+                    <option value="İş Ortağı" ${profileData.role === 'İş Ortağı' ? 'selected' : ''}>🤝 İş Ortağı</option>
+                    <option value="Genel Yönetici" ${profileData.role === 'Genel Yönetici' ? 'selected' : ''}>⭐ Genel Yönetici</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-field" style="margin-bottom:1.5rem;">
+                <label class="form-label"><i data-lucide="lock"></i> Profil Şifresi Belirleyin</label>
+                <input type="password" id="reg-profile-password" class="form-input" placeholder="En az 6 karakterli güvenli bir şifre" value="${profileData.password}">
+                
+                <div class="password-meter" style="margin-top:0.6rem;">
+                  <div id="profile-password-meter-fill" class="password-meter-fill ${calculatePasswordStrength(profileData.password).class}"></div>
+                </div>
+                <div id="profile-password-strength-text" style="font-size:0.8rem; font-weight:700; margin-top:4px; text-align:right; color:var(--color-text-muted);">
+                  ${profileData.password ? `Şifre Gücü: ${calculatePasswordStrength(profileData.password).text}` : ''}
+                </div>
+              </div>
+
+              <div style="background:rgba(255,255,255,0.04); padding:1rem; border-radius:var(--radius-md); border:var(--border-glass); margin-bottom:1.5rem;">
+                <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; color:var(--color-text-muted); cursor:pointer;">
+                  <input type="checkbox" id="profile-terms" checked style="accent-color:var(--color-primary); width:18px; height:18px;">
+                  <span><strong style="color:#fff;">BuyurAbi Kullanıcı ve Hizmet Koşullarını</strong> okudum ve kabul ediyorum.</span>
+                </label>
+              </div>
+
+              <button class="btn-primary-hero" id="btn-save-profile-next" style="width:100%; justify-content:center;">
+                Profili Kaydet & İşletme Kaydına Geç <i data-lucide="arrow-right"></i>
+              </button>
+            ` : `
+              <!-- LOGIN WITH EXISTING PROFILE -->
+              <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:1.5rem; border-radius:var(--radius-md); margin-bottom:1.5rem;">
+                <div class="form-field" style="margin-bottom:1.2rem;">
+                  <label class="form-label"><i data-lucide="mail"></i> E-posta veya Cep Telefonu</label>
+                  <input type="text" id="login-profile-id" class="form-input" placeholder="Kayıtlı e-posta veya telefonunuz" value="${profileData.email || profileData.phone}">
+                </div>
+
+                <div class="form-field" style="margin-bottom:1rem;">
+                  <label class="form-label"><i data-lucide="lock"></i> Şifreniz</label>
+                  <input type="password" id="login-profile-pass" class="form-input" placeholder="Profil şifreniz">
+                </div>
+              </div>
+
+              <button class="btn-primary-hero" id="btn-login-profile-next" style="width:100%; justify-content:center;">
+                Giriş Yap & İşletme Kaydına Devam Et <i data-lucide="arrow-right"></i>
+              </button>
+            `}
+          ` : ''}
 
           <!-- STEP 1: BUSINESS DETAILS & PLAN SELECTION -->
           ${currentStep === 1 ? `
             <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
               <div style="width:40px; height:40px; background:var(--color-primary-light); color:var(--color-primary); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center;">
-                <i data-lucide="receipt" style="width:24px; height:24px;"></i>
+                <i data-lucide="store" style="width:24px; height:24px;"></i>
               </div>
-              <h2 class="wizard-title" style="margin:0;">Restoran & Dijital Adisyon Sistemi Kaydı</h2>
+              <h2 class="wizard-title" style="margin:0;">İşletme Bilgileri & Masa Kapasitesi</h2>
             </div>
-            <p class="wizard-subtitle">İşletme bilgilerinizi girin ve salonunuzun masa kapasitesine uygun kullanım planını seçin.</p>
+            <p class="wizard-subtitle">Restoranınızın adını, işletme türünü ve masa ekleme kapasitenize uygun kullanım planını seçin.</p>
 
             <div class="form-group-row">
               <div class="form-field">
@@ -117,21 +257,14 @@ export function renderRegisterPage(container) {
               </div>
             </div>
 
-            <div class="form-group-row">
-              <div class="form-field">
-                <label class="form-label"><i data-lucide="user"></i> Yetkili Ad Soyad</label>
-                <input type="text" id="reg-fullname" class="form-input" placeholder="Örn: Ahmet Yılmaz" value="${formData.fullName}">
-              </div>
-
-              <div class="form-field">
-                <label class="form-label"><i data-lucide="phone"></i> Cep Telefonu</label>
-                <input type="tel" id="reg-phone" class="form-input" placeholder="0555 123 45 67" value="${formData.phone}">
-              </div>
+            <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+              <button class="btn-secondary-hero" id="btn-step1-prev-profile">
+                <i data-lucide="arrow-left"></i> Profil Bilgilerim
+              </button>
+              <button class="btn-primary-hero" id="btn-step1-next" style="flex:1; justify-content:center;">
+                Adres Bilgilerine Geç <i data-lucide="arrow-right"></i>
+              </button>
             </div>
-
-            <button class="btn-primary-hero" id="btn-step1-next" style="width:100%; justify-content:center; margin-top:0.5rem;">
-              Adres Bilgilerine Geç <i data-lucide="arrow-right"></i>
-            </button>
           ` : ''}
 
           <!-- STEP 2: LOCATION & FULL ADDRESS -->
@@ -160,7 +293,7 @@ export function renderRegisterPage(container) {
             <div style="display:flex; gap:1rem; margin-top:1.5rem;">
               <button class="btn-secondary-hero" id="btn-step2-prev">Geri</button>
               <button class="btn-primary-hero" id="btn-step2-next" style="flex:1; justify-content:center;">
-                Güvenlik Adımına Geç <i data-lucide="arrow-right"></i>
+                Kasa Şifresi Adımına Geç <i data-lucide="arrow-right"></i>
               </button>
             </div>
           ` : ''}
@@ -172,13 +305,13 @@ export function renderRegisterPage(container) {
 
             <div class="form-field">
               <label class="form-label"><i data-lucide="lock"></i> Kasa & Sistem Giriş Şifresi</label>
-              <input type="password" id="reg-password" class="form-input" placeholder="En az 6 karakter, harf ve rakam" value="${formData.password}">
+              <input type="password" id="reg-password" class="form-input" placeholder="En az 6 karakter, harf ve rakam" value="${formData.password || profileData.password}">
               
               <div class="password-meter" style="margin-top:0.6rem;">
-                <div id="password-meter-fill-el" class="password-meter-fill ${calculatePasswordStrength(formData.password).class}"></div>
+                <div id="password-meter-fill-el" class="password-meter-fill ${calculatePasswordStrength(formData.password || profileData.password).class}"></div>
               </div>
               <div id="password-strength-text-el" style="font-size:0.8rem; font-weight:700; margin-top:4px; text-align:right; color:var(--color-text-muted);">
-                ${formData.password ? `Şifre Gücü: ${calculatePasswordStrength(formData.password).text}` : ''}
+                ${(formData.password || profileData.password) ? `Şifre Gücü: ${calculatePasswordStrength(formData.password || profileData.password).text}` : ''}
               </div>
             </div>
 
@@ -205,7 +338,7 @@ export function renderRegisterPage(container) {
               </div>
 
               <h2 class="wizard-title">SMS Doğrulama Kodu</h2>
-              <p class="wizard-subtitle"><strong>${formData.phone || '0555 123 45 67'}</strong> numaralı telefonunuza gönderilen 6 haneli doğrulama kodunu girin.</p>
+              <p class="wizard-subtitle"><strong>${profileData.phone || '0555 123 45 67'}</strong> numaralı telefonunuza gönderilen 6 haneli doğrulama kodunu girin.</p>
 
               <div style="display:flex; justify-content:center; gap:0.6rem; margin:2rem 0;">
                 <input type="text" maxlength="1" class="form-input otp-pin" style="width:48px; height:54px; text-align:center; font-size:1.4rem; font-weight:800;" value="7">
@@ -217,7 +350,7 @@ export function renderRegisterPage(container) {
               </div>
 
               <button class="btn-primary-hero" id="btn-verify-otp" style="width:100%; justify-content:center;">
-                <i data-lucide="check-circle-2"></i> Başvuruyu Gönder
+                <i data-lucide="check-circle-2"></i> İşletme Kaydını Tamamla & Başla
               </button>
             </div>
           ` : ''}
@@ -290,12 +423,14 @@ export function renderRegisterPage(container) {
                   </div>
                 </div>
 
-                <!-- 3. DETAILS SUMMARY TABLE -->
+                <!-- 3. DETAILS SUMMARY TABLE WITH PROFILE INFO -->
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:var(--radius-md); padding:0.85rem 1.1rem; margin-bottom:1.2rem; font-size:0.83rem;">
-                  <div><span style="color:var(--color-text-muted);">Yetkili Ad Soyad:</span> <strong style="color:#fff; display:block;">${formData.fullName || registeredBusiness?.fullName || 'Belirtilmedi'}</strong></div>
-                  <div><span style="color:var(--color-text-muted);">Telefon Numarası:</span> <strong style="color:#fff; display:block;">${formData.phone || registeredBusiness?.phone || 'Belirtilmedi'}</strong></div>
+                  <div><span style="color:var(--color-text-muted);">Yetkili Ad Soyad:</span> <strong style="color:#fff; display:block;">${activeProfile?.fullName || formData.fullName || registeredBusiness?.fullName || 'Belirtilmedi'}</strong></div>
+                  <div><span style="color:var(--color-text-muted);">Yetkili Rolü:</span> <strong style="color:var(--color-primary); display:block;">${activeProfile?.role || 'İşletme Sahibi'}</strong></div>
+                  <div><span style="color:var(--color-text-muted);">E-posta Adresi:</span> <strong style="color:#fff; display:block;">${activeProfile?.email || 'Belirtilmedi'}</strong></div>
+                  <div><span style="color:var(--color-text-muted);">Telefon Numarası:</span> <strong style="color:#fff; display:block;">${activeProfile?.phone || formData.phone || registeredBusiness?.phone || 'Belirtilmedi'}</strong></div>
                   <div><span style="color:var(--color-text-muted);">İşletme Türü:</span> <strong style="color:#fff; display:block;">${formData.businessType || registeredBusiness?.businessType || 'Restoran'}</strong></div>
-                  <div><span style="color:var(--color-text-muted);">Seçilen Paket:</span> <strong style="color:var(--color-accent-green); display:block;">${formData.plan || registeredBusiness?.plan || 'Profesyonel'}</strong></div>
+                  <div><span style="color:var(--color-text-muted);">Masa Kapasite Planı:</span> <strong style="color:var(--color-accent-green); display:block;">${formData.plan || registeredBusiness?.plan || 'Profesyonel'}</strong></div>
                   <div style="grid-column:1 / -1;"><span style="color:var(--color-text-muted);">Konum & Açık Adres:</span> <strong style="color:#fff; display:block;">${formData.city || registeredBusiness?.city || ''} - ${formData.fullAddress || registeredBusiness?.fullAddress || ''}</strong></div>
                 </div>
 
@@ -320,7 +455,7 @@ export function renderRegisterPage(container) {
                 </button>
 
                 <button class="btn-secondary-hero" id="btn-new-registration" style="flex:1; min-width:200px; justify-content:center; border-color:rgba(255,255,255,0.15);">
-                  <i data-lucide="user-plus"></i> Yeni İşletme Kaydı Yap
+                  <i data-lucide="plus-circle"></i> Yeni İşletme Kaydı Yap
                 </button>
               </div>
             </div>
@@ -330,20 +465,30 @@ export function renderRegisterPage(container) {
         <!-- RIGHT: LIVE DIGITAL BADGE PREVIEW -->
         <div class="badge-preview-card">
           <div class="badge-preview-header">
-            <i data-lucide="badge-check" style="vertical-align:middle; margin-right:4px;"></i> ${currentStep === 5 ? 'Dijital Adisyon Lisans Kartı' : 'Canlı Adisyon Lisans Önizlemesi'}
+            <i data-lucide="badge-check" style="vertical-align:middle; margin-right:4px;"></i> 
+            ${currentStep === 0 ? 'Yetkili Profil Kartı' : (currentStep === 5 ? 'Kayıtlı İşletme & Profil Kimliği' : 'Canlı Adisyon Lisans Önizlemesi')}
           </div>
 
           <div class="digital-badge-chip">
             <div class="badge-avatar">
-              ${((formData.businessName || registeredBusiness?.businessName) || 'R').charAt(0).toUpperCase()}
+              ${currentStep === 0 
+                ? (profileData.fullName || 'P').charAt(0).toUpperCase()
+                : ((formData.businessName || registeredBusiness?.businessName || profileData.fullName) || 'R').charAt(0).toUpperCase()
+              }
             </div>
             
             <div class="badge-user-name" id="badge-disp-business">
-              ${formData.businessName || registeredBusiness?.businessName || 'İşletme Adı'}
+              ${currentStep === 0 
+                ? (profileData.fullName || 'Yetkili Ad Soyad')
+                : (formData.businessName || registeredBusiness?.businessName || 'İşletme Adı')
+              }
             </div>
 
             <div class="badge-user-role" id="badge-disp-type">
-              🏬 ${formData.businessType || registeredBusiness?.businessType}
+              ${currentStep === 0 
+                ? `👤 ${profileData.role || 'İşletme Sahibi'}`
+                : `🏬 ${formData.businessType || registeredBusiness?.businessType}`
+              }
             </div>
 
             <div class="badge-info-list">
@@ -353,16 +498,28 @@ export function renderRegisterPage(container) {
                   <span style="color:var(--color-primary); font-family:monospace; font-size:1.15rem; font-weight:900; letter-spacing:1px;">${registeredBusiness.id}</span>
                 </div>
               ` : ''}
-              <div><strong>Masa Kapasite Planı:</strong> <span style="color:var(--color-accent-green); font-weight:800;" id="badge-disp-plan">${formData.plan || registeredBusiness?.plan}</span></div>
-              <div><strong>Yetkili:</strong> <span id="badge-disp-fullname">${formData.fullName || registeredBusiness?.fullName || 'Ad Soyad'}</span></div>
-              <div><strong>Telefon:</strong> <span id="badge-disp-phone">${formData.phone || registeredBusiness?.phone || '0555 *** ** **'}</span></div>
-              <div><strong>Şehir:</strong> <span id="badge-disp-city">${formData.city || registeredBusiness?.city}</span></div>
-              <div><strong>Durum:</strong> <span style="color:var(--color-accent-green); font-weight:800;">${currentStep === 5 ? '✓ AKTİF LİSANS' : '⏳ ONAY BEKLİYOR'}</span></div>
+
+              ${currentStep === 0 ? `
+                <div><strong>Yetkili:</strong> <span id="badge-disp-profile-name">${profileData.fullName || 'Ad Soyad'}</span></div>
+                <div><strong>E-posta:</strong> <span id="badge-disp-profile-email">${profileData.email || 'ornek@email.com'}</span></div>
+                <div><strong>Telefon:</strong> <span id="badge-disp-profile-phone">${profileData.phone || '0555 *** ** **'}</span></div>
+                <div><strong>Rol:</strong> <span>${profileData.role || 'İşletme Sahibi'}</span></div>
+                <div><strong>Aşama:</strong> <span style="color:var(--color-primary); font-weight:800;">1. Profil Oluşturuluyor</span></div>
+              ` : `
+                <div><strong>Yetkili Profil:</strong> <span>${activeProfile?.fullName || profileData.fullName || 'Ad Soyad'} (${activeProfile?.role || profileData.role})</span></div>
+                <div><strong>Masa Kapasitesi:</strong> <span style="color:var(--color-accent-green); font-weight:800;" id="badge-disp-plan">${formData.plan || registeredBusiness?.plan}</span></div>
+                <div><strong>Telefon:</strong> <span>${activeProfile?.phone || profileData.phone || '0555 *** ** **'}</span></div>
+                <div><strong>Şehir:</strong> <span id="badge-disp-city">${formData.city || registeredBusiness?.city}</span></div>
+                <div><strong>Durum:</strong> <span style="color:var(--color-accent-green); font-weight:800;">${currentStep === 5 ? '✓ AKTİF LİSANS' : '⏳ İŞLETME KAYDI ALINIYOR'}</span></div>
+              `}
             </div>
           </div>
 
           <p style="font-size:0.78rem; color:var(--color-text-muted); margin-top:1.5rem; max-width:280px; text-align:center;">
-            ${currentStep === 5 ? 'Dijital adisyon lisans kaydınız ve kodunuz aktif durumda tutulmaktadır.' : 'Formu doldurdukça adisyon lisans kartınız canlı olarak güncellenir.'}
+            ${currentStep === 0 
+              ? 'Önce yetkili profilinizi oluşturun, ardından işletme ve masa kapasitenizi kaydedin.'
+              : (currentStep === 5 ? 'İşletme ve profil kaydınız aktif durumda tutulmaktadır.' : 'Bilgileri girdikçe lisans kartınız canlı olarak güncellenir.')
+            }
           </p>
         </div>
       </div>
@@ -370,12 +527,150 @@ export function renderRegisterPage(container) {
 
     if (window.lucide) window.lucide.createIcons();
 
-    // Event Bindings
+    // -------------------------------------------------------------
+    // EVENT BINDINGS
+    // -------------------------------------------------------------
+
+    // Top edit profile trigger
+    container.querySelector('#btn-edit-profile-trigger')?.addEventListener('click', () => {
+      currentStep = 0;
+      profileMode = 'create';
+      updateView();
+    });
+
+    // STEP 0: PROFILE CREATION OR LOGIN
+    if (currentStep === 0) {
+      const tabCreate = container.querySelector('#tab-profile-create');
+      const tabLogin = container.querySelector('#tab-profile-login');
+
+      tabCreate?.addEventListener('click', () => {
+        profileMode = 'create';
+        updateView();
+      });
+
+      tabLogin?.addEventListener('click', () => {
+        profileMode = 'login';
+        updateView();
+      });
+
+      if (profileMode === 'create') {
+        const fnInput = container.querySelector('#reg-profile-fullname');
+        const emInput = container.querySelector('#reg-profile-email');
+        const phInput = container.querySelector('#reg-profile-phone');
+        const rlSelect = container.querySelector('#reg-profile-role');
+        const pwInput = container.querySelector('#reg-profile-password');
+
+        fnInput?.addEventListener('input', (e) => {
+          profileData.fullName = e.target.value;
+          const disp = container.querySelector('#badge-disp-profile-name');
+          if (disp) disp.textContent = profileData.fullName || 'Ad Soyad';
+        });
+
+        emInput?.addEventListener('input', (e) => {
+          profileData.email = e.target.value;
+          const disp = container.querySelector('#badge-disp-profile-email');
+          if (disp) disp.textContent = profileData.email || 'ornek@email.com';
+        });
+
+        phInput?.addEventListener('input', (e) => {
+          profileData.phone = e.target.value;
+          const disp = container.querySelector('#badge-disp-profile-phone');
+          if (disp) disp.textContent = profileData.phone || '0555 *** ** **';
+        });
+
+        rlSelect?.addEventListener('change', (e) => {
+          profileData.role = e.target.value;
+        });
+
+        pwInput?.addEventListener('input', (e) => {
+          profileData.password = e.target.value;
+          const strength = calculatePasswordStrength(profileData.password);
+          const fillEl = container.querySelector('#profile-password-meter-fill');
+          const textEl = container.querySelector('#profile-password-strength-text');
+          if (fillEl) fillEl.className = `password-meter-fill ${strength.class}`;
+          if (textEl) textEl.textContent = profileData.password ? `Şifre Gücü: ${strength.text}` : '';
+        });
+
+        container.querySelector('#btn-save-profile-next')?.addEventListener('click', async () => {
+          if (!profileData.fullName.trim() || !profileData.email.trim() || !profileData.phone.trim()) {
+            showToast('Lütfen Ad Soyad, E-posta ve Telefon alanlarını eksiksiz doldurun!', 'error');
+            return;
+          }
+          if (!profileData.password || profileData.password.length < 6) {
+            showToast('Lütfen profiliniz için en az 6 karakterli bir şifre belirleyin!', 'error');
+            return;
+          }
+
+          // Save Profile to store & Supabase
+          const res = await store.saveUserProfile(profileData);
+          if (res?.error) {
+            console.warn('Profile Supabase notice:', res.error);
+          }
+          formData.fullName = profileData.fullName;
+          formData.phone = profileData.phone;
+          formData.password = profileData.password;
+
+          currentStep = 1;
+          updateView();
+          showToast('🎉 Profiliniz başarıyla oluşturuldu ve veritabanına bağlandı! Şimdi işletmenizi kaydedebilirsiniz.', 'success');
+        });
+      } else {
+        // LOGIN MODE
+        container.querySelector('#btn-login-profile-next')?.addEventListener('click', async () => {
+          const idInput = container.querySelector('#login-profile-id')?.value.trim();
+          const passInput = container.querySelector('#login-profile-pass')?.value;
+
+          if (!idInput) {
+            showToast('Lütfen kayıtlı e-posta adresinizi veya telefonunuzu girin!', 'error');
+            return;
+          }
+          if (!passInput) {
+            showToast('Lütfen profil şifrenizi girin!', 'error');
+            return;
+          }
+
+          // Search existing profiles in store / Supabase
+          const cleanId = idInput.toLowerCase();
+          const matchedProfile = (store.profiles || []).find(p => 
+            (p.email && p.email.toLowerCase() === cleanId) || 
+            (p.phone && p.phone.replace(/\s+/g, '') === idInput.replace(/\s+/g, '')) ||
+            (p.id && p.id.toLowerCase() === cleanId)
+          );
+
+          if (matchedProfile) {
+            profileData = { ...matchedProfile };
+            await store.saveUserProfile(profileData);
+          } else {
+            const existingProfile = store.getUserProfile();
+            if (existingProfile) {
+              profileData = { ...existingProfile };
+            } else {
+              profileData = {
+                fullName: idInput.includes('@') ? idInput.split('@')[0] : 'Yetkili Kullanıcı',
+                email: idInput.includes('@') ? idInput : '',
+                phone: idInput.includes('@') ? '0555 123 45 67' : idInput,
+                password: passInput,
+                role: 'İşletme Sahibi'
+              };
+            }
+            await store.saveUserProfile(profileData);
+          }
+
+          formData.fullName = profileData.fullName;
+          formData.phone = profileData.phone;
+          formData.password = profileData.password;
+
+          currentStep = 1;
+          updateView();
+          showToast('👋 Profilinize giriş yapıldı! İşletme kaydınıza devam edebilirsiniz.', 'success');
+        });
+      }
+    }
+
+    // STEP 1: BUSINESS DETAILS & PLAN
     if (currentStep === 1) {
       const bnInput = container.querySelector('#reg-businessname');
       const btSelect = container.querySelector('#reg-businesstype');
-      const fnInput = container.querySelector('#reg-fullname');
-      const phInput = container.querySelector('#reg-phone');
 
       bnInput?.addEventListener('input', (e) => {
         formData.businessName = e.target.value;
@@ -397,21 +692,15 @@ export function renderRegisterPage(container) {
         });
       });
 
-      fnInput?.addEventListener('input', (e) => {
-        formData.fullName = e.target.value;
-        const disp = container.querySelector('#badge-disp-fullname');
-        if (disp) disp.textContent = formData.fullName || 'Ad Soyad';
-      });
-
-      phInput?.addEventListener('input', (e) => {
-        formData.phone = e.target.value;
-        const disp = container.querySelector('#badge-disp-phone');
-        if (disp) disp.textContent = formData.phone || '0555 *** ** **';
+      container.querySelector('#btn-step1-prev-profile')?.addEventListener('click', () => {
+        currentStep = 0;
+        profileMode = 'create';
+        updateView();
       });
 
       container.querySelector('#btn-step1-next')?.addEventListener('click', () => {
-        if (!formData.businessName || !formData.fullName || !formData.phone) {
-          showToast('Lütfen İşletme Adı, Yetkili Ad Soyad ve Telefon alanlarını doldurun!', 'error');
+        if (!formData.businessName || !formData.businessName.trim()) {
+          showToast('Lütfen Restoran / İşletme Adını giriniz!', 'error');
           return;
         }
         currentStep = 2;
@@ -419,6 +708,7 @@ export function renderRegisterPage(container) {
       });
     }
 
+    // STEP 2: LOCATION
     if (currentStep === 2) {
       const citySelect = container.querySelector('#reg-city');
       const addrInput = container.querySelector('#reg-fulladdress');
@@ -439,7 +729,7 @@ export function renderRegisterPage(container) {
       });
 
       container.querySelector('#btn-step2-next')?.addEventListener('click', () => {
-        if (!formData.fullAddress) {
+        if (!formData.fullAddress || !formData.fullAddress.trim()) {
           showToast('Lütfen Açık Adres alanını doldurun!', 'error');
           return;
         }
@@ -448,6 +738,7 @@ export function renderRegisterPage(container) {
       });
     }
 
+    // STEP 3: KASA PASSWORD & SECURITY
     if (currentStep === 3) {
       const passInput = container.querySelector('#reg-password');
 
@@ -469,7 +760,7 @@ export function renderRegisterPage(container) {
 
       container.querySelector('#btn-step3-next')?.addEventListener('click', () => {
         if (!formData.password || formData.password.length < 6) {
-          showToast('Lütfen en az 6 karakterli bir şifre belirleyin!', 'error');
+          showToast('Lütfen en az 6 karakterli bir kasa şifresi belirleyin!', 'error');
           return;
         }
         currentStep = 4;
@@ -477,31 +768,38 @@ export function renderRegisterPage(container) {
       });
     }
 
+    // STEP 4: SMS OTP VERIFICATION & FINAL SUBMIT
     if (currentStep === 4) {
       container.querySelector('#btn-verify-otp')?.addEventListener('click', async () => {
         const btn = container.querySelector('#btn-verify-otp');
         if (btn) {
           btn.disabled = true;
-          btn.innerHTML = '⏳ Gönderiliyor...';
+          btn.innerHTML = '⏳ İşletme Kaydediliyor...';
         }
+
+        const profile = store.getUserProfile() || profileData;
 
         const res = await store.addRegistration({
           businessName: formData.businessName,
-          fullName: formData.fullName,
+          fullName: profile.fullName || 'Yetkili',
+          email: profile.email || '',
+          role: profile.role || 'İşletme Sahibi',
+          ownerEmail: profile.email || '',
+          ownerRole: profile.role || 'İşletme Sahibi',
           businessType: formData.businessType,
           plan: formData.plan,
           planPrice: formData.planPrice,
-          phone: formData.phone,
+          phone: profile.phone || formData.phone || '',
           city: formData.city,
           fullAddress: formData.fullAddress,
-          password: formData.password
+          password: formData.password || profile.password || ''
         });
 
         if (res && res.error) {
           showToast(`⚠️ Supabase Kayıt Uyarısı: ${res.error}`, 'error');
           if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<i data-lucide="check-circle-2"></i> Başvuruyu Gönder';
+            btn.innerHTML = '<i data-lucide="check-circle-2"></i> İşletme Kaydını Tamamla & Başla';
             if (window.lucide) window.lucide.createIcons();
           }
           return;
@@ -515,10 +813,12 @@ export function renderRegisterPage(container) {
       });
     }
 
+    // STEP 5: SUCCESS CREDENTIALS
     if (currentStep === 5) {
       const activeReg = registeredBusiness || store.getLastRegisteredBusiness() || {};
       const activeId = activeReg.id || 'BYR-0000';
-      const activePass = formData.password || activeReg.password || '';
+      const activePass = formData.password || activeReg.password || profileData.password || '';
+      const currentProf = store.getUserProfile() || profileData;
 
       // 1. Copy Business ID
       container.querySelector('#btn-copy-id')?.addEventListener('click', () => {
@@ -556,8 +856,9 @@ export function renderRegisterPage(container) {
 İşletme Adı: ${formData.businessName || activeReg.businessName || ''}
 İşletme Kodu (ID): ${activeId}
 Kasa Giriş Şifresi: ${activePass}
-Yetkili: ${formData.fullName || activeReg.fullName || ''}
-Telefon: ${formData.phone || activeReg.phone || ''}
+Bağlı Yetkili: ${currentProf.fullName || activeReg.fullName || ''} (${currentProf.role || 'İşletme Sahibi'})
+E-posta: ${currentProf.email || ''}
+Telefon: ${currentProf.phone || activeReg.phone || ''}
 İşletme Türü: ${formData.businessType || activeReg.businessType || ''}
 Masa Kapasite Planı: ${formData.plan || activeReg.plan || ''}
 Konum: ${formData.city || activeReg.city || ''} - ${formData.fullAddress || activeReg.fullAddress || ''}
@@ -581,8 +882,10 @@ BUYURABİ DİJİTAL ADİSYON & RESTORAN KASA BİLGİ KARTI
 İşletme Adı        : ${formData.businessName || activeReg.businessName || ''}
 İşletme Kodu (ID)  : ${activeId}
 Kasa Giriş Parolası: ${activePass}
-Yetkili Kişi       : ${formData.fullName || activeReg.fullName || ''}
-Telefon No         : ${formData.phone || activeReg.phone || ''}
+Yetkili Kişi       : ${currentProf.fullName || activeReg.fullName || ''}
+Yetkili Rolü       : ${currentProf.role || 'İşletme Sahibi'}
+E-posta Adresi     : ${currentProf.email || ''}
+Telefon No         : ${currentProf.phone || activeReg.phone || ''}
 İşletme Türü       : ${formData.businessType || activeReg.businessType || ''}
 Masa Kapasite Planı: ${formData.plan || activeReg.plan || ''}
 Açık Adres         : ${formData.city || activeReg.city || ''} / ${formData.fullAddress || activeReg.fullAddress || ''}
@@ -614,23 +917,21 @@ Lütfen bu dosyayı güvenli bir yerde saklayınız.
         store.setView('landing');
       });
 
-      // 7. Start New Registration (Clears saved registration)
+      // 7. Start New Registration under same profile
       container.querySelector('#btn-new-registration')?.addEventListener('click', () => {
         if (confirm('Farklı bir işletme kaydı yapmak istiyor musunuz? (Mevcut işletme ID kartınız bu ekrandan kaldırılacaktır)')) {
           store.clearLastRegisteredBusiness();
           registeredBusiness = null;
           formData = {
             businessName: '',
-            fullName: '',
             businessType: 'Restoran & Lokanta',
             plan: 'Profesyonel Paket (25 Masa - ₺899/ay)',
             planPrice: 899,
-            phone: '',
             city: 'İstanbul / Kadıköy',
             fullAddress: '',
-            password: ''
+            password: store.getUserProfile()?.password || ''
           };
-          currentStep = 1;
+          currentStep = store.hasUserProfile() ? 1 : 0;
           updateView();
           showToast('Yeni işletme kayıt formu açıldı.', 'info');
         }
@@ -648,6 +949,7 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = 'toast-message';
   if (type === 'error') toast.style.borderLeftColor = 'var(--color-danger)';
+  if (type === 'success') toast.style.borderLeftColor = 'var(--color-accent-green)';
   toast.innerHTML = message;
   container.appendChild(toast);
 

@@ -17,11 +17,14 @@ class AppStore {
         phone: '0532 555 44 33',
         city: 'İstanbul / Kadıköy',
         fullAddress: 'Caferağa Mah. Moda Cad. No:84/A Kadıköy',
-        plan: 'Profesyonel Paket (₺899/ay)',
+        plan: 'Profesyonel Paket (25 Masa - ₺899/ay)',
         planPrice: 899,
-        status: 'bekliyor',
+        status: 'onaylandi',
+        password: '123456',
         createdAt: '10 dk önce',
-        timestamp: Date.now() - 10 * 60 * 1000
+        timestamp: Date.now() - 10 * 60 * 1000,
+        ownerEmail: 'ahmet@gaziantepsofrasi.com',
+        ownerRole: 'İşletme Sahibi'
       },
       {
         id: 'REG-1002',
@@ -31,11 +34,14 @@ class AppStore {
         phone: '0544 888 12 34',
         city: 'İstanbul / Kadıköy',
         fullAddress: 'Mühürdar Sok. No:12 Moda',
-        plan: 'Başlangıç Paketi (₺499/ay)',
+        plan: 'Başlangıç Paketi (10 Masa - ₺499/ay)',
         planPrice: 499,
         status: 'onaylandi',
+        password: '123456',
         createdAt: '2 saat önce',
-        timestamp: Date.now() - 120 * 60 * 1000
+        timestamp: Date.now() - 120 * 60 * 1000,
+        ownerEmail: 'selin@modakafe.com',
+        ownerRole: 'Restoran Müdürü'
       },
       {
         id: 'REG-1003',
@@ -45,16 +51,47 @@ class AppStore {
         phone: '0505 111 22 33',
         city: 'Ankara / Çankaya',
         fullAddress: 'Tunalı Hilmi Cad. No:45 Çankaya',
-        plan: 'Kurumsal Paket (₺1.499/ay)',
+        plan: 'Kurumsal Paket (Sınırsız - ₺1.499/ay)',
         planPrice: 1499,
         status: 'bekliyor',
+        password: '123456',
         createdAt: '45 dk önce',
-        timestamp: Date.now() - 45 * 60 * 1000
+        timestamp: Date.now() - 45 * 60 * 1000,
+        ownerEmail: 'mehmet@citirpide.com',
+        ownerRole: 'İşletme Sahibi'
       }
     ];
 
     const savedLastReg = localStorage.getItem('buyurabi_last_registered_business');
     this.lastRegisteredBusiness = savedLastReg ? JSON.parse(savedLastReg) : null;
+
+    // User Profiles
+    const savedProfiles = localStorage.getItem('buyurabi_user_profiles_list');
+    this.profiles = savedProfiles ? JSON.parse(savedProfiles) : [
+      {
+        id: 'PRF-1001',
+        fullName: 'Ahmet Yılmaz',
+        email: 'ahmet@gaziantepsofrasi.com',
+        phone: '0532 555 44 33',
+        role: 'İşletme Sahibi',
+        password: '123456',
+        createdAt: 'Bugün',
+        timestamp: Date.now() - 60 * 60 * 1000
+      },
+      {
+        id: 'PRF-1002',
+        fullName: 'Selin Kaya',
+        email: 'selin@modakafe.com',
+        phone: '0544 888 12 34',
+        role: 'Restoran Müdürü',
+        password: '123456',
+        createdAt: 'Dün',
+        timestamp: Date.now() - 24 * 60 * 60 * 1000
+      }
+    ];
+
+    const savedUserProfile = localStorage.getItem('buyurabi_user_profile');
+    this.userProfile = savedUserProfile ? JSON.parse(savedUserProfile) : null;
 
     // Live Orders per business
     const savedOrders = localStorage.getItem('buyurabi_restaurant_orders');
@@ -133,7 +170,7 @@ class AppStore {
         businessId: 'REG-1001',
         agent: 'Destek Temsilcisi (Yusuf)',
         category: 'Masa / QR Kontrolü',
-        text: 'Ahmet Bey aradı. Masa 4 QR etiketinin okutulmasıyla ilgili müşteri kamera izin sorunu kontrol edildi. Canlı test siparişi ile sistem teyit edildi.',
+        text: 'Ahmet Bey aradı. Masa 4 garson çağırma testi yapıldı ve kasanın bildirim sesi onaylandı.',
         createdAt: 'Bugün 11:20',
         timestamp: Date.now() - 120 * 60 * 1000
       },
@@ -158,159 +195,7 @@ class AppStore {
     }
   }
 
-  getLastRegisteredBusiness() {
-    if (this.lastRegisteredBusiness) return this.lastRegisteredBusiness;
-    try {
-      const saved = localStorage.getItem('buyurabi_last_registered_business');
-      return saved ? JSON.parse(saved) : null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  setLastRegisteredBusiness(reg) {
-    this.lastRegisteredBusiness = reg;
-    if (reg) {
-      localStorage.setItem('buyurabi_last_registered_business', JSON.stringify(reg));
-    } else {
-      localStorage.removeItem('buyurabi_last_registered_business');
-    }
-    this.notify();
-  }
-
-  clearLastRegisteredBusiness() {
-    this.lastRegisteredBusiness = null;
-    localStorage.removeItem('buyurabi_last_registered_business');
-    this.notify();
-  }
-
-  async initSupabase() {
-    await this.fetchRegistrations();
-    this.setupRealtimeSubscription();
-  }
-
-  // Helper to format object for Supabase table row
-  toDbRow(reg, includePassword = true) {
-    const row = {
-      id: String(reg.id),
-      business_name: reg.businessName || '',
-      full_name: reg.fullName || '',
-      business_type: reg.businessType || 'Restoran',
-      phone: reg.phone || '',
-      city: reg.city || '',
-      full_address: reg.fullAddress || '',
-      plan: reg.plan || 'Profesyonel Paket (₺899/ay)',
-      plan_price: Number(reg.planPrice || 899),
-      status: reg.status || 'bekliyor',
-      created_at: reg.createdAt || 'Yeni',
-      timestamp: Number(reg.timestamp || Date.now())
-    };
-
-    if (includePassword && reg.password) {
-      row.password = reg.password;
-    }
-
-    return row;
-  }
-
-  async fetchRegistrations() {
-    if (!supabase) return;
-    try {
-      const { data, error } = await supabase
-        .from('registrations')
-        .select('*')
-        .order('timestamp', { ascending: false });
-
-      if (error) {
-        console.warn('Supabase fetch error:', error.message);
-        this.lastSupabaseError = error.message;
-        this.notify();
-        return;
-      }
-
-      this.lastSupabaseError = null;
-
-      if (data && data.length > 0) {
-        this.registrations = data.map(item => ({
-          id: item.id,
-          businessName: item.business_name,
-          fullName: item.full_name,
-          businessType: item.business_type,
-          phone: item.phone,
-          city: item.city,
-          fullAddress: item.full_address,
-          plan: item.plan,
-          planPrice: Number(item.plan_price || 899),
-          status: item.status || 'bekliyor',
-          password: item.password || '',
-          createdAt: item.created_at || 'Yeni',
-          timestamp: Number(item.timestamp || Date.now())
-        }));
-        this.notify();
-      } else {
-        // If Supabase table is empty, seed existing sample registrations into Supabase
-        const dbRows = this.registrations.map(r => this.toDbRow(r));
-        const { error: seedError } = await supabase.from('registrations').upsert(dbRows);
-        if (seedError) {
-          console.warn('Supabase seed error:', seedError.message);
-          this.lastSupabaseError = seedError.message;
-        } else {
-          console.log('Supabase initialized with sample data successfully.');
-          // Re-fetch to synchronize state
-          const { data: refetchedData } = await supabase
-            .from('registrations')
-            .select('*')
-            .order('timestamp', { ascending: false });
-          if (refetchedData && refetchedData.length > 0) {
-            this.registrations = refetchedData.map(item => ({
-              id: item.id,
-              businessName: item.business_name,
-              fullName: item.full_name,
-              businessType: item.business_type,
-              phone: item.phone,
-              city: item.city,
-              fullAddress: item.full_address,
-              plan: item.plan,
-              planPrice: Number(item.plan_price || 899),
-              status: item.status || 'bekliyor',
-              createdAt: item.created_at || 'Yeni',
-              timestamp: Number(item.timestamp || Date.now())
-            }));
-          }
-        }
-        this.notify();
-      }
-    } catch (err) {
-      console.error('Supabase connection error:', err);
-      this.lastSupabaseError = err.message || 'Bağlantı hatası';
-      this.notify();
-    }
-  }
-
-  setupRealtimeSubscription() {
-    if (!supabase) return;
-    try {
-      supabase
-        .channel('registrations-channel')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'registrations' },
-          () => {
-            this.fetchRegistrations();
-          }
-        )
-        .subscribe((status, err) => {
-          if (status === 'SUBSCRIBED') {
-            console.log('Supabase Realtime yayınına başarıyla bağlandı.');
-          } else if (err || status === 'CHANNEL_ERROR') {
-            console.warn('Supabase Realtime kanal uyarısı:', status, err);
-          }
-        });
-    } catch (err) {
-      console.warn('Supabase Realtime subscription error:', err);
-    }
-  }
-
+  // --- Subscriptions & State Persistence ---
   subscribe(listener) {
     this.listeners.push(listener);
     return () => {
@@ -324,7 +209,24 @@ class AppStore {
   }
 
   saveState() {
-    localStorage.setItem('buyurabi_restaurant_registrations', JSON.stringify(this.registrations));
+    try {
+      localStorage.setItem('buyurabi_restaurant_registrations', JSON.stringify(this.registrations));
+      localStorage.setItem('buyurabi_restaurant_orders', JSON.stringify(this.orders));
+      localStorage.setItem('buyurabi_support_call_notes', JSON.stringify(this.supportNotes));
+      localStorage.setItem('buyurabi_user_profiles_list', JSON.stringify(this.profiles));
+      if (this.userProfile) {
+        localStorage.setItem('buyurabi_user_profile', JSON.stringify(this.userProfile));
+      } else {
+        localStorage.removeItem('buyurabi_user_profile');
+      }
+      if (this.lastRegisteredBusiness) {
+        localStorage.setItem('buyurabi_last_registered_business', JSON.stringify(this.lastRegisteredBusiness));
+      } else {
+        localStorage.removeItem('buyurabi_last_registered_business');
+      }
+    } catch (e) {
+      console.warn('LocalStorage save error:', e);
+    }
   }
 
   setView(viewName) {
@@ -348,7 +250,318 @@ class AppStore {
     this.notify();
   }
 
-  // --- Registration Actions ---
+  // ========================================================
+  // SUPABASE INITIALIZATION & REALTIME SYNC
+  // ========================================================
+  async initSupabase() {
+    try {
+      await Promise.all([
+        this.fetchRegistrations(),
+        this.fetchOrders(),
+        this.fetchSupportNotes(),
+        this.fetchProfiles()
+      ]);
+      this.setupRealtimeSubscriptions();
+    } catch (err) {
+      console.warn('Supabase initial loading notice:', err);
+    }
+  }
+
+  setupRealtimeSubscriptions() {
+    if (!supabase) return;
+    try {
+      supabase
+        .channel('buyurabi-all-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'registrations' },
+          () => {
+            console.log('Realtime update on registrations table');
+            this.fetchRegistrations();
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'orders' },
+          () => {
+            console.log('Realtime update on orders table');
+            this.fetchOrders();
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'support_notes' },
+          () => {
+            console.log('Realtime update on support_notes table');
+            this.fetchSupportNotes();
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'profiles' },
+          () => {
+            console.log('Realtime update on profiles table');
+            this.fetchProfiles();
+          }
+        )
+        .subscribe((status, err) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('✅ Supabase Realtime tüm tablolara başarıyla bağlandı.');
+          } else if (err || status === 'CHANNEL_ERROR') {
+            console.warn('Supabase Realtime kanal uyarısı:', status, err);
+          }
+        });
+    } catch (err) {
+      console.warn('Supabase Realtime subscription error:', err);
+    }
+  }
+
+  // ========================================================
+  // 1. PROFILES MANAGEMENT & SUPABASE
+  // ========================================================
+  toProfileDbRow(profile) {
+    return {
+      id: String(profile.id || ('PRF-' + Math.floor(1000 + Math.random() * 9000))),
+      full_name: profile.fullName || 'Yetkili',
+      email: profile.email || '',
+      phone: profile.phone || '',
+      role: profile.role || 'İşletme Sahibi',
+      password: profile.password || '123456',
+      created_at: profile.createdAt || 'Yeni',
+      timestamp: Number(profile.timestamp || Date.now())
+    };
+  }
+
+  fromProfileDbRow(row) {
+    return {
+      id: row.id,
+      fullName: row.full_name,
+      email: row.email,
+      phone: row.phone,
+      role: row.role || 'İşletme Sahibi',
+      password: row.password || '',
+      createdAt: row.created_at || 'Yeni',
+      timestamp: Number(row.timestamp || Date.now())
+    };
+  }
+
+  getUserProfile() {
+    if (this.userProfile) return this.userProfile;
+    try {
+      const saved = localStorage.getItem('buyurabi_user_profile');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  hasUserProfile() {
+    return !!this.getUserProfile();
+  }
+
+  clearUserProfile() {
+    this.userProfile = null;
+    localStorage.removeItem('buyurabi_user_profile');
+    this.notify();
+  }
+
+  async fetchProfiles() {
+    if (!supabase) return;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.warn('Supabase profiles fetch error:', error.message);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        this.profiles = data.map(r => this.fromProfileDbRow(r));
+        this.notify();
+      } else {
+        // Seed default profiles to Supabase
+        const dbRows = this.profiles.map(p => this.toProfileDbRow(p));
+        const { error: seedError } = await supabase.from('profiles').upsert(dbRows);
+        if (seedError) {
+          console.warn('Supabase profiles seed error:', seedError.message);
+        } else {
+          console.log('Supabase profiles seeded successfully.');
+        }
+      }
+    } catch (err) {
+      console.warn('fetchProfiles error:', err);
+    }
+  }
+
+  async saveUserProfile(profileData) {
+    const profile = {
+      id: profileData.id || ('PRF-' + Math.floor(1000 + Math.random() * 9000)),
+      fullName: profileData.fullName,
+      email: profileData.email || '',
+      phone: profileData.phone,
+      role: profileData.role || 'İşletme Sahibi',
+      password: profileData.password || '123456',
+      createdAt: profileData.createdAt || 'Az önce',
+      timestamp: profileData.timestamp || Date.now()
+    };
+
+    // Save locally
+    this.userProfile = profile;
+    const existingIdx = this.profiles.findIndex(p => p.id === profile.id || (profile.email && p.email === profile.email) || (profile.phone && p.phone === profile.phone));
+    if (existingIdx >= 0) {
+      this.profiles[existingIdx] = profile;
+    } else {
+      this.profiles.unshift(profile);
+    }
+    this.notify();
+
+    // Persist to Supabase profiles table
+    if (this.supabaseConnected && supabase) {
+      try {
+        const dbRow = this.toProfileDbRow(profile);
+        const { error } = await supabase.from('profiles').upsert([dbRow], { onConflict: 'id' });
+        if (error) {
+          console.error('Supabase profile save error:', error.message);
+          this.lastSupabaseError = error.message;
+          return { success: false, profile, error: error.message };
+        } else {
+          console.log('Profile successfully saved to Supabase profiles table!');
+        }
+      } catch (err) {
+        console.error('saveUserProfile Supabase exception:', err);
+        return { success: false, profile, error: err.message };
+      }
+    }
+
+    return { success: true, profile };
+  }
+
+  async deleteProfile(profileId) {
+    this.profiles = this.profiles.filter(p => p.id !== profileId);
+    if (this.userProfile?.id === profileId) {
+      this.userProfile = null;
+    }
+    this.notify();
+
+    if (this.supabaseConnected && supabase) {
+      try {
+        await supabase.from('profiles').delete().eq('id', profileId);
+      } catch (err) {
+        console.warn('deleteProfile Supabase error:', err);
+      }
+    }
+    return { success: true };
+  }
+
+  // ========================================================
+  // 2. REGISTRATIONS MANAGEMENT & SUPABASE
+  // ========================================================
+  toDbRow(reg, includePassword = true) {
+    const row = {
+      id: String(reg.id),
+      business_name: reg.businessName || '',
+      full_name: reg.fullName || '',
+      business_type: reg.businessType || 'Restoran & Lokanta',
+      phone: reg.phone || '',
+      city: reg.city || '',
+      full_address: reg.fullAddress || '',
+      plan: reg.plan || 'Profesyonel Paket (25 Masa - ₺899/ay)',
+      plan_price: Number(reg.planPrice || 899),
+      status: reg.status || 'bekliyor',
+      created_at: reg.createdAt || 'Yeni',
+      timestamp: Number(reg.timestamp || Date.now()),
+      owner_email: reg.ownerEmail || reg.email || '',
+      owner_role: reg.ownerRole || reg.role || 'İşletme Sahibi'
+    };
+
+    if (includePassword && reg.password) {
+      row.password = reg.password;
+    }
+
+    return row;
+  }
+
+  fromDbRow(item) {
+    return {
+      id: item.id,
+      businessName: item.business_name,
+      fullName: item.full_name,
+      businessType: item.business_type,
+      phone: item.phone,
+      city: item.city,
+      fullAddress: item.full_address,
+      plan: item.plan,
+      planPrice: Number(item.plan_price || 899),
+      status: item.status || 'bekliyor',
+      password: item.password || '',
+      createdAt: item.created_at || 'Yeni',
+      timestamp: Number(item.timestamp || Date.now()),
+      ownerEmail: item.owner_email || '',
+      ownerRole: item.owner_role || 'İşletme Sahibi'
+    };
+  }
+
+  getLastRegisteredBusiness() {
+    if (this.lastRegisteredBusiness) return this.lastRegisteredBusiness;
+    try {
+      const saved = localStorage.getItem('buyurabi_last_registered_business');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  setLastRegisteredBusiness(reg) {
+    this.lastRegisteredBusiness = reg;
+    this.notify();
+  }
+
+  clearLastRegisteredBusiness() {
+    this.lastRegisteredBusiness = null;
+    localStorage.removeItem('buyurabi_last_registered_business');
+    this.notify();
+  }
+
+  async fetchRegistrations() {
+    if (!supabase) return;
+    try {
+      const { data, error } = await supabase
+        .from('registrations')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.warn('Supabase registrations fetch error:', error.message);
+        this.lastSupabaseError = error.message;
+        this.notify();
+        return;
+      }
+
+      this.lastSupabaseError = null;
+
+      if (data && data.length > 0) {
+        this.registrations = data.map(item => this.fromDbRow(item));
+        this.notify();
+      } else {
+        // If table is empty, seed existing sample registrations
+        const dbRows = this.registrations.map(r => this.toDbRow(r));
+        const { error: seedError } = await supabase.from('registrations').upsert(dbRows);
+        if (seedError) {
+          console.warn('Supabase registrations seed error:', seedError.message);
+        } else {
+          console.log('Supabase registrations seeded successfully.');
+        }
+      }
+    } catch (err) {
+      console.error('Supabase registrations connection error:', err);
+      this.lastSupabaseError = err.message || 'Bağlantı hatası';
+      this.notify();
+    }
+  }
+
   async addRegistration(regData) {
     const generatedId = regData.id || ('BYR-' + Math.floor(1000 + Math.random() * 9000));
     const newReg = {
@@ -356,36 +569,46 @@ class AppStore {
       status: 'bekliyor',
       createdAt: 'Az önce',
       timestamp: Date.now(),
+      ownerEmail: regData.ownerEmail || regData.email || '',
+      ownerRole: regData.ownerRole || regData.role || 'İşletme Sahibi',
       ...regData
     };
 
-    // 1. Add locally first and persist last registered business for the user
+    // 1. Add locally
     this.registrations.unshift(newReg);
     this.lastRegisteredBusiness = newReg;
-    localStorage.setItem('buyurabi_last_registered_business', JSON.stringify(newReg));
     this.notify();
 
-    // 2. Persist to Supabase using upsert
-    console.log('addRegistration triggered:', newReg, 'supabaseConnected:', this.supabaseConnected);
+    // 2. Persist to Supabase registrations table
     if (this.supabaseConnected && supabase) {
       try {
         const dbRowWithPass = this.toDbRow(newReg, true);
-        console.log('Sending to Supabase registrations table:', dbRowWithPass);
-        let { data, error } = await supabase
+        let { error } = await supabase
           .from('registrations')
           .upsert([dbRowWithPass], { onConflict: 'id' });
 
-        if (error && (error.code === '42703' || (error.message && error.message.includes('password')))) {
-          console.warn('Password column missing on Supabase table, retrying without password column...');
-          const retryRes = await supabase
-            .from('registrations')
-            .upsert([this.toDbRow(newReg, false)], { onConflict: 'id' });
+        if (error && (error.code === '42703' || (error.message && error.message.includes('column')))) {
+          console.warn('Some columns missing, retrying with minimal row...');
+          const minimalRow = {
+            id: String(newReg.id),
+            business_name: newReg.businessName,
+            full_name: newReg.fullName,
+            business_type: newReg.businessType,
+            phone: newReg.phone,
+            city: newReg.city,
+            full_address: newReg.fullAddress,
+            plan: newReg.plan,
+            plan_price: Number(newReg.planPrice || 899),
+            status: newReg.status,
+            created_at: newReg.createdAt,
+            timestamp: Number(newReg.timestamp)
+          };
+          const retryRes = await supabase.from('registrations').upsert([minimalRow], { onConflict: 'id' });
           error = retryRes.error;
-          data = retryRes.data;
         }
 
         if (error) {
-          console.error('Supabase insert error:', error.message);
+          console.error('Supabase registration insert error:', error.message);
           this.lastSupabaseError = error.message;
           this.notify();
           return { success: false, reg: newReg, error: error.message };
@@ -397,8 +620,6 @@ class AppStore {
         console.error('Supabase client error:', err);
         return { success: false, reg: newReg, error: err.message };
       }
-    } else {
-      console.warn('Supabase not connected. Registration saved to local storage.');
     }
 
     return { success: true, reg: newReg };
@@ -410,34 +631,15 @@ class AppStore {
       reg.status = 'onaylandi';
       this.notify();
 
-      console.log('approveRegistration triggered for ID:', id, 'supabaseConnected:', this.supabaseConnected);
       if (this.supabaseConnected && supabase) {
         try {
-          const dbRowWithPass = this.toDbRow(reg, true);
-          console.log('Upserting approved row to Supabase:', dbRowWithPass);
-          let { error } = await supabase
-            .from('registrations')
-            .upsert([dbRowWithPass], { onConflict: 'id' });
-
-          if (error && (error.code === '42703' || (error.message && error.message.includes('password')))) {
-            console.warn('Password column missing on Supabase table, retrying without password column...');
-            const retryRes = await supabase
-              .from('registrations')
-              .upsert([this.toDbRow(reg, false)], { onConflict: 'id' });
-            error = retryRes.error;
-          }
-
+          const dbRow = this.toDbRow(reg, true);
+          let { error } = await supabase.from('registrations').upsert([dbRow], { onConflict: 'id' });
           if (error) {
             console.error('Supabase approve error:', error.message);
-            this.lastSupabaseError = error.message;
-            this.notify();
             return { success: false, error: error.message };
-          } else {
-            console.log('Supabase approval saved successfully!');
-            this.lastSupabaseError = null;
           }
         } catch (err) {
-          console.error('Supabase update error:', err);
           return { success: false, error: err.message };
         }
       }
@@ -451,24 +653,15 @@ class AppStore {
       reg.status = 'reddedildi';
       this.notify();
 
-      console.log('rejectRegistration triggered for ID:', id);
       if (this.supabaseConnected && supabase) {
         try {
-          const dbRow = this.toDbRow(reg);
-          const { error } = await supabase
-            .from('registrations')
-            .upsert([dbRow], { onConflict: 'id' });
-
+          const dbRow = this.toDbRow(reg, true);
+          let { error } = await supabase.from('registrations').upsert([dbRow], { onConflict: 'id' });
           if (error) {
             console.error('Supabase reject error:', error.message);
-            this.lastSupabaseError = error.message;
-            this.notify();
             return { success: false, error: error.message };
-          } else {
-            this.lastSupabaseError = null;
           }
         } catch (err) {
-          console.error('Supabase update error:', err);
           return { success: false, error: err.message };
         }
       }
@@ -482,19 +675,12 @@ class AppStore {
 
     if (this.supabaseConnected && supabase) {
       try {
-        const { error } = await supabase
-          .from('registrations')
-          .delete()
-          .eq('id', id);
-
+        const { error } = await supabase.from('registrations').delete().eq('id', id);
         if (error) {
           console.error('Supabase delete error:', error.message);
-          this.lastSupabaseError = error.message;
-          this.notify();
           return { success: false, error: error.message };
         }
       } catch (err) {
-        console.error('Supabase delete error:', err);
         return { success: false, error: err.message };
       }
     }
@@ -511,9 +697,72 @@ class AppStore {
       .reduce((sum, r) => sum + (r.planPrice || 899), 0);
   }
 
-  // --- Live Orders Management ---
-  saveOrders() {
-    localStorage.setItem('buyurabi_restaurant_orders', JSON.stringify(this.orders));
+  // ========================================================
+  // 3. LIVE ORDERS MANAGEMENT & SUPABASE
+  // ========================================================
+  toOrderDbRow(order) {
+    return {
+      id: String(order.id),
+      business_id: String(order.businessId || ''),
+      business_name: order.businessName || '',
+      table_name: order.tableName || '',
+      customer_name: order.customerName || '',
+      items: order.items || [],
+      total_price: Number(order.totalPrice || 0),
+      status: order.status || 'yeni',
+      payment_method: order.paymentMethod || 'Masada Kart / Nakit',
+      cancel_reason: order.cancelReason || null,
+      created_at: order.createdAt || 'Az önce',
+      timestamp: Number(order.timestamp || Date.now())
+    };
+  }
+
+  fromOrderDbRow(item) {
+    return {
+      id: item.id,
+      businessId: item.business_id,
+      businessName: item.business_name,
+      tableName: item.table_name,
+      customerName: item.customer_name,
+      items: Array.isArray(item.items) ? item.items : [],
+      totalPrice: Number(item.total_price || 0),
+      status: item.status || 'yeni',
+      paymentMethod: item.payment_method || 'Masada Kart / Nakit',
+      cancelReason: item.cancel_reason || '',
+      createdAt: item.created_at || 'Az önce',
+      timestamp: Number(item.timestamp || Date.now())
+    };
+  }
+
+  async fetchOrders() {
+    if (!supabase) return;
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.warn('Supabase orders fetch error:', error.message);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        this.orders = data.map(item => this.fromOrderDbRow(item));
+        this.notify();
+      } else {
+        // Seed default orders to Supabase
+        const dbRows = this.orders.map(o => this.toOrderDbRow(o));
+        const { error: seedError } = await supabase.from('orders').upsert(dbRows);
+        if (seedError) {
+          console.warn('Supabase orders seed error:', seedError.message);
+        } else {
+          console.log('Supabase orders seeded successfully.');
+        }
+      }
+    } catch (err) {
+      console.warn('fetchOrders error:', err);
+    }
   }
 
   getOrders(businessId = 'all') {
@@ -525,51 +774,81 @@ class AppStore {
     return this.orders.filter(o => o.businessId === businessId);
   }
 
-  updateOrderStatus(orderId, newStatus) {
+  async updateOrderStatus(orderId, newStatus) {
     const order = this.orders.find(o => o.id === orderId);
     if (order) {
       order.status = newStatus;
-      this.saveOrders();
       this.notify();
+
+      if (this.supabaseConnected && supabase) {
+        try {
+          const { error } = await supabase
+            .from('orders')
+            .update({ status: newStatus })
+            .eq('id', orderId);
+          if (error) {
+            console.error('Supabase updateOrderStatus error:', error.message);
+          }
+        } catch (err) {
+          console.error('updateOrderStatus error:', err);
+        }
+      }
       return true;
     }
     return false;
   }
 
-  cancelOrder(orderId, reason = 'Destek ekibi tarafından iptal edildi') {
+  async cancelOrder(orderId, reason = 'Destek ekibi tarafından iptal edildi') {
     const order = this.orders.find(o => o.id === orderId);
     if (order) {
       order.status = 'iptal';
       order.cancelReason = reason;
-      this.saveOrders();
       this.notify();
+
+      if (this.supabaseConnected && supabase) {
+        try {
+          await supabase
+            .from('orders')
+            .update({ status: 'iptal', cancel_reason: reason })
+            .eq('id', orderId);
+        } catch (err) {
+          console.error('cancelOrder error:', err);
+        }
+      }
       return true;
     }
     return false;
   }
 
-  deleteOrder(orderId) {
+  async deleteOrder(orderId) {
     this.orders = this.orders.filter(o => o.id !== orderId);
-    this.saveOrders();
     this.notify();
+
+    if (this.supabaseConnected && supabase) {
+      try {
+        await supabase.from('orders').delete().eq('id', orderId);
+      } catch (err) {
+        console.error('deleteOrder error:', err);
+      }
+    }
     return true;
   }
 
-  clearCompletedOrders() {
+  async clearCompletedOrders() {
     this.orders = this.orders.filter(o => o.status !== 'tamamlandi' && o.status !== 'iptal');
-    this.saveOrders();
     this.notify();
+
+    if (this.supabaseConnected && supabase) {
+      try {
+        await supabase.from('orders').delete().in('status', ['tamamlandi', 'iptal']);
+      } catch (err) {
+        console.error('clearCompletedOrders error:', err);
+      }
+    }
     return true;
   }
 
-  deleteSupportNote(noteId) {
-    this.supportNotes = this.supportNotes.filter(n => n.id !== noteId);
-    this.saveSupportNotes();
-    this.notify();
-    return true;
-  }
-
-  createTestOrderForBusiness(businessId) {
+  async createTestOrderForBusiness(businessId) {
     const business = this.registrations.find(r => r.id === businessId) || {
       id: businessId,
       businessName: 'Test Restoranı'
@@ -607,15 +886,77 @@ class AppStore {
     };
 
     this.orders.unshift(testOrder);
-    this.saveOrders();
     this.playChime();
     this.notify();
+
+    if (this.supabaseConnected && supabase) {
+      try {
+        const dbRow = this.toOrderDbRow(testOrder);
+        await supabase.from('orders').upsert([dbRow], { onConflict: 'id' });
+      } catch (err) {
+        console.error('createTestOrderForBusiness Supabase error:', err);
+      }
+    }
+
     return testOrder;
   }
 
-  // --- Live Support & Call Logs Management ---
-  saveSupportNotes() {
-    localStorage.setItem('buyurabi_support_call_notes', JSON.stringify(this.supportNotes));
+  // ========================================================
+  // 4. LIVE SUPPORT NOTES & SUPABASE
+  // ========================================================
+  toNoteDbRow(note) {
+    return {
+      id: String(note.id),
+      business_id: String(note.businessId || ''),
+      agent: note.agent || 'Destek Temsilcisi',
+      category: note.category || 'Genel Danışma',
+      text: note.text || '',
+      created_at: note.createdAt || 'Az önce',
+      timestamp: Number(note.timestamp || Date.now())
+    };
+  }
+
+  fromNoteDbRow(item) {
+    return {
+      id: item.id,
+      businessId: item.business_id,
+      agent: item.agent || 'Destek Temsilcisi',
+      category: item.category || 'Genel Danışma',
+      text: item.text || '',
+      createdAt: item.created_at || 'Az önce',
+      timestamp: Number(item.timestamp || Date.now())
+    };
+  }
+
+  async fetchSupportNotes() {
+    if (!supabase) return;
+    try {
+      const { data, error } = await supabase
+        .from('support_notes')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.warn('Supabase support_notes fetch error:', error.message);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        this.supportNotes = data.map(item => this.fromNoteDbRow(item));
+        this.notify();
+      } else {
+        // Seed default support notes to Supabase
+        const dbRows = this.supportNotes.map(n => this.toNoteDbRow(n));
+        const { error: seedError } = await supabase.from('support_notes').upsert(dbRows);
+        if (seedError) {
+          console.warn('Supabase support_notes seed error:', seedError.message);
+        } else {
+          console.log('Supabase support_notes seeded successfully.');
+        }
+      }
+    } catch (err) {
+      console.warn('fetchSupportNotes error:', err);
+    }
   }
 
   getSupportNotes(businessId = 'all') {
@@ -623,7 +964,7 @@ class AppStore {
     return this.supportNotes.filter(n => n.businessId === businessId);
   }
 
-  addSupportNote(businessId, { category, text, agent = 'Destek Temsilcisi' }) {
+  async addSupportNote(businessId, { category, text, agent = 'Destek Temsilcisi' }) {
     const newNote = {
       id: 'NOTE-' + Date.now(),
       businessId,
@@ -635,9 +976,32 @@ class AppStore {
     };
 
     this.supportNotes.unshift(newNote);
-    this.saveSupportNotes();
     this.notify();
+
+    if (this.supabaseConnected && supabase) {
+      try {
+        const dbRow = this.toNoteDbRow(newNote);
+        await supabase.from('support_notes').upsert([dbRow], { onConflict: 'id' });
+      } catch (err) {
+        console.error('addSupportNote Supabase error:', err);
+      }
+    }
+
     return newNote;
+  }
+
+  async deleteSupportNote(noteId) {
+    this.supportNotes = this.supportNotes.filter(n => n.id !== noteId);
+    this.notify();
+
+    if (this.supabaseConnected && supabase) {
+      try {
+        await supabase.from('support_notes').delete().eq('id', noteId);
+      } catch (err) {
+        console.error('deleteSupportNote Supabase error:', err);
+      }
+    }
+    return true;
   }
 
   // --- Diagnostics Helper ---
@@ -651,7 +1015,7 @@ class AppStore {
 
     return {
       business,
-      qrUrl: `https://buyurabi.com/menu/${business.id}`,
+      qrUrl: `https://buyurabi.com/kasa/${business.id}`,
       systemStatus: business.status === 'onaylandi' ? '🟢 Aktif & Siparişe Açık' : '⏳ Onay Bekliyor',
       latency: Math.floor(18 + Math.random() * 14) + ' ms',
       kitchenStatus: '🟢 Çevrimiçi (Sinyal: Mükemmel)',
@@ -662,7 +1026,7 @@ class AppStore {
     };
   }
 
-  // Pleasant Web Audio Two-tone chime for incoming orders & tests
+  // Audio chime for orders
   playChime() {
     if (!this.soundEnabled) return;
     try {
@@ -683,7 +1047,6 @@ class AppStore {
         osc.stop(ctx.currentTime + time + duration);
       };
 
-      // Two-tone chime: 587.33 Hz (D5) -> 880 Hz (A5)
       playTone(587.33, 0, 0.25);
       playTone(880.00, 0.15, 0.4);
     } catch (e) {
