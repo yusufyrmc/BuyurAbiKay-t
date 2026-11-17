@@ -106,95 +106,121 @@ export function renderRegisterPage(container) {
             </div>
           ` : ''}
 
-          <!-- STEP 0: YETKİLİ PROFİLİ OLUŞTUR / GİRİŞ YAP -->
+          <!-- STEP 0: YETKİLİ PROFİLİ OLUŞTUR / GİRİŞ YAP (KURUMSAL PANEL) -->
           ${currentStep === 0 ? `
-            <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
-              <div style="width:40px; height:40px; background:var(--color-primary-light); color:var(--color-primary); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center;">
-                <i data-lucide="user-plus" style="width:24px; height:24px;"></i>
+            <div class="corporate-auth-header">
+              <div class="corporate-badge-tag">
+                <i data-lucide="shield-check" style="width:14px; height:14px;"></i>
+                <span>BuyurAbi Kurumsal Yetkili Portalı</span>
               </div>
-              <h2 class="wizard-title" style="margin:0;">Yetkili Profilinizi Oluşturun</h2>
+              <h2 class="wizard-title" style="margin:0 0 0.4rem 0;">Yetkili Hesabı & Güvenli Giriş</h2>
+              <p class="wizard-subtitle" style="margin-bottom:1.4rem;">Restoranınızı sisteme kaydetmek, sipariş ve kasa adisyonlarını yönetmek için yetkili profilinizi oluşturun veya hesabınıza giriş yapın.</p>
             </div>
-            <p class="wizard-subtitle">İşletmenizi kaydetmeden önce sistemi yönetecek yetkili profilinizi oluşturun. Profilinizi kaydettikten sonra işletme bilgilerinize geçeceksiniz.</p>
 
             <!-- PROFILE MODE TABS (YENİ PROFİL / MEVCUT HESABA GİRİŞ) -->
-            <div class="profile-mode-tabs">
+            <div class="profile-mode-tabs corporate-tabs">
               <button class="profile-tab-btn ${profileMode === 'create' ? 'active' : ''}" id="tab-profile-create">
-                <i data-lucide="user-plus" style="width:16px; height:16px;"></i> Yeni Profil Oluştur
+                <i data-lucide="user-plus" style="width:16px; height:16px;"></i> Yeni Yetkili Profili Aç
               </button>
               <button class="profile-tab-btn ${profileMode === 'login' ? 'active' : ''}" id="tab-profile-login">
-                <i data-lucide="log-in" style="width:16px; height:16px;"></i> Mevcut Hesaba Giriş Yap
+                <i data-lucide="log-in" style="width:16px; height:16px;"></i> Kayıtlı Hesaba Giriş Yap
               </button>
             </div>
 
             ${profileMode === 'create' ? `
-              <div class="form-group-row">
-                <div class="form-field">
-                  <label class="form-label"><i data-lucide="user"></i> Yetkili Ad Soyad</label>
-                  <input type="text" id="reg-profile-fullname" class="form-input" placeholder="Örn: Ahmet Yılmaz" value="${profileData.fullName}">
+              <div class="corporate-form-container">
+                <div class="form-group-row">
+                  <div class="form-field">
+                    <label class="form-label"><i data-lucide="user"></i> Yetkili Ad Soyad *</label>
+                    <input type="text" id="reg-profile-fullname" class="form-input corporate-input" placeholder="Örn: Mehmet Ali Öztürk" value="${profileData.fullName}">
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label"><i data-lucide="mail"></i> Kurumsal E-posta Adresi *</label>
+                    <input type="email" id="reg-profile-email" class="form-input corporate-input" placeholder="yetkili@restoran.com" value="${profileData.email}">
+                  </div>
                 </div>
 
-                <div class="form-field">
-                  <label class="form-label"><i data-lucide="mail"></i> E-posta Adresi</label>
-                  <input type="email" id="reg-profile-email" class="form-input" placeholder="ahmet@gmail.com" value="${profileData.email}">
+                <div class="form-group-row">
+                  <div class="form-field">
+                    <label class="form-label"><i data-lucide="phone"></i> İletişim & Onay Cep Telefonu *</label>
+                    <input type="tel" id="reg-profile-phone" class="form-input corporate-input" placeholder="0555 123 45 67" value="${profileData.phone}">
+                  </div>
+
+                  <div class="form-field">
+                    <label class="form-label"><i data-lucide="briefcase"></i> İşletmedeki Ünvan / Rol *</label>
+                    <select id="reg-profile-role" class="form-input corporate-input">
+                      <option value="İşletme Sahibi" ${profileData.role === 'İşletme Sahibi' ? 'selected' : ''}>👑 İşletme Sahibi / Kurucu</option>
+                      <option value="Restoran Müdürü" ${profileData.role === 'Restoran Müdürü' ? 'selected' : ''}>👔 Restoran Genel Müdürü</option>
+                      <option value="İş Ortağı" ${profileData.role === 'İş Ortağı' ? 'selected' : ''}>🤝 İş Ortağı / Hissedar</option>
+                      <option value="Operasyon Yöneticisi" ${profileData.role === 'Operasyon Yöneticisi' ? 'selected' : ''}>⭐ Kasa & Operasyon Sorumlusu</option>
+                    </select>
+                  </div>
                 </div>
+
+                <div class="form-field" style="margin-bottom:1.4rem;">
+                  <label class="form-label"><i data-lucide="lock"></i> Profil Şifresi Belirleyin *</label>
+                  <input type="password" id="reg-profile-password" class="form-input corporate-input" placeholder="En az 6 karakterli kurumsal şifre" value="${profileData.password}">
+                  
+                  <div class="password-meter" style="margin-top:0.6rem;">
+                    <div id="profile-password-meter-fill" class="password-meter-fill ${calculatePasswordStrength(profileData.password).class}"></div>
+                  </div>
+                  <div id="profile-password-strength-text" style="font-size:0.8rem; font-weight:700; margin-top:4px; text-align:right; color:var(--color-text-muted);">
+                    ${profileData.password ? `Şifre Gücü: ${calculatePasswordStrength(profileData.password).text}` : ''}
+                  </div>
+                </div>
+
+                <!-- TRUST BADGES -->
+                <div class="corporate-trust-banner">
+                  <div class="trust-badge-item">
+                    <i data-lucide="shield-check" style="color:var(--color-accent-green);"></i>
+                    <span>256-Bit SSL Şifreleme</span>
+                  </div>
+                  <div class="trust-badge-item">
+                    <i data-lucide="database" style="color:var(--color-accent-cyan);"></i>
+                    <span>Supabase Bulut Güvencesi</span>
+                  </div>
+                  <div class="trust-badge-item">
+                    <i data-lucide="file-check-2" style="color:var(--color-primary);"></i>
+                    <span>KVKK Uyumlu</span>
+                  </div>
+                </div>
+
+                <div style="background:rgba(255,255,255,0.03); padding:0.9rem 1.1rem; border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.07); margin-bottom:1.5rem;">
+                  <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.83rem; color:var(--color-text-muted); cursor:pointer;">
+                    <input type="checkbox" id="profile-terms" checked style="accent-color:var(--color-primary); width:18px; height:18px;">
+                    <span><strong style="color:#fff;">BuyurAbi Kullanıcı Sözleşmesi ve Hizmet Şartlarını</strong> okudum, onaylıyorum.</span>
+                  </label>
+                </div>
+
+                <button class="btn-primary-hero" id="btn-save-profile-next" style="width:100%; justify-content:center; padding:1.1rem;">
+                  <i data-lucide="user-check"></i> Yetkili Profilini Kaydet & İşletme Adımına Geç <i data-lucide="arrow-right"></i>
+                </button>
               </div>
-
-              <div class="form-group-row">
-                <div class="form-field">
-                  <label class="form-label"><i data-lucide="phone"></i> Cep Telefonu Numarası</label>
-                  <input type="tel" id="reg-profile-phone" class="form-input" placeholder="0555 123 45 67" value="${profileData.phone}">
-                </div>
-
-                <div class="form-field">
-                  <label class="form-label"><i data-lucide="briefcase"></i> İşletmedeki Rolünüz / Ünvanınız</label>
-                  <select id="reg-profile-role" class="form-input">
-                    <option value="İşletme Sahibi" ${profileData.role === 'İşletme Sahibi' ? 'selected' : ''}>👑 İşletme Sahibi</option>
-                    <option value="Restoran Müdürü" ${profileData.role === 'Restoran Müdürü' ? 'selected' : ''}>👔 Restoran Müdürü</option>
-                    <option value="İş Ortağı" ${profileData.role === 'İş Ortağı' ? 'selected' : ''}>🤝 İş Ortağı</option>
-                    <option value="Genel Yönetici" ${profileData.role === 'Genel Yönetici' ? 'selected' : ''}>⭐ Genel Yönetici</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-field" style="margin-bottom:1.5rem;">
-                <label class="form-label"><i data-lucide="lock"></i> Profil Şifresi Belirleyin</label>
-                <input type="password" id="reg-profile-password" class="form-input" placeholder="En az 6 karakterli güvenli bir şifre" value="${profileData.password}">
-                
-                <div class="password-meter" style="margin-top:0.6rem;">
-                  <div id="profile-password-meter-fill" class="password-meter-fill ${calculatePasswordStrength(profileData.password).class}"></div>
-                </div>
-                <div id="profile-password-strength-text" style="font-size:0.8rem; font-weight:700; margin-top:4px; text-align:right; color:var(--color-text-muted);">
-                  ${profileData.password ? `Şifre Gücü: ${calculatePasswordStrength(profileData.password).text}` : ''}
-                </div>
-              </div>
-
-              <div style="background:rgba(255,255,255,0.04); padding:1rem; border-radius:var(--radius-md); border:var(--border-glass); margin-bottom:1.5rem;">
-                <label style="display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; color:var(--color-text-muted); cursor:pointer;">
-                  <input type="checkbox" id="profile-terms" checked style="accent-color:var(--color-primary); width:18px; height:18px;">
-                  <span><strong style="color:#fff;">BuyurAbi Kullanıcı ve Hizmet Koşullarını</strong> okudum ve kabul ediyorum.</span>
-                </label>
-              </div>
-
-              <button class="btn-primary-hero" id="btn-save-profile-next" style="width:100%; justify-content:center;">
-                Profili Kaydet & İşletme Kaydına Geç <i data-lucide="arrow-right"></i>
-              </button>
             ` : `
-              <!-- LOGIN WITH EXISTING PROFILE -->
-              <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:1.5rem; border-radius:var(--radius-md); margin-bottom:1.5rem;">
+              <!-- LOGIN WITH EXISTING PROFILE (CORPORATE) -->
+              <div class="corporate-form-container">
+                <div style="background:rgba(0,229,255,0.06); border:1px solid rgba(0,229,255,0.25); border-radius:var(--radius-md); padding:0.85rem 1.1rem; margin-bottom:1.4rem; display:flex; align-items:center; gap:0.75rem;">
+                  <i data-lucide="key-round" style="color:var(--color-accent-cyan); width:20px; height:20px; flex-shrink:0;"></i>
+                  <span style="font-size:0.82rem; color:var(--color-text-main);">
+                    Daha önce kayıt olduysanız e-posta veya cep telefonunuzla giriş yaparak işletme başvurularınızı yönetebilirsiniz.
+                  </span>
+                </div>
+
                 <div class="form-field" style="margin-bottom:1.2rem;">
-                  <label class="form-label"><i data-lucide="mail"></i> E-posta veya Cep Telefonu</label>
-                  <input type="text" id="login-profile-id" class="form-input" placeholder="Kayıtlı e-posta veya telefonunuz" value="${profileData.email || profileData.phone}">
+                  <label class="form-label"><i data-lucide="mail"></i> Kayıtlı E-posta veya Cep Telefonu</label>
+                  <input type="text" id="login-profile-id" class="form-input corporate-input" placeholder="ahmet@gmail.com veya 0555 123 45 67" value="${profileData.email || profileData.phone}">
                 </div>
 
-                <div class="form-field" style="margin-bottom:1rem;">
-                  <label class="form-label"><i data-lucide="lock"></i> Şifreniz</label>
-                  <input type="password" id="login-profile-pass" class="form-input" placeholder="Profil şifreniz">
+                <div class="form-field" style="margin-bottom:1.5rem;">
+                  <label class="form-label"><i data-lucide="lock"></i> Profil Şifreniz</label>
+                  <input type="password" id="login-profile-pass" class="form-input corporate-input" placeholder="Profil şifrenizi girin">
                 </div>
+
+                <button class="btn-primary-hero" id="btn-login-profile-next" style="width:100%; justify-content:center; padding:1.1rem;">
+                  <i data-lucide="log-in"></i> Güvenli Giriş Yap & İşletme Kaydına Devam Et <i data-lucide="arrow-right"></i>
+                </button>
               </div>
-
-              <button class="btn-primary-hero" id="btn-login-profile-next" style="width:100%; justify-content:center;">
-                Giriş Yap & İşletme Kaydına Devam Et <i data-lucide="arrow-right"></i>
-              </button>
             `}
           ` : ''}
 
@@ -355,110 +381,143 @@ export function renderRegisterPage(container) {
             </div>
           ` : ''}
 
-          <!-- STEP 5: SUCCESS EKRANI & GİRİŞ BİLGİLERİ -->
+          <!-- STEP 5: SUCCESS EKRANI & GİRİŞ BİLGİLERİ (ADMİN ONAY KONTROLLÜ) -->
           ${currentStep === 5 ? `
-            <div style="text-align:center; padding:0.5rem 0;">
-              <div style="width:74px; height:74px; background:rgba(0,230,118,0.15); color:var(--color-accent-green); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; border:2px solid var(--color-accent-green); box-shadow:0 0 35px rgba(0,230,118,0.35);">
-                <i data-lucide="check-check" style="width:42px; height:42px;"></i>
-              </div>
+            ${(() => {
+              const activeReg = registeredBusiness || store.getLastRegisteredBusiness() || {};
+              const isApproved = activeReg.status === 'onaylandi';
+              const isRejected = activeReg.status === 'reddedildi';
+              const isPending = !isApproved && !isRejected;
 
-              <h2 class="wizard-title" style="color:var(--color-accent-green); font-size:1.8rem; margin-bottom:0.3rem;">Dijital Adisyon & Kasa Kaydınız Oluşturuldu! 🎉</h2>
-              <p class="wizard-subtitle" style="max-width:560px; margin:0 auto 1.2rem auto; font-size:0.95rem;">
-                <strong>${formData.businessName || registeredBusiness?.businessName || 'İşletmeniz'}</strong> için dijital adisyon sistemi kasa kodu ve şifreniz tanımlanmıştır.
-              </p>
-
-              <!-- PERSISTENT NOTICE BANNER -->
-              <div style="background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.35); border-radius:var(--radius-md); padding:0.85rem 1.2rem; margin-bottom:1.5rem; text-align:left; display:flex; align-items:center; gap:0.85rem;">
-                <i data-lucide="shield-check" style="width:28px; height:28px; color:var(--color-accent-green); flex-shrink:0;"></i>
-                <div style="font-size:0.86rem; color:var(--color-text-main); line-height:1.4;">
-                  <strong style="color:var(--color-accent-green); display:block; margin-bottom:2px;">📌 Dijital Adisyon Bilgi Kartınız Sabitlenmiştir</strong>
-                  Bu işletme kodu ve şifre ile kasanızı, salon masalarınızı, garson telefon girişlerini ve mutfak sıcak ekranınızı yönetebilirsiniz.
-                </div>
-              </div>
-
-              <!-- CREDENTIALS DISPLAY BOX -->
-              <div style="background:rgba(0,0,0,0.55); border:1px solid rgba(255,107,0,0.45); box-shadow:0 0 30px rgba(255,107,0,0.15); border-radius:var(--radius-lg); padding:1.5rem 1.8rem; margin-bottom:1.5rem; text-align:left; position:relative; overflow:hidden;">
-                <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:var(--color-primary-gradient);"></div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:0.75rem;">
-                  <div>
-                    <span style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--color-text-muted); font-weight:800;">DİJİTAL ADİSYON GİRİŞ KARTI</span>
-                    <h4 style="font-size:1.2rem; color:#fff; margin:2px 0 0 0; font-weight:800;">${formData.businessName || registeredBusiness?.businessName}</h4>
+              return `
+                <div style="text-align:center; padding:0.5rem 0;">
+                  <div style="width:74px; height:74px; background:${isApproved ? 'rgba(0,230,118,0.15)' : 'rgba(245,158,11,0.15)'}; color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; border:2px solid ${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; box-shadow:0 0 35px ${isApproved ? 'rgba(0,230,118,0.35)' : 'rgba(245,158,11,0.35)'};">
+                    <i data-lucide="${isApproved ? 'check-check' : 'clock'}" style="width:42px; height:42px;"></i>
                   </div>
-                  <span style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-size:0.75rem; font-weight:800; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
-                    ● AKTİF LİSANS ALINDI
-                  </span>
-                </div>
 
-                <!-- 1. FIELD: ISLETME KODU (ID) -->
-                <div style="margin-bottom:1.2rem;">
-                  <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
-                    <i data-lucide="hash" style="width:15px; height:15px; vertical-align:middle; color:var(--color-primary);"></i> İşletme Kodu (ID) - Kasa, Masa ve Garson Tanımlama Kodu:
-                  </label>
-                  <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,107,0,0.5); border-radius:var(--radius-md); padding:0.75rem 1.2rem;">
-                    <span id="display-business-id" style="font-family:monospace; font-size:1.6rem; font-weight:900; color:var(--color-primary); letter-spacing:2px; flex:1;">
-                      ${registeredBusiness?.id || 'BYR-0000'}
-                    </span>
-                    <button id="btn-copy-id" class="pill-btn" style="background:rgba(255,107,0,0.2); border:1px solid rgba(255,107,0,0.5); color:var(--color-primary); font-weight:800; padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
-                      <i data-lucide="copy" style="width:15px; height:15px;"></i> <span id="copy-id-text">Kopyala</span>
+                  <h2 class="wizard-title" style="color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; font-size:1.8rem; margin-bottom:0.3rem;">
+                    ${isApproved ? 'Dijital Adisyon Lisansınız Onaylandı! 🎉' : 'İşletme Başvurunuz Alındı! ⏳'}
+                  </h2>
+                  <p class="wizard-subtitle" style="max-width:580px; margin:0 auto 1.2rem auto; font-size:0.95rem;">
+                    ${isApproved 
+                      ? `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> için yetkili onayı tamamlanmış ve kasa lisans kodunuz aktif edilmiştir.` 
+                      : `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> için başvurunuz alındı. <strong>Admin onayından sonra işletme kodunuz aktif olacaktır.</strong> Durumunuzu sağ üstteki <strong>"Başvurularım"</strong> sekmesinden takip edebilirsiniz.`
+                    }
+                  </p>
+
+                  <!-- PERSISTENT NOTICE BANNER -->
+                  <div style="background:${isApproved ? 'rgba(0,230,118,0.1)' : 'rgba(245,158,11,0.1)'}; border:1px solid ${isApproved ? 'rgba(0,230,118,0.35)' : 'rgba(245,158,11,0.35)'}; border-radius:var(--radius-md); padding:0.85rem 1.2rem; margin-bottom:1.5rem; text-align:left; display:flex; align-items:center; gap:0.85rem;">
+                    <i data-lucide="${isApproved ? 'shield-check' : 'alert-circle'}" style="width:28px; height:28px; color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; flex-shrink:0;"></i>
+                    <div style="font-size:0.86rem; color:var(--color-text-main); line-height:1.4;">
+                      ${isApproved 
+                        ? `<strong style="color:var(--color-accent-green); display:block; margin-bottom:2px;">📌 Lisansınız Onaylandı ve Kullanıma Hazır</strong>Bu işletme kodu ve şifre ile kasanızı, masalarınızı ve garson girişlerinizi hemen başlatabilirsiniz.` 
+                        : `<strong style="color:#F59E0B; display:block; margin-bottom:2px;">📌 Yetkili Onayı Bekleniyor (Kod Kilitli)</strong>Sistem güvenliği için işletme lisans kodları yönetici onayından sonra açılmaktadır. Onay verildiğinde kodunuz otomatik olarak aktifleşecektir.`
+                      }
+                    </div>
+                  </div>
+
+                  <!-- CREDENTIALS DISPLAY BOX -->
+                  <div style="background:rgba(0,0,0,0.55); border:1px solid ${isApproved ? 'rgba(0,230,118,0.45)' : 'rgba(245,158,11,0.45)'}; box-shadow:0 0 30px ${isApproved ? 'rgba(0,230,118,0.15)' : 'rgba(245,158,11,0.15)'}; border-radius:var(--radius-lg); padding:1.5rem 1.8rem; margin-bottom:1.5rem; text-align:left; position:relative; overflow:hidden;">
+                    <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:${isApproved ? 'var(--color-accent-green)' : 'linear-gradient(90deg, #F59E0B, #FF6B00)'};"></div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+                      <div>
+                        <span style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--color-text-muted); font-weight:800;">DİJİTAL ADİSYON İŞLETME KARTI</span>
+                        <h4 style="font-size:1.2rem; color:#fff; margin:2px 0 0 0; font-weight:800;">${activeReg.businessName || formData.businessName}</h4>
+                      </div>
+                      ${isApproved ? `
+                        <span style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-size:0.75rem; font-weight:800; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
+                          ● AKTİF LİSANS ALINDI
+                        </span>
+                      ` : `
+                        <span style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#F59E0B; font-size:0.75rem; font-weight:800; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
+                          ⏳ YÖNETİCİ ONAYI BEKLENİYOR
+                        </span>
+                      `}
+                    </div>
+
+                    <!-- 1. FIELD: ISLETME KODU (ID) - ADMIN ONAYLAMADAN VERİLMEZ -->
+                    <div style="margin-bottom:1.2rem;">
+                      <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
+                        <i data-lucide="${isApproved ? 'hash' : 'lock'}" style="width:15px; height:15px; vertical-align:middle; color:${isApproved ? 'var(--color-primary)' : '#F59E0B'};"></i> 
+                        İşletme Kodu (ID) - Kasa & Garson Giriş Kodu:
+                      </label>
+                      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.06); border:1.5px solid ${isApproved ? 'rgba(255,107,0,0.5)' : 'rgba(245,158,11,0.4)'}; border-radius:var(--radius-md); padding:0.75rem 1.2rem;">
+                        <span id="display-business-id" style="font-family:monospace; font-size:${isApproved ? '1.6rem' : '1.1rem'}; font-weight:900; color:${isApproved ? 'var(--color-primary)' : '#F59E0B'}; letter-spacing:1px; flex:1;">
+                          ${isApproved ? (activeReg.id || 'BYR-0000') : '🔒 Onay Bekleniyor (Admin Onaylayınca Açılacak)'}
+                        </span>
+                        ${isApproved ? `
+                          <button id="btn-copy-id" class="pill-btn" style="background:rgba(255,107,0,0.2); border:1px solid rgba(255,107,0,0.5); color:var(--color-primary); font-weight:800; padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
+                            <i data-lucide="copy" style="width:15px; height:15px;"></i> <span id="copy-id-text">Kopyala</span>
+                          </button>
+                        ` : `
+                          <button id="btn-check-my-apps-trigger" class="pill-btn" style="background:rgba(245,158,11,0.2); border:1px solid rgba(245,158,11,0.5); color:#F59E0B; font-weight:800; padding:0.5rem 1rem; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
+                            <i data-lucide="clock" style="width:14px; height:14px;"></i> Durumu Gör
+                          </button>
+                        `}
+                      </div>
+                    </div>
+
+                    <!-- 2. FIELD: SIFRE -->
+                    <div style="margin-bottom:1.2rem;">
+                      <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
+                        <i data-lucide="lock" style="width:15px; height:15px; vertical-align:middle; color:var(--color-accent-green);"></i> Kasa & Sistem Giriş Şifreniz:
+                      </label>
+                      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:var(--radius-md); padding:0.65rem 1.2rem;">
+                        <span id="display-password" style="font-family:monospace; font-size:1.3rem; font-weight:800; color:#fff; letter-spacing:2px; flex:1;">
+                          ${showPasswordInStep5 ? (formData.password || activeReg.password || '••••••') : '•'.repeat(Math.max((formData.password || activeReg.password || '123456').length, 6))}
+                        </span>
+                        <button id="btn-toggle-show-pass" class="pill-btn" style="background:rgba(255,255,255,0.08); border:var(--border-glass); color:var(--color-text-muted); padding:0.5rem 0.8rem; font-size:0.82rem; cursor:pointer; border-radius:var(--radius-sm);" title="${showPasswordInStep5 ? 'Gizle' : 'Göster'}">
+                          <i data-lucide="${showPasswordInStep5 ? 'eye-off' : 'eye'}" style="width:15px; height:15px;"></i>
+                        </button>
+                        ${isApproved ? `
+                          <button id="btn-copy-pass" class="pill-btn" style="background:rgba(0,230,118,0.18); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-weight:800; padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
+                            <i data-lucide="copy" style="width:15px; height:15px;"></i> <span id="copy-pass-text">Kopyala</span>
+                          </button>
+                        ` : ''}
+                      </div>
+                    </div>
+
+                    <!-- 3. DETAILS SUMMARY TABLE WITH PROFILE INFO -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:var(--radius-md); padding:0.85rem 1.1rem; margin-bottom:1.2rem; font-size:0.83rem;">
+                      <div><span style="color:var(--color-text-muted);">Yetkili Ad Soyad:</span> <strong style="color:#fff; display:block;">${activeProfile?.fullName || activeReg.fullName || 'Belirtilmedi'}</strong></div>
+                      <div><span style="color:var(--color-text-muted);">Yetkili Rolü:</span> <strong style="color:var(--color-primary); display:block;">${activeProfile?.role || 'İşletme Sahibi'}</strong></div>
+                      <div><span style="color:var(--color-text-muted);">E-posta Adresi:</span> <strong style="color:#fff; display:block;">${activeProfile?.email || 'Belirtilmedi'}</strong></div>
+                      <div><span style="color:var(--color-text-muted);">Telefon Numarası:</span> <strong style="color:#fff; display:block;">${activeProfile?.phone || activeReg.phone || 'Belirtilmedi'}</strong></div>
+                      <div><span style="color:var(--color-text-muted);">İşletme Türü:</span> <strong style="color:#fff; display:block;">${activeReg.businessType || formData.businessType || 'Restoran'}</strong></div>
+                      <div><span style="color:var(--color-text-muted);">Masa Kapasite Planı:</span> <strong style="color:var(--color-accent-green); display:block;">${activeReg.plan || formData.plan || 'Profesyonel'}</strong></div>
+                      <div style="grid-column:1 / -1;"><span style="color:var(--color-text-muted);">Onay Durumu:</span> <strong style="color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; display:block;">${isApproved ? '✅ Onaylandı (Kod Kullanıma Açık)' : '⏳ İncelemede (Yönetici Onayından Sonra Kod Açılacaktır)'}</strong></div>
+                    </div>
+
+                    <!-- ACTION BUTTONS ROW -->
+                    <div style="display:grid; grid-template-columns:${isApproved ? '1fr 1fr' : '1fr'}; gap:0.75rem;">
+                      <button id="btn-view-applications-trigger" class="pill-btn" style="justify-content:center; background:rgba(255,107,0,0.15); border:1px solid var(--color-primary); color:#fff; padding:0.75rem; border-radius:var(--radius-md); font-weight:700; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                        <i data-lucide="clipboard-list" style="width:16px; height:16px; color:var(--color-primary);"></i>
+                        <span>Başvurularım Ekranında Takip Et</span>
+                      </button>
+
+                      ${isApproved ? `
+                        <button id="btn-download-txt" class="pill-btn" style="justify-content:center; background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.3); color:var(--color-accent-cyan); padding:0.75rem; border-radius:var(--radius-md); font-weight:700; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                          <i data-lucide="download" style="width:16px; height:16px;"></i>
+                          <span>Bilgi Dosyasını İndir (.txt)</span>
+                        </button>
+                      ` : ''}
+                    </div>
+                  </div>
+
+                  <!-- BOTTOM NAVIGATION & ACTIONS -->
+                  <div style="display:flex; gap:0.85rem; justify-content:center; flex-wrap:wrap;">
+                    <button class="btn-primary-hero" id="btn-finish-go-home" style="flex:1; min-width:200px; justify-content:center;">
+                      <i data-lucide="home"></i> Tanıtım Sayfasına Git
+                    </button>
+
+                    <button class="btn-secondary-hero" id="btn-new-registration" style="flex:1; min-width:200px; justify-content:center; border-color:rgba(255,255,255,0.15);">
+                      <i data-lucide="plus-circle"></i> Yeni İşletme Kaydı Yap
                     </button>
                   </div>
                 </div>
-
-                <!-- 2. FIELD: SIFRE -->
-                <div style="margin-bottom:1.2rem;">
-                  <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
-                    <i data-lucide="lock" style="width:15px; height:15px; vertical-align:middle; color:var(--color-accent-green);"></i> Kasa & Sistem Giriş Şifreniz:
-                  </label>
-                  <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:var(--radius-md); padding:0.65rem 1.2rem;">
-                    <span id="display-password" style="font-family:monospace; font-size:1.4rem; font-weight:800; color:#fff; letter-spacing:2px; flex:1;">
-                      ${showPasswordInStep5 ? (formData.password || registeredBusiness?.password || '••••••') : '•'.repeat(Math.max((formData.password || registeredBusiness?.password || '123456').length, 6))}
-                    </span>
-                    <button id="btn-toggle-show-pass" class="pill-btn" style="background:rgba(255,255,255,0.08); border:var(--border-glass); color:var(--color-text-muted); padding:0.5rem 0.8rem; font-size:0.82rem; cursor:pointer; border-radius:var(--radius-sm);" title="${showPasswordInStep5 ? 'Gizle' : 'Göster'}">
-                      <i data-lucide="${showPasswordInStep5 ? 'eye-off' : 'eye'}" style="width:15px; height:15px;"></i>
-                    </button>
-                    <button id="btn-copy-pass" class="pill-btn" style="background:rgba(0,230,118,0.18); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-weight:800; padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
-                      <i data-lucide="copy" style="width:15px; height:15px;"></i> <span id="copy-pass-text">Kopyala</span>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- 3. DETAILS SUMMARY TABLE WITH PROFILE INFO -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:var(--radius-md); padding:0.85rem 1.1rem; margin-bottom:1.2rem; font-size:0.83rem;">
-                  <div><span style="color:var(--color-text-muted);">Yetkili Ad Soyad:</span> <strong style="color:#fff; display:block;">${activeProfile?.fullName || formData.fullName || registeredBusiness?.fullName || 'Belirtilmedi'}</strong></div>
-                  <div><span style="color:var(--color-text-muted);">Yetkili Rolü:</span> <strong style="color:var(--color-primary); display:block;">${activeProfile?.role || 'İşletme Sahibi'}</strong></div>
-                  <div><span style="color:var(--color-text-muted);">E-posta Adresi:</span> <strong style="color:#fff; display:block;">${activeProfile?.email || 'Belirtilmedi'}</strong></div>
-                  <div><span style="color:var(--color-text-muted);">Telefon Numarası:</span> <strong style="color:#fff; display:block;">${activeProfile?.phone || formData.phone || registeredBusiness?.phone || 'Belirtilmedi'}</strong></div>
-                  <div><span style="color:var(--color-text-muted);">İşletme Türü:</span> <strong style="color:#fff; display:block;">${formData.businessType || registeredBusiness?.businessType || 'Restoran'}</strong></div>
-                  <div><span style="color:var(--color-text-muted);">Masa Kapasite Planı:</span> <strong style="color:var(--color-accent-green); display:block;">${formData.plan || registeredBusiness?.plan || 'Profesyonel'}</strong></div>
-                  <div style="grid-column:1 / -1;"><span style="color:var(--color-text-muted);">Konum & Açık Adres:</span> <strong style="color:#fff; display:block;">${formData.city || registeredBusiness?.city || ''} - ${formData.fullAddress || registeredBusiness?.fullAddress || ''}</strong></div>
-                </div>
-
-                <!-- ACTION BUTTONS ROW: COPY ALL & DOWNLOAD TXT -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
-                  <button id="btn-copy-all" class="pill-btn" style="justify-content:center; background:rgba(255,255,255,0.06); border:1px dashed rgba(255,255,255,0.25); color:#fff; padding:0.75rem; border-radius:var(--radius-md); font-weight:700; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
-                    <i data-lucide="clipboard-check" style="width:16px; height:16px; color:var(--color-primary);"></i>
-                    <span id="copy-all-text">Tüm Bilgileri Kopyala</span>
-                  </button>
-
-                  <button id="btn-download-txt" class="pill-btn" style="justify-content:center; background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.3); color:var(--color-accent-cyan); padding:0.75rem; border-radius:var(--radius-md); font-weight:700; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
-                    <i data-lucide="download" style="width:16px; height:16px;"></i>
-                    <span>Bilgi Dosyasını İndir (.txt)</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- BOTTOM NAVIGATION & ACTIONS -->
-              <div style="display:flex; gap:0.85rem; justify-content:center; flex-wrap:wrap;">
-                <button class="btn-primary-hero" id="btn-finish-go-home" style="flex:1; min-width:200px; justify-content:center;">
-                  <i data-lucide="home"></i> Tanıtım Sayfasına Git
-                </button>
-
-                <button class="btn-secondary-hero" id="btn-new-registration" style="flex:1; min-width:200px; justify-content:center; border-color:rgba(255,255,255,0.15);">
-                  <i data-lucide="plus-circle"></i> Yeni İşletme Kaydı Yap
-                </button>
-              </div>
-            </div>
+              `;
+            })()}
           ` : ''}
         </div>
 
@@ -493,9 +552,11 @@ export function renderRegisterPage(container) {
 
             <div class="badge-info-list">
               ${(registeredBusiness?.id) ? `
-                <div style="background:rgba(255,107,0,0.15); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,107,0,0.35); margin-bottom:6px;">
+                <div style="background:${registeredBusiness?.status === 'onaylandi' ? 'rgba(0,230,118,0.15)' : 'rgba(245,158,11,0.15)'}; padding:8px 10px; border-radius:8px; border:1px solid ${registeredBusiness?.status === 'onaylandi' ? 'rgba(0,230,118,0.35)' : 'rgba(245,158,11,0.35)'}; margin-bottom:6px;">
                   <span style="font-size:0.75rem; color:var(--color-text-muted); display:block;">Kasa & Giriş Kodu:</span>
-                  <span style="color:var(--color-primary); font-family:monospace; font-size:1.15rem; font-weight:900; letter-spacing:1px;">${registeredBusiness.id}</span>
+                  <span style="color:${registeredBusiness?.status === 'onaylandi' ? 'var(--color-accent-green)' : '#F59E0B'}; font-family:monospace; font-size:1.1rem; font-weight:900; letter-spacing:1px;">
+                    ${registeredBusiness?.status === 'onaylandi' ? registeredBusiness.id : '🔒 Onay Bekleniyor'}
+                  </span>
                 </div>
               ` : ''}
 
@@ -510,7 +571,7 @@ export function renderRegisterPage(container) {
                 <div><strong>Masa Kapasitesi:</strong> <span style="color:var(--color-accent-green); font-weight:800;" id="badge-disp-plan">${formData.plan || registeredBusiness?.plan}</span></div>
                 <div><strong>Telefon:</strong> <span>${activeProfile?.phone || profileData.phone || '0555 *** ** **'}</span></div>
                 <div><strong>Şehir:</strong> <span id="badge-disp-city">${formData.city || registeredBusiness?.city}</span></div>
-                <div><strong>Durum:</strong> <span style="color:var(--color-accent-green); font-weight:800;">${currentStep === 5 ? '✓ AKTİF LİSANS' : '⏳ İŞLETME KAYDI ALINIYOR'}</span></div>
+                <div><strong>Durum:</strong> <span style="color:${(registeredBusiness?.status === 'onaylandi') ? 'var(--color-accent-green)' : '#F59E0B'}; font-weight:800;">${(registeredBusiness?.status === 'onaylandi') ? '✓ ONAYLANDI & AKTİF' : (currentStep === 5 ? '⏳ YÖNETİCİ ONAYI BEKLENİYOR' : '⏳ BAŞVURU ALINIYOR')}</span></div>
               `}
             </div>
           </div>
@@ -854,7 +915,7 @@ export function renderRegisterPage(container) {
         currentStep = 5;
         updateView();
         triggerConfetti();
-        showToast('🎉 İşletme kaydınız ve kodunuz başarıyla oluşturuldu! ID ekranınız açık kalacaktır.', 'success');
+        showToast('🎉 İşletme başvurunuz başarıyla alındı! Yönetici onayından sonra işletme kodunuz aktif olacaktır.', 'success');
       });
     }
 
@@ -862,11 +923,29 @@ export function renderRegisterPage(container) {
     if (currentStep === 5) {
       const activeReg = registeredBusiness || store.getLastRegisteredBusiness() || {};
       const activeId = activeReg.id || 'BYR-0000';
+      const isApproved = activeReg.status === 'onaylandi';
       const activePass = formData.password || activeReg.password || profileData.password || '';
       const currentProf = store.getUserProfile() || profileData;
 
-      // 1. Copy Business ID
+      // Trigger Applications Modal
+      const openApps = () => {
+        const btnApps = document.getElementById('btn-dropdown-applications');
+        if (btnApps) {
+          btnApps.click();
+        } else {
+          showToast('Başvuru durumunuzu profilinizdeki Başvurularım menüsünden görebilirsiniz.', 'info');
+        }
+      };
+
+      container.querySelector('#btn-view-applications-trigger')?.addEventListener('click', openApps);
+      container.querySelector('#btn-check-my-apps-trigger')?.addEventListener('click', openApps);
+
+      // 1. Copy Business ID (Only if approved)
       container.querySelector('#btn-copy-id')?.addEventListener('click', () => {
+        if (!isApproved) {
+          showToast('⏳ İşletme kodunuz yönetici onayından sonra açılacaktır!', 'info');
+          return;
+        }
         navigator.clipboard.writeText(activeId).then(() => {
           const btnText = container.querySelector('#copy-id-text');
           if (btnText) btnText.textContent = 'Kopyalandı! ✓';

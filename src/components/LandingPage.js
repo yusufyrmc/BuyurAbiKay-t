@@ -2,23 +2,29 @@ import { store } from '../state/store.js';
 
 export function renderLandingPage(container) {
   const lastReg = store.getLastRegisteredBusiness();
+  const isApproved = lastReg && lastReg.status === 'onaylandi';
+  const isPending = lastReg && lastReg.status !== 'onaylandi' && lastReg.status !== 'reddedildi';
 
   container.innerHTML = `
     <!-- REGISTERED USER ID BANNER (IF REGISTERED) -->
     ${lastReg && lastReg.id ? `
-      <div style="background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.35); border-radius:var(--radius-md); padding:0.9rem 1.4rem; margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+      <div style="background:${isApproved ? 'rgba(0,230,118,0.1)' : 'rgba(245,158,11,0.1)'}; border:1px solid ${isApproved ? 'rgba(0,230,118,0.35)' : 'rgba(245,158,11,0.35)'}; border-radius:var(--radius-md); padding:0.9rem 1.4rem; margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
         <div style="display:flex; align-items:center; gap:0.85rem;">
-          <div style="width:40px; height:40px; border-radius:50%; background:rgba(0,230,118,0.2); color:var(--color-accent-green); display:flex; align-items:center; justify-content:center;">
-            <i data-lucide="badge-check" style="width:22px; height:22px;"></i>
+          <div style="width:40px; height:40px; border-radius:50%; background:${isApproved ? 'rgba(0,230,118,0.2)' : 'rgba(245,158,11,0.2)'}; color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; display:flex; align-items:center; justify-content:center;">
+            <i data-lucide="${isApproved ? 'badge-check' : 'clock'}" style="width:22px; height:22px;"></i>
           </div>
           <div>
-            <div style="font-size:0.8rem; color:var(--color-text-muted);">Sistemde Kayıtlı Adisyon İşletmeniz:</div>
+            <div style="font-size:0.8rem; color:var(--color-text-muted);">${isApproved ? 'Sistemde Kayıtlı Adisyon İşletmeniz:' : 'İncelenmekte Olan İşletme Başvurunuz:'}</div>
             <strong style="font-size:1.05rem; color:#fff;">${lastReg.businessName}</strong>
-            <span style="font-family:monospace; background:rgba(255,107,0,0.2); color:var(--color-primary); font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.92rem;">KOD: ${lastReg.id}</span>
+            ${isApproved ? `
+              <span style="font-family:monospace; background:rgba(255,107,0,0.2); color:var(--color-primary); font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.92rem;">KOD: ${lastReg.id}</span>
+            ` : `
+              <span style="font-family:monospace; background:rgba(245,158,11,0.2); color:#F59E0B; font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.85rem;">⏳ YÖNETİCİ ONAYI BEKLENİYOR</span>
+            `}
           </div>
         </div>
-        <button id="btn-banner-view-id" class="pill-btn" style="background:var(--color-primary-gradient); color:#fff; font-weight:800; padding:0.6rem 1.2rem; border:none; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm); box-shadow:var(--shadow-glow);">
-          <i data-lucide="id-card" style="width:16px; height:16px;"></i> Giriş Kartımı Aç
+        <button id="btn-banner-view-id" class="pill-btn" style="background:${isApproved ? 'var(--color-primary-gradient)' : 'rgba(245,158,11,0.2)'}; border:${isApproved ? 'none' : '1px solid rgba(245,158,11,0.5)'}; color:${isApproved ? '#fff' : '#F59E0B'}; font-weight:800; padding:0.6rem 1.2rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm); box-shadow:${isApproved ? 'var(--shadow-glow)' : 'none'};">
+          <i data-lucide="${isApproved ? 'id-card' : 'clipboard-list'}" style="width:16px; height:16px;"></i> ${isApproved ? 'Giriş Kartımı Aç' : 'Başvuru Durumunu Gör'}
         </button>
       </div>
     ` : ''}
@@ -469,7 +475,16 @@ export function renderLandingPage(container) {
   });
 
   document.getElementById('btn-banner-view-id')?.addEventListener('click', () => {
-    store.setView('register');
+    if (isApproved) {
+      store.setView('register');
+    } else {
+      const btnApps = document.getElementById('btn-dropdown-applications');
+      if (btnApps) {
+        btnApps.click();
+      } else {
+        store.setView('register');
+      }
+    }
   });
 
   document.getElementById('landing-btn-bottom-register')?.addEventListener('click', () => {

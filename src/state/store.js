@@ -598,6 +598,28 @@ class AppStore {
     this.notify();
   }
 
+  // Get all applications that belong to the logged-in user
+  getUserApplications() {
+    const profile = this.getUserProfile();
+    if (!profile) return [];
+    const cleanEmail = (profile.email || '').toLowerCase().trim();
+    const cleanPhone = (profile.phone || '').replace(/\s+/g, '').replace(/[^0-9]/g, '');
+    const cleanName = (profile.fullName || '').toLowerCase().trim();
+
+    return this.registrations.filter(r => {
+      const regEmail = (r.ownerEmail || r.email || '').toLowerCase().trim();
+      const regPhone = (r.phone || '').replace(/\s+/g, '').replace(/[^0-9]/g, '');
+      const regName = (r.fullName || '').toLowerCase().trim();
+
+      const emailMatch = cleanEmail && regEmail && cleanEmail === regEmail;
+      const phoneMatch = cleanPhone && regPhone && cleanPhone === regPhone;
+      const nameMatch = cleanName && regName && cleanName === regName;
+      const lastRegMatch = this.lastRegisteredBusiness && this.lastRegisteredBusiness.id === r.id;
+
+      return emailMatch || phoneMatch || (nameMatch && (cleanEmail || cleanPhone)) || lastRegMatch;
+    });
+  }
+
   async fetchRegistrations() {
     if (!supabase) return;
     try {

@@ -69,6 +69,10 @@
             <button id="btn-dropdown-edit-profile" class="dropdown-item">
               <i data-lucide="user-pen" style="width:15px; height:15px;"></i> Profili Düzenle
             </button>
+            <button id="btn-dropdown-applications" class="dropdown-item">
+              <i data-lucide="clipboard-list" style="width:15px; height:15px;"></i> Başvurularım
+              <span id="badge-dropdown-app-count" style="display:none; background:var(--color-primary); color:#fff; font-size:0.7rem; font-weight:800; padding:2px 7px; border-radius:10px; margin-left:auto;">0</span>
+            </button>
             <button id="btn-dropdown-logout" class="dropdown-item dropdown-item-danger">
               <i data-lucide="log-out" style="width:15px; height:15px;"></i> Çıkış Yap
             </button>
@@ -80,6 +84,30 @@
 
   <!-- Notification Toast Container -->
   <div id="toast-container" class="toast-container"></div>
+
+  <!-- BAŞVURULARIM MODAL -->
+  <div id="modal-my-applications-backdrop" class="modal-backdrop" style="display:none;">
+    <div class="modal-card-app">
+      <div class="modal-card-header">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <div style="width:36px; height:36px; border-radius:10px; background:rgba(255,107,0,0.15); color:var(--color-primary); display:flex; align-items:center; justify-content:center;">
+            <i data-lucide="clipboard-list" style="width:20px; height:20px;"></i>
+          </div>
+          <div>
+            <h3 style="margin:0; font-family:var(--font-heading); font-size:1.25rem; font-weight:800; color:#fff;">İşletme Başvurularım</h3>
+            <span style="font-size:0.75rem; color:var(--color-text-muted);">Kayıtlı restoran başvurularınız ve onay durumları</span>
+          </div>
+        </div>
+        <button id="btn-close-app-modal" class="modal-close-btn" title="Kapat">
+          <i data-lucide="x" style="width:18px; height:18px;"></i>
+        </button>
+      </div>
+
+      <div id="modal-applications-body" class="modal-card-body">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
 
   <!-- Main Content Container -->
   <main class="app-main-content">
