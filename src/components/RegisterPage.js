@@ -18,11 +18,26 @@ export function renderRegisterPage(container) {
     role: savedProfile?.role || 'İşletme Sahibi'
   };
 
+  const availablePlans = store.getPricingPlans();
+  const defaultPlanObj = availablePlans.find(p => p.popular) || availablePlans[0];
+  const defaultPlanTitle = defaultPlanObj ? `${defaultPlanObj.name} (${defaultPlanObj.badge || ''} - ₺${defaultPlanObj.price}${defaultPlanObj.period || '/ay'})` : 'Profesyonel Paket (25 Masa - ₺899/ay)';
+  const defaultPlanPrice = defaultPlanObj ? defaultPlanObj.price : 899;
+
+  // Check if user clicked a plan from Landing Page
+  const preSelected = sessionStorage.getItem('buyurabi_selected_plan');
+  let parsedPreSelect = null;
+  if (preSelected) {
+    try {
+      parsedPreSelect = JSON.parse(preSelected);
+      sessionStorage.removeItem('buyurabi_selected_plan');
+    } catch (e) {}
+  }
+
   let formData = {
     businessName: savedLastReg?.businessName || '',
     businessType: savedLastReg?.businessType || 'Restoran & Lokanta',
-    plan: savedLastReg?.plan || 'Profesyonel Paket (25 Masa - ₺899/ay)',
-    planPrice: savedLastReg?.planPrice || 899,
+    plan: parsedPreSelect?.plan || savedLastReg?.plan || defaultPlanTitle,
+    planPrice: parsedPreSelect?.price || savedLastReg?.planPrice || defaultPlanPrice,
     city: savedLastReg?.city || 'İstanbul / Kadıköy',
     fullAddress: savedLastReg?.fullAddress || '',
     password: savedLastReg?.password || savedProfile?.password || ''
@@ -254,32 +269,32 @@ export function renderRegisterPage(container) {
               </div>
             </div>
 
-            <!-- MASA EKLEME İÇİN PLAN SEÇİMİ -->
+            <!-- MASA EKLEME İÇİN PLAN SEÇİMİ (DİNAMİK) -->
             <div style="margin-bottom:1.5rem;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
                 <label class="form-label" style="margin:0;"><i data-lucide="credit-card"></i> Masa Eklemek İçin Kullanım Planı Seçin</label>
                 <span style="font-size:0.75rem; color:var(--color-accent-green); font-weight:700;">Esnek Masa Kapasitesi</span>
               </div>
               
-              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.85rem;">
-                <div class="role-select-card ${formData.planPrice === 499 ? 'selected' : ''}" data-plan="Başlangıç Paketi (10 Masa - ₺499/ay)" data-price="499" style="padding:1rem 0.6rem;">
-                  <div style="font-size:1.2rem; margin-bottom:4px;">🥉</div>
-                  <strong style="font-size:0.88rem; color:#fff; display:block;">Başlangıç (10 Masa)</strong>
-                  <span style="font-size:0.95rem; font-weight:800; color:var(--color-primary);">₺499 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
-                </div>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:0.85rem;">
+                ${store.getPricingPlans().map((plan, idx) => {
+                  const medal = idx === 0 ? '🥉' : (idx === 1 ? '🥈' : '🥇');
+                  const planTitle = `${plan.name} (${plan.badge || ''} - ₺${plan.price}${plan.period || '/ay'})`;
+                  const isSelected = formData.planPrice === plan.price || formData.plan === planTitle;
+                  const priceColor = idx === 0 ? 'var(--color-primary)' : (idx === 1 ? 'var(--color-accent-green)' : 'var(--color-accent-cyan)');
 
-                <div class="role-select-card ${formData.planPrice === 899 ? 'selected' : ''}" data-plan="Profesyonel Paket (25 Masa - ₺899/ay)" data-price="899" style="padding:1rem 0.6rem; position:relative;">
-                  <div style="position:absolute; top:-10px; right:10px; background:var(--color-primary); color:#fff; font-size:0.6rem; font-weight:800; padding:2px 6px; border-radius:10px;">POPÜLER</div>
-                  <div style="font-size:1.2rem; margin-bottom:4px;">🥈</div>
-                  <strong style="font-size:0.88rem; color:#fff; display:block;">Profesyonel (25 Masa)</strong>
-                  <span style="font-size:0.95rem; font-weight:800; color:var(--color-accent-green);">₺899 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
-                </div>
-
-                <div class="role-select-card ${formData.planPrice === 1499 ? 'selected' : ''}" data-plan="Kurumsal Paket (Sınırsız Masa - ₺1.499/ay)" data-price="1499" style="padding:1rem 0.6rem;">
-                  <div style="font-size:1.2rem; margin-bottom:4px;">🥇</div>
-                  <strong style="font-size:0.88rem; color:#fff; display:block;">Kurumsal (Sınırsız)</strong>
-                  <span style="font-size:0.95rem; font-weight:800; color:var(--color-accent-cyan);">₺1.499 <span style="font-size:0.7rem; color:var(--color-text-muted);">/ay</span></span>
-                </div>
+                  return `
+                    <div class="role-select-card ${isSelected ? 'selected' : ''}" data-plan="${planTitle}" data-price="${plan.price}" style="padding:1rem 0.6rem; position:relative; cursor:pointer;">
+                      ${plan.popular ? `
+                        <div style="position:absolute; top:-10px; right:10px; background:var(--color-primary); color:#fff; font-size:0.6rem; font-weight:800; padding:2px 6px; border-radius:10px;">POPÜLER</div>
+                      ` : ''}
+                      <div style="font-size:1.2rem; margin-bottom:4px;">${medal}</div>
+                      <strong style="font-size:0.88rem; color:#fff; display:block;">${plan.name}</strong>
+                      <span style="font-size:0.75rem; color:var(--color-text-muted); display:block; margin:2px 0;">${plan.badge || ''}</span>
+                      <span style="font-size:0.95rem; font-weight:800; color:${priceColor};">₺${Number(plan.price).toLocaleString('tr-TR')} <span style="font-size:0.7rem; color:var(--color-text-muted);">${plan.period || '/ay'}</span></span>
+                    </div>
+                  `;
+                }).join('')}
               </div>
             </div>
 

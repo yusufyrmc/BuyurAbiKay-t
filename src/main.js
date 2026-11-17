@@ -157,20 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function openApplicationsModal() {
     if (!appModalBackdrop || !appModalBody) return;
-
-    appModalBackdrop.style.display = 'flex';
-    appModalBody.innerHTML = `
-      <div style="text-align:center; padding:2rem 1rem; color:var(--color-text-muted);">
-        <div style="width:36px; height:36px; border:3px solid var(--color-primary); border-top-color:transparent; border-radius:50%; margin:0 auto 1rem auto; animation:spin 0.8s linear infinite;"></div>
-        <p style="font-size:0.9rem; font-weight:700; color:#fff;">Onay durumu canlı kontrol ediliyor...</p>
-      </div>
-    `;
-
-    // Fetch freshest data from Supabase / localStorage
-    store.loadFromStorage();
-    if (store.supabaseConnected) {
+    // Always fetch freshest data from Supabase before opening
+    try {
       await store.fetchRegistrations();
-    }
+    } catch (e) {}
 
     const myApps = store.getUserApplications();
 
@@ -191,13 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     } else {
       appModalBody.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.6rem; border-bottom:1px solid rgba(255,255,255,0.08);">
-          <span style="font-size:0.82rem; color:var(--color-text-muted);">Toplam <strong>${myApps.length}</strong> işletme başvurusu</span>
-          <button id="btn-refresh-apps-list" class="pill-btn" style="background:rgba(255,255,255,0.08); border:var(--border-glass); color:#fff; font-size:0.75rem; padding:0.35rem 0.8rem; border-radius:var(--radius-sm); cursor:pointer; display:flex; align-items:center; gap:5px;">
-            <i data-lucide="refresh-cw" style="width:12px; height:12px;"></i> Durumu Yenile
-          </button>
-        </div>
-
         <div style="display:flex; flex-direction:column; gap:1rem;">
           ${myApps.map(app => {
             const isApproved = app.status === 'onaylandi';
@@ -284,12 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     appModalBackdrop.style.display = 'flex';
     if (window.lucide) window.lucide.createIcons();
-
-    // Refresh list button event
-    appModalBody.querySelector('#btn-refresh-apps-list')?.addEventListener('click', () => {
-      openApplicationsModal();
-      showToast('🔄 Başvurular ve onay durumları güncellendi.', 'info');
-    });
 
     // Copy code button event
     appModalBody.querySelectorAll('.btn-copy-app-code').forEach(btn => {
@@ -402,6 +379,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.activeView) {
       switchView(state.activeView, true);
     }
+  });
+
+  // Listen to window focus for real-time status updates (e.g. admin approved in another tab)
+  window.addEventListener('focus', () => {
+    store.fetchRegistrations();
   });
 
   // Initial setup

@@ -212,6 +212,16 @@ export function renderOwnerAdminPanel(container) {
                 </span>
               </button>
 
+              <button class="admin-nav-item ${activeTab === 'pricing' ? 'active' : ''}" data-sidebar-tab="pricing">
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                  <i data-lucide="tag" style="width:18px; height:18px; color:var(--color-accent-green);"></i>
+                  <span>Paket & Fiyat Yönetimi</span>
+                </div>
+                <span style="background:rgba(0,230,118,0.15); color:var(--color-accent-green); border-radius:10px; padding:1px 7px; font-size:0.72rem; font-weight:800;">
+                  3 Paket
+                </span>
+              </button>
+
               <button class="admin-nav-item ${activeTab === 'health' ? 'active' : ''}" data-sidebar-tab="health">
                 <div style="display:flex; align-items:center; gap:0.75rem;">
                   <i data-lucide="activity" style="width:18px; height:18px; color:var(--color-accent-purple);"></i>
@@ -282,6 +292,7 @@ export function renderOwnerAdminPanel(container) {
                   activeTab === 'support' ? '🎧 Canlı Destek & Müşteri Çağrı Konsolu' :
                   activeTab === 'registrations' ? '🏢 İşletme Kayıt Başvuruları & Paketler' :
                   activeTab === 'profiles' ? '👤 Kayıtlı Yetkili Profilleri (Supabase)' :
+                  activeTab === 'pricing' ? '🏷️ Paket & Fiyat Düzenleme Paneli' :
                   '📊 Bulut Sunucu & Sistem Altyapı Sağlığı'
                 }
               </h2>
@@ -291,6 +302,7 @@ export function renderOwnerAdminPanel(container) {
                   activeTab === 'support' ? 'Destek arayan restoranların anında teşhisi, parola hatırlatması ve canlı test siparişi' :
                   activeTab === 'registrations' ? 'Gelen restoran başvurularını inceleyin, seçtikleri aylık paketleri onaylayın' :
                   activeTab === 'profiles' ? 'Supabase veritabanında saklanan restoran sahibi ve yetkili profilleri listesi' :
+                  activeTab === 'pricing' ? 'Müşterilere sunulan paketlerin aylık fiyatlarını, masa kapasitelerini ve özellik maddelerini canlı olarak güncelleyin' :
                   'Postgres veritabanı, Realtime web soket ve platform uptime istatistikleri'
                 }
               </p>
@@ -966,6 +978,113 @@ export function renderOwnerAdminPanel(container) {
             </div>
           ` : ''}
 
+          <!-- ==================== TAB: FİYAT & PAKET YÖNETİMİ ==================== -->
+          ${activeTab === 'pricing' ? `
+            ${(() => {
+              const plans = store.getPricingPlans();
+              return `
+                <div style="background:var(--color-bg-card); padding:2rem; border-radius:var(--radius-lg); border:var(--border-glass); box-shadow:var(--shadow-card);">
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.8rem; flex-wrap:wrap; gap:1rem;">
+                    <div>
+                      <h3 style="font-family:var(--font-heading); font-size:1.45rem; font-weight:900; color:#fff; margin:0 0 4px 0; display:flex; align-items:center; gap:0.6rem;">
+                        <i data-lucide="tag" style="color:var(--color-accent-green);"></i> Adisyon Paket Fiyatları & İçerik Düzenleme
+                      </h3>
+                      <p style="color:var(--color-text-muted); font-size:0.85rem; margin:0;">
+                        Burada yaptığınız fiyat ve özellik değişiklikleri <strong>anında ana sayfaya ve müşteri kayıt ekranına</strong> yansır.
+                      </p>
+                    </div>
+
+                    <div style="display:flex; gap:0.75rem;">
+                      <button id="btn-reset-pricing" class="btn-secondary-hero" style="padding:0.6rem 1.1rem; font-size:0.85rem;" title="Orijinal paket fiyatlarına dön">
+                        <i data-lucide="rotate-ccw" style="width:15px; height:15px;"></i> Varsayılana Sıfırla
+                      </button>
+                      <button id="btn-save-all-pricing" class="btn-primary-hero" style="padding:0.6rem 1.4rem; font-size:0.9rem;">
+                        <i data-lucide="save" style="width:16px; height:16px;"></i> Fiyatları Canlıya Kaydet
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- PRICING CARDS EDIT GRID -->
+                  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+                    ${plans.map((p, idx) => `
+                      <div class="pricing-edit-card" data-plan-index="${idx}" style="background:rgba(14,19,31,0.85); border:2px solid ${p.popular ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)'}; border-radius:var(--radius-lg); padding:1.6rem; position:relative; box-shadow:${p.popular ? 'var(--shadow-glow)' : 'none'};">
+                        ${p.popular ? `
+                          <div style="position:absolute; top:-12px; right:16px; background:var(--color-primary); color:#fff; font-size:0.68rem; font-weight:900; padding:2px 10px; border-radius:12px; letter-spacing:0.5px;">
+                            ÖNE ÇIKAN (EN ÇOK SEÇİLEN)
+                          </div>
+                        ` : ''}
+
+                        <div style="margin-bottom:1.2rem;">
+                          <label style="display:block; font-size:0.78rem; font-weight:800; color:var(--color-text-muted); margin-bottom:4px;">
+                            PAKET ADI
+                          </label>
+                          <input type="text" class="form-input plan-input-name" value="${p.name}" style="font-weight:800; font-size:1.1rem; color:#fff;">
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; margin-bottom:1.2rem;">
+                          <div>
+                            <label style="display:block; font-size:0.78rem; font-weight:800; color:var(--color-accent-green); margin-bottom:4px;">
+                              AYLIK ÜCRET (₺)
+                            </label>
+                            <div style="position:relative;">
+                              <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--color-text-muted); font-weight:800;">₺</span>
+                              <input type="number" class="form-input plan-input-price" value="${p.price}" style="padding-left:26px; font-weight:900; font-size:1.2rem; color:var(--color-accent-green);">
+                            </div>
+                          </div>
+
+                          <div>
+                            <label style="display:block; font-size:0.78rem; font-weight:800; color:var(--color-accent-cyan); margin-bottom:4px;">
+                              KAPASİTE ROZETİ
+                            </label>
+                            <input type="text" class="form-input plan-input-badge" value="${p.badge || ''}" placeholder="Örn: 10 MASA" style="font-weight:700; font-size:0.82rem;">
+                          </div>
+                        </div>
+
+                        <div style="margin-bottom:1.2rem;">
+                          <label style="display:block; font-size:0.78rem; font-weight:800; color:var(--color-text-muted); margin-bottom:4px;">
+                            AÇIKLAMA METNİ
+                          </label>
+                          <textarea class="form-input plan-input-desc" rows="2" style="font-size:0.82rem; line-height:1.4;">${p.description || ''}</textarea>
+                        </div>
+
+                        <div style="margin-bottom:1.2rem;">
+                          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <label style="font-size:0.78rem; font-weight:800; color:var(--color-text-muted);">
+                              PAKET ÖZELLİKLERİ & İÇERİK (Her satıra bir özellik yazın)
+                            </label>
+                          </div>
+                          <textarea class="form-input plan-input-features" rows="7" style="font-family:monospace; font-size:0.82rem; line-height:1.6;" placeholder="Her satıra bir özellik">${(p.features || []).join('\n')}</textarea>
+                          <span style="font-size:0.7rem; color:var(--color-text-dim); display:block; margin-top:2px;">
+                            💡 Maddeleri alt alta yazarak yeni özellikler ekleyebilir veya silebilirsiniz.
+                          </span>
+                        </div>
+
+                        <div style="background:rgba(255,255,255,0.03); padding:0.6rem 0.8rem; border-radius:var(--radius-sm); border:1px solid rgba(255,255,255,0.06);">
+                          <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; color:#fff; cursor:pointer;">
+                            <input type="checkbox" class="plan-input-popular" ${p.popular ? 'checked' : ''} style="width:16px; height:16px; accent-color:var(--color-primary);">
+                            <span>Bu paketi <strong>"En Çok Tercih Edilen"</strong> olarak öne çıkar</span>
+                          </label>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+
+                  <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.3); border-radius:var(--radius-md); padding:1rem 1.4rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                      <i data-lucide="check-circle" style="color:var(--color-accent-green); width:24px; height:24px; flex-shrink:0;"></i>
+                      <div style="font-size:0.85rem; color:var(--color-text-main);">
+                        Paket fiyatlarını ve özelliklerini güncelledikten sonra <strong>"Fiyatları Canlıya Kaydet"</strong> butonuna basın.
+                      </div>
+                    </div>
+                    <button id="btn-save-all-pricing-bottom" class="btn-primary-hero" style="padding:0.7rem 1.6rem; font-size:0.95rem;">
+                      <i data-lucide="save"></i> Fiyatları Canlıya Kaydet
+                    </button>
+                  </div>
+                </div>
+              `;
+            })()}
+          ` : ''}
+
           <!-- ==================== TAB 4: SİSTEM & SUNUCU SAĞLIĞI ==================== -->
           ${activeTab === 'health' ? `
             <div style="background:var(--color-bg-card); padding:2rem; border-radius:var(--radius-lg); border:var(--border-glass); box-shadow:var(--shadow-card);">
@@ -1384,6 +1503,54 @@ export function renderOwnerAdminPanel(container) {
         }
         updateView();
       });
+    });
+
+    // PRICING MANAGEMENT EVENTS
+    const handleSavePricing = () => {
+      const cards = container.querySelectorAll('.pricing-edit-card');
+      const currentPlans = store.getPricingPlans();
+      const updatedPlans = [];
+
+      cards.forEach((card, idx) => {
+        const name = card.querySelector('.plan-input-name')?.value.trim() || currentPlans[idx]?.name || '';
+        const price = Number(card.querySelector('.plan-input-price')?.value) || currentPlans[idx]?.price || 0;
+        const badge = card.querySelector('.plan-input-badge')?.value.trim() || '';
+        const description = card.querySelector('.plan-input-desc')?.value.trim() || '';
+        const featuresText = card.querySelector('.plan-input-features')?.value || '';
+        const popular = card.querySelector('.plan-input-popular')?.checked || false;
+
+        const features = featuresText
+          .split('\n')
+          .map(f => f.trim())
+          .filter(f => f.length > 0);
+
+        updatedPlans.push({
+          id: currentPlans[idx]?.id || ('plan-' + idx),
+          name,
+          badge,
+          price,
+          period: '/ay',
+          description,
+          features,
+          popular,
+          capacity: currentPlans[idx]?.capacity || 10
+        });
+      });
+
+      store.savePricingPlans(updatedPlans);
+      showToast('🎉 Tüm paket fiyatları ve içerikleri canlıya kaydedildi!', 'success');
+      updateView();
+    };
+
+    container.querySelector('#btn-save-all-pricing')?.addEventListener('click', handleSavePricing);
+    container.querySelector('#btn-save-all-pricing-bottom')?.addEventListener('click', handleSavePricing);
+
+    container.querySelector('#btn-reset-pricing')?.addEventListener('click', () => {
+      if (confirm('Tüm paket fiyatlarını ve özelliklerini fabrika varsayılan ayarlarına döndürmek istiyor musunuz?')) {
+        store.resetPricingPlans();
+        showToast('🔄 Paket fiyatları varsayılana sıfırlandı.', 'info');
+        updateView();
+      }
     });
   }
 

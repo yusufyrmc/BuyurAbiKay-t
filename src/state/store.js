@@ -1,5 +1,65 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
 
+export const DEFAULT_PLANS = [
+  {
+    id: 'starter',
+    name: 'Başlangıç Paketi',
+    badge: '10 MASA KAPASİTESİ',
+    price: 499,
+    period: '/ay',
+    description: 'Küçük kafeler, butik lokantalar ve tek salonlu işletmeler için ideal adisyon çözümü.',
+    features: [
+      '10 Masaya Kadar Masa Ekleme',
+      'Masada QR ile Garson Çağırma',
+      'Garson QR ile Telefon Girişi & Sipariş Ekleme',
+      'Masalar ve Ücretleri Kasa Ekranı',
+      'Yan Panelde Açılan Adisyon & Nakit/Kart Tahsilat',
+      'Günlük Kasa Raporu'
+    ],
+    popular: false,
+    capacity: 10
+  },
+  {
+    id: 'pro',
+    name: 'Profesyonel Paket',
+    badge: '25 MASA KAPASİTESİ',
+    price: 899,
+    period: '/ay',
+    description: 'Orta ölçekli restoranlar, kebapçılar ve yoğun çalışan mutfaklar için tam teşekküllü otomasyon.',
+    features: [
+      '25 Masaya Kadar Masa Ekleme',
+      'Ciro Gizleme Butonu',
+      'Mutfak Sıcak Sayfası (Aşçı Hazırlık)',
+      'Sipariş Görme Açma/Kapama & Sipariş Silme',
+      'Menü Fiyat Ayarlama',
+      'Sınırsız Garson Tanımlama & QR Giriş',
+      'Fiş / Fatura Çıkarma',
+      'Günlük Kasa & Haftalık Ciro Raporu'
+    ],
+    popular: true,
+    capacity: 25
+  },
+  {
+    id: 'enterprise',
+    name: 'Kurumsal Paket',
+    badge: 'SINIRSIZ MASA KAPASİTESİ',
+    price: 1499,
+    period: '/ay',
+    description: 'Büyük restoranlar, çok salonlu mekanlar ve zincir işletmeler için sınırsız güç.',
+    features: [
+      'Sınırsız Masa Ekleme',
+      'Özel Masalara Fiyat Ayarlaması (VIP/Loca)',
+      'Günlük En Çok Satılanlar Analizi',
+      'Alınan Ücretler & Tahsilat Dökümü',
+      'Çoklu Kasa & Şube Entegrasyonu',
+      'Termal Yazıcı ve Fatura Entegrasyonu',
+      '7/24 Öncelikli Telefon & Canlı Destek'
+    ],
+    popular: false,
+    capacity: 999
+  }
+];
+
 class AppStore {
   constructor() {
     this.listeners = [];
@@ -190,23 +250,38 @@ class AppStore {
     this.adminUnlocked = sessionStorage.getItem('buyurabi_admin_session') === 'true';
     this.adminPassword = '123456';
 
-    // Pricing & Capacity Plans (Admin editable)
-    const savedPricing = localStorage.getItem('buyurabi_pricing_plans');
-    this.pricingPlans = savedPricing ? JSON.parse(savedPricing) : this.getDefaultPricingPlans();
-
-    // Cross-tab Synchronization: Listen to changes in other tabs
-    if (typeof window !== 'undefined') {
-      window.addEventListener('storage', (e) => {
-        if (e.key === 'buyurabi_restaurant_registrations' || e.key === 'buyurabi_last_registered_business' || e.key === 'buyurabi_pricing_plans') {
-          this.loadFromStorage();
-          this.notify();
-        }
-      });
-    }
+    // Pricing & Capacity Plans (Dynamic from Admin Panel)
+    const savedPlans = localStorage.getItem('buyurabi_pricing_plans');
+    this.pricingPlans = savedPlans ? JSON.parse(savedPlans) : JSON.parse(JSON.stringify(DEFAULT_PLANS));
 
     if (this.supabaseConnected) {
       this.initSupabase();
     }
+  }
+
+  // --- Pricing Plans Methods ---
+  getPricingPlans() {
+    return this.pricingPlans || DEFAULT_PLANS;
+  }
+
+  savePricingPlans(newPlans) {
+    this.pricingPlans = newPlans;
+    try {
+      localStorage.setItem('buyurabi_pricing_plans', JSON.stringify(newPlans));
+    } catch (e) {
+      console.warn('Failed to save plans to localStorage:', e);
+    }
+    this.notify();
+    return true;
+  }
+
+  resetPricingPlans() {
+    this.pricingPlans = JSON.parse(JSON.stringify(DEFAULT_PLANS));
+    try {
+      localStorage.setItem('buyurabi_pricing_plans', JSON.stringify(this.pricingPlans));
+    } catch (e) {}
+    this.notify();
+    return this.pricingPlans;
   }
 
   // --- Subscriptions & State Persistence ---
@@ -228,7 +303,6 @@ class AppStore {
       localStorage.setItem('buyurabi_restaurant_orders', JSON.stringify(this.orders));
       localStorage.setItem('buyurabi_support_call_notes', JSON.stringify(this.supportNotes));
       localStorage.setItem('buyurabi_user_profiles_list', JSON.stringify(this.profiles));
-      localStorage.setItem('buyurabi_pricing_plans', JSON.stringify(this.pricingPlans));
       if (this.userProfile) {
         localStorage.setItem('buyurabi_user_profile', JSON.stringify(this.userProfile));
       } else {
@@ -242,102 +316,6 @@ class AppStore {
     } catch (e) {
       console.warn('LocalStorage save error:', e);
     }
-  }
-
-  loadFromStorage() {
-    try {
-      const savedRegs = localStorage.getItem('buyurabi_restaurant_registrations');
-      if (savedRegs) this.registrations = JSON.parse(savedRegs);
-
-      const savedLast = localStorage.getItem('buyurabi_last_registered_business');
-      if (savedLast) this.lastRegisteredBusiness = JSON.parse(savedLast);
-
-      const savedPricing = localStorage.getItem('buyurabi_pricing_plans');
-      if (savedPricing) this.pricingPlans = JSON.parse(savedPricing);
-    } catch (e) {
-      console.warn('loadFromStorage error:', e);
-    }
-  }
-
-  // --- Pricing Plans Methods ---
-  getDefaultPricingPlans() {
-    return [
-      {
-        id: 'starter',
-        name: 'Başlangıç Paketi',
-        badge: '10 MASA KAPASİTESİ',
-        icon: '🥉',
-        price: 499,
-        capacity: '10 Masa',
-        description: 'Küçük kafeler, butik lokantalar ve tek salonlu işletmeler için ideal adisyon çözümü.',
-        isPopular: false,
-        features: [
-          '10 Masaya Kadar Masa Ekleme',
-          'Masada QR ile Garson Çağırma',
-          'Garson QR ile Telefon Girişi & Sipariş Ekleme',
-          'Masalar ve Ücretleri Kasa Ekranı',
-          'Yan Panelde Açılan Adisyon & Nakit/Kart Tahsilat',
-          'Günlük Kasa Raporu'
-        ]
-      },
-      {
-        id: 'pro',
-        name: 'Profesyonel Paket',
-        badge: '25 MASA KAPASİTESİ',
-        icon: '🥈',
-        price: 899,
-        capacity: '25 Masa',
-        description: 'Orta ölçekli restoranlar, kebapçılar ve yoğun çalışan mutfaklar için tam teşekküllü otomasyon.',
-        isPopular: true,
-        features: [
-          '25 Masaya Kadar Masa Ekleme',
-          'Ciro Gizleme Butonu',
-          'Mutfak Sıcak Sayfası (Aşçı Hazırlık)',
-          'Sipariş Görme Açma/Kapama & Sipariş Silme',
-          'Menü Fiyat Ayarlama',
-          'Sınırsız Garson Tanımlama & QR Giriş',
-          'Fiş / Fatura Çıkarma',
-          'Günlük Kasa & Haftalık Ciro Raporu'
-        ]
-      },
-      {
-        id: 'enterprise',
-        name: 'Kurumsal Paket',
-        badge: 'SINIRSIZ MASA KAPASİTESİ',
-        icon: '🥇',
-        price: 1499,
-        capacity: 'Sınırsız Masa',
-        description: 'Büyük restoranlar, çok salonlu mekanlar ve zincir işletmeler için sınırsız güç.',
-        isPopular: false,
-        features: [
-          'Sınırsız Masa Ekleme',
-          'Özel Masalara Fiyat Ayarlaması (VIP/Loca)',
-          'Günlük En Çok Satılanlar Analizi',
-          'Alınan Ücretler & Tahsilat Dökümü',
-          'Çoklu Kasa & Şube Entegrasyonu',
-          'Termal Yazıcı ve Fatura Entegrasyonu',
-          '7/24 Öncelikli Telefon & Canlı Destek'
-        ]
-      }
-    ];
-  }
-
-  getPricingPlans() {
-    return this.pricingPlans || this.getDefaultPricingPlans();
-  }
-
-  savePricingPlans(newPlans) {
-    this.pricingPlans = newPlans;
-    this.saveState();
-    this.notify();
-    return true;
-  }
-
-  resetPricingPlans() {
-    this.pricingPlans = this.getDefaultPricingPlans();
-    this.saveState();
-    this.notify();
-    return true;
   }
 
   setView(viewName) {
@@ -689,17 +667,31 @@ class AppStore {
   }
 
   getLastRegisteredBusiness() {
-    if (this.lastRegisteredBusiness) return this.lastRegisteredBusiness;
-    try {
-      const saved = localStorage.getItem('buyurabi_last_registered_business');
-      return saved ? JSON.parse(saved) : null;
-    } catch (e) {
-      return null;
+    let current = this.lastRegisteredBusiness;
+    if (!current) {
+      try {
+        const saved = localStorage.getItem('buyurabi_last_registered_business');
+        current = saved ? JSON.parse(saved) : null;
+      } catch (e) {
+        current = null;
+      }
     }
+    // Always sync with live registrations list for up-to-date status (approved/pending)
+    if (current && this.registrations && this.registrations.length > 0) {
+      const live = this.registrations.find(r => r.id === current.id);
+      if (live) {
+        current = { ...current, ...live };
+        this.lastRegisteredBusiness = current;
+      }
+    }
+    return current;
   }
 
   setLastRegisteredBusiness(reg) {
     this.lastRegisteredBusiness = reg;
+    try {
+      localStorage.setItem('buyurabi_last_registered_business', JSON.stringify(reg));
+    } catch (e) {}
     this.notify();
   }
 
@@ -750,14 +742,14 @@ class AppStore {
 
       if (data) {
         this.registrations = data.map(item => this.fromDbRow(item));
-        // Keep lastRegisteredBusiness in sync with fresh database status
+        // Live sync lastRegisteredBusiness
         if (this.lastRegisteredBusiness) {
-          const matched = this.registrations.find(r => r.id === this.lastRegisteredBusiness.id);
-          if (matched) {
-            this.lastRegisteredBusiness = { ...this.lastRegisteredBusiness, ...matched };
+          const live = this.registrations.find(r => r.id === this.lastRegisteredBusiness.id);
+          if (live) {
+            this.lastRegisteredBusiness = { ...this.lastRegisteredBusiness, ...live };
+            localStorage.setItem('buyurabi_last_registered_business', JSON.stringify(this.lastRegisteredBusiness));
           }
         }
-        this.saveState();
         this.notify();
       }
     } catch (err) {

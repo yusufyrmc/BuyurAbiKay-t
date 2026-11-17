@@ -345,7 +345,7 @@ export function renderLandingPage(container) {
       </div>
     </div>
 
-    <!-- MASA EKLEME İÇİN KULLANIM VE KAPASİTE PLANLARI -->
+    <!-- MASA EKLEME İÇİN KULLANIM VE KAPASİTE PLANLARI (DİNAMİK) -->
     <div style="margin:5rem 0 3rem 0;">
       <div style="text-align:center; max-width:650px; margin:0 auto 2.5rem auto;">
         <h2 style="font-family:var(--font-heading); font-size:2.2rem; font-weight:900; color:#fff; margin-bottom:0.6rem;">
@@ -357,95 +357,47 @@ export function renderLandingPage(container) {
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
-        <!-- PLAN 1: BAŞLANGIÇ -->
-        <div style="background:var(--color-bg-card); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-lg); padding:2rem; position:relative; display:flex; flex-direction:column; justify-content:space-between;">
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
-              <span style="font-size:1.4rem;">🥉</span>
-              <span style="font-size:0.75rem; background:rgba(255,255,255,0.06); color:var(--color-text-muted); padding:3px 8px; border-radius:6px; font-weight:700;">10 MASA KAPASİTESİ</span>
-            </div>
-            <h3 style="font-family:var(--font-heading); font-size:1.3rem; font-weight:800; color:#fff;">Başlangıç Paketi</h3>
-            <div style="font-size:1.8rem; font-weight:900; color:var(--color-primary); margin:0.8rem 0;">
-              ₺499 <span style="font-size:0.85rem; color:var(--color-text-muted); font-weight:500;">/ay</span>
-            </div>
-            <p style="font-size:0.84rem; color:var(--color-text-muted); line-height:1.5; margin-bottom:1.2rem;">
-              Küçük kafeler, butik lokantalar ve tek salonlu işletmeler için ideal adisyon çözümü.
-            </p>
-            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.6rem; font-size:0.85rem; color:var(--color-text-main);">
-              <li>✓ <strong>10 Masaya Kadar</strong> Masa Ekleme</li>
-              <li>✓ Masada QR ile Garson Çağırma</li>
-              <li>✓ Garson QR ile Telefon Girişi & Sipariş Ekleme</li>
-              <li>✓ Masalar ve Ücretleri Kasa Ekranı</li>
-              <li>✓ Yan Panelde Açılan Adisyon & Nakit/Kart Tahsilat</li>
-              <li>✓ Günlük Kasa Raporu</li>
-            </ul>
-          </div>
-          <button class="btn-primary-hero btn-plan-select-cta" data-plan="Başlangıç Paketi (10 Masa - ₺499/ay)" data-price="499" style="width:100%; justify-content:center; margin-top:1.8rem;">
-            Başlangıç Planını Seç
-          </button>
-        </div>
+        ${store.getPricingPlans().map((plan, idx) => {
+          const medal = idx === 0 ? '🥉' : (idx === 1 ? '🥈' : '🥇');
+          const isPop = !!plan.popular;
+          const priceColor = idx === 0 ? 'var(--color-primary)' : (idx === 1 ? 'var(--color-accent-green)' : 'var(--color-accent-cyan)');
+          const borderColor = isPop ? 'var(--color-primary)' : (idx === 2 ? 'rgba(0,229,255,0.3)' : 'rgba(255,255,255,0.08)');
+          const borderStyle = isPop ? '2px solid var(--color-primary)' : `1px solid ${borderColor}`;
+          const shadowStyle = isPop ? 'box-shadow:var(--shadow-glow);' : '';
+          const btnBg = idx === 2 ? 'background:linear-gradient(135deg, #00E5FF 0%, #3B82F6 100%);' : '';
+          const planFullName = `${plan.name} (${plan.badge || ''} - ₺${plan.price}${plan.period || '/ay'})`;
 
-        <!-- PLAN 2: PROFESYONEL (POPÜLER) -->
-        <div style="background:var(--color-bg-card); border:2px solid var(--color-primary); border-radius:var(--radius-lg); padding:2rem; position:relative; display:flex; flex-direction:column; justify-content:space-between; box-shadow:var(--shadow-glow);">
-          <div style="position:absolute; top:-12px; right:20px; background:var(--color-primary); color:#fff; font-size:0.7rem; font-weight:900; padding:3px 12px; border-radius:12px; letter-spacing:0.5px;">
-            EN ÇOK TERCİH EDİLEN
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
-              <span style="font-size:1.4rem;">🥈</span>
-              <span style="font-size:0.75rem; background:rgba(0,230,118,0.15); color:var(--color-accent-green); padding:3px 8px; border-radius:6px; font-weight:800;">25 MASA KAPASİTESİ</span>
+          return `
+            <div style="background:var(--color-bg-card); border:${borderStyle}; border-radius:var(--radius-lg); padding:2rem; position:relative; display:flex; flex-direction:column; justify-content:space-between; ${shadowStyle}">
+              ${isPop ? `
+                <div style="position:absolute; top:-12px; right:20px; background:var(--color-primary); color:#fff; font-size:0.7rem; font-weight:900; padding:3px 12px; border-radius:12px; letter-spacing:0.5px;">
+                  EN ÇOK TERCİH EDİLEN
+                </div>
+              ` : ''}
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+                  <span style="font-size:1.4rem;">${medal}</span>
+                  <span style="font-size:0.75rem; background:${idx === 1 ? 'rgba(0,230,118,0.15)' : (idx === 2 ? 'rgba(0,229,255,0.15)' : 'rgba(255,255,255,0.06)')}; color:${idx === 1 ? 'var(--color-accent-green)' : (idx === 2 ? 'var(--color-accent-cyan)' : 'var(--color-text-muted)')}; padding:3px 8px; border-radius:6px; font-weight:800;">
+                    ${plan.badge || 'KAPASİTE PLANI'}
+                  </span>
+                </div>
+                <h3 style="font-family:var(--font-heading); font-size:1.3rem; font-weight:800; color:#fff;">${plan.name}</h3>
+                <div style="font-size:1.8rem; font-weight:900; color:${priceColor}; margin:0.8rem 0;">
+                  ₺${Number(plan.price).toLocaleString('tr-TR')} <span style="font-size:0.85rem; color:var(--color-text-muted); font-weight:500;">${plan.period || '/ay'}</span>
+                </div>
+                <p style="font-size:0.84rem; color:var(--color-text-muted); line-height:1.5; margin-bottom:1.2rem;">
+                  ${plan.description || ''}
+                </p>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.6rem; font-size:0.85rem; color:var(--color-text-main);">
+                  ${(plan.features || []).map(feat => `<li>✓ ${feat}</li>`).join('')}
+                </ul>
+              </div>
+              <button class="btn-primary-hero btn-plan-select-cta" data-plan="${planFullName}" data-price="${plan.price}" style="width:100%; justify-content:center; margin-top:1.8rem; ${btnBg}">
+                ${plan.name} Planını Seç
+              </button>
             </div>
-            <h3 style="font-family:var(--font-heading); font-size:1.3rem; font-weight:800; color:#fff;">Profesyonel Paket</h3>
-            <div style="font-size:1.8rem; font-weight:900; color:var(--color-accent-green); margin:0.8rem 0;">
-              ₺899 <span style="font-size:0.85rem; color:var(--color-text-muted); font-weight:500;">/ay</span>
-            </div>
-            <p style="font-size:0.84rem; color:var(--color-text-muted); line-height:1.5; margin-bottom:1.2rem;">
-              Orta ölçekli restoranlar, kebapçılar ve yoğun çalışan mutfaklar için tam teşekküllü otomasyon.
-            </p>
-            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.6rem; font-size:0.85rem; color:var(--color-text-main);">
-              <li>✓ <strong>25 Masaya Kadar</strong> Masa Ekleme</li>
-              <li>✓ <strong>Ciro Gizleme Butonu</strong></li>
-              <li>✓ <strong>Mutfak Sıcak Sayfası</strong> (Aşçı Hazırlık)</li>
-              <li>✓ Sipariş Görme Açma/Kapama & Sipariş Silme</li>
-              <li>✓ Menü Fiyat Ayarlama</li>
-              <li>✓ Sınırsız Garson Tanımlama & QR Giriş</li>
-              <li>✓ Fiş / Fatura Çıkarma</li>
-              <li>✓ Günlük Kasa & Haftalık Ciro Raporu</li>
-            </ul>
-          </div>
-          <button class="btn-primary-hero btn-plan-select-cta" data-plan="Profesyonel Paket (25 Masa - ₺899/ay)" data-price="899" style="width:100%; justify-content:center; margin-top:1.8rem;">
-            Profesyonel Planı Seç
-          </button>
-        </div>
-
-        <!-- PLAN 3: KURUMSAL -->
-        <div style="background:var(--color-bg-card); border:1px solid rgba(0,229,255,0.3); border-radius:var(--radius-lg); padding:2rem; position:relative; display:flex; flex-direction:column; justify-content:space-between;">
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
-              <span style="font-size:1.4rem;">🥇</span>
-              <span style="font-size:0.75rem; background:rgba(0,229,255,0.15); color:var(--color-accent-cyan); padding:3px 8px; border-radius:6px; font-weight:800;">SINIRSIZ MASA KAPASİTESİ</span>
-            </div>
-            <h3 style="font-family:var(--font-heading); font-size:1.3rem; font-weight:800; color:#fff;">Kurumsal Paket</h3>
-            <div style="font-size:1.8rem; font-weight:900; color:var(--color-accent-cyan); margin:0.8rem 0;">
-              ₺1.499 <span style="font-size:0.85rem; color:var(--color-text-muted); font-weight:500;">/ay</span>
-            </div>
-            <p style="font-size:0.84rem; color:var(--color-text-muted); line-height:1.5; margin-bottom:1.2rem;">
-              Büyük restoranlar, çok salonlu mekanlar ve zincir işletmeler için sınırsız güç.
-            </p>
-            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.6rem; font-size:0.85rem; color:var(--color-text-main);">
-              <li>✓ <strong>Sınırsız Masa Ekleme</strong></li>
-              <li>✓ <strong>Özel Masalara Fiyat Ayarlaması</strong> (VIP/Loca)</li>
-              <li>✓ Günlük En Çok Satılanlar Analizi</li>
-              <li>✓ Alınan Ücretler & Tahsilat Dökümü</li>
-              <li>✓ Çoklu Kasa & Şube Entegrasyonu</li>
-              <li>✓ Termal Yazıcı ve Fatura Entegrasyonu</li>
-              <li>✓ 7/24 Öncelikli Telefon & Canlı Destek</li>
-            </ul>
-          </div>
-          <button class="btn-primary-hero btn-plan-select-cta" data-plan="Kurumsal Paket (Sınırsız Masa - ₺1.499/ay)" data-price="1499" style="width:100%; justify-content:center; margin-top:1.8rem; background:linear-gradient(135deg, #00E5FF 0%, #3B82F6 100%);">
-            Kurumsal Planı Seç
-          </button>
-        </div>
+          `;
+        }).join('')}
       </div>
     </div>
 
@@ -497,7 +449,12 @@ export function renderLandingPage(container) {
   });
 
   container.querySelectorAll('.btn-plan-select-cta').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      const selectedPlan = e.currentTarget.dataset.plan;
+      const selectedPrice = Number(e.currentTarget.dataset.price);
+      if (selectedPlan) {
+        sessionStorage.setItem('buyurabi_selected_plan', JSON.stringify({ plan: selectedPlan, price: selectedPrice }));
+      }
       store.setView('register');
     });
   });
