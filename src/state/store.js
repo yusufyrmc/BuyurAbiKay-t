@@ -666,6 +666,32 @@ class AppStore {
     };
   }
 
+  reloadFromLocalStorage() {
+    try {
+      const savedRegs = localStorage.getItem('buyurabi_restaurant_registrations');
+      if (savedRegs) this.registrations = JSON.parse(savedRegs);
+
+      const savedLast = localStorage.getItem('buyurabi_last_registered_business');
+      if (savedLast) this.lastRegisteredBusiness = JSON.parse(savedLast);
+
+      const savedProfiles = localStorage.getItem('buyurabi_user_profiles_list');
+      if (savedProfiles) this.profiles = JSON.parse(savedProfiles);
+
+      const savedUser = localStorage.getItem('buyurabi_user_profile');
+      if (savedUser) this.userProfile = JSON.parse(savedUser);
+
+      if (this.lastRegisteredBusiness && this.registrations) {
+        const live = this.registrations.find(r => r.id === this.lastRegisteredBusiness.id);
+        if (live) {
+          this.lastRegisteredBusiness = { ...this.lastRegisteredBusiness, ...live };
+        }
+      }
+      this.listeners.forEach(l => l(this));
+    } catch (e) {
+      console.warn('reloadFromLocalStorage error:', e);
+    }
+  }
+
   getLastRegisteredBusiness() {
     let current = this.lastRegisteredBusiness;
     if (!current) {
@@ -676,7 +702,18 @@ class AppStore {
         current = null;
       }
     }
-    // Always sync with live registrations list for up-to-date status (approved/pending)
+
+    try {
+      const savedRegs = localStorage.getItem('buyurabi_restaurant_registrations');
+      if (savedRegs) {
+        const parsed = JSON.parse(savedRegs);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.registrations = parsed;
+        }
+      }
+    } catch (e) {}
+
+    // Always sync with live registrations list for up-to-date status (approved/pending/rejected)
     if (current && this.registrations && this.registrations.length > 0) {
       const live = this.registrations.find(r => r.id === current.id);
       if (live) {
@@ -743,10 +780,17 @@ class AppStore {
       if (data) {
         this.registrations = data.map(item => this.fromDbRow(item));
         // Live sync lastRegisteredBusiness
-        if (this.lastRegisteredBusiness) {
-          const live = this.registrations.find(r => r.id === this.lastRegisteredBusiness.id);
+        let currentLast = this.lastRegisteredBusiness;
+        if (!currentLast) {
+          try {
+            const saved = localStorage.getItem('buyurabi_last_registered_business');
+            currentLast = saved ? JSON.parse(saved) : null;
+          } catch (e) {}
+        }
+        if (currentLast) {
+          const live = this.registrations.find(r => r.id === currentLast.id);
           if (live) {
-            this.lastRegisteredBusiness = { ...this.lastRegisteredBusiness, ...live };
+            this.lastRegisteredBusiness = { ...currentLast, ...live };
             localStorage.setItem('buyurabi_last_registered_business', JSON.stringify(this.lastRegisteredBusiness));
           }
         }
@@ -829,6 +873,16 @@ class AppStore {
       if (this.lastRegisteredBusiness?.id === id) {
         this.lastRegisteredBusiness.status = 'onaylandi';
       }
+      try {
+        const savedLast = localStorage.getItem('buyurabi_last_registered_business');
+        if (savedLast) {
+          const parsed = JSON.parse(savedLast);
+          if (parsed && parsed.id === id) {
+            parsed.status = 'onaylandi';
+            localStorage.setItem('buyurabi_last_registered_business', JSON.stringify(parsed));
+          }
+        }
+      } catch (e) {}
       this.notify();
 
       if (this.supabaseConnected && supabase) {
@@ -858,6 +912,16 @@ class AppStore {
       if (this.lastRegisteredBusiness?.id === id) {
         this.lastRegisteredBusiness.status = 'reddedildi';
       }
+      try {
+        const savedLast = localStorage.getItem('buyurabi_last_registered_business');
+        if (savedLast) {
+          const parsed = JSON.parse(savedLast);
+          if (parsed && parsed.id === id) {
+            parsed.status = 'reddedildi';
+            localStorage.setItem('buyurabi_last_registered_business', JSON.stringify(parsed));
+          }
+        }
+      } catch (e) {}
       this.notify();
 
       if (this.supabaseConnected && supabase) {

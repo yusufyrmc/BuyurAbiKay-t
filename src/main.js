@@ -22,9 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerCtaSpan = document.querySelector('#btn-header-cta span');
     if (lastReg && lastReg.id) {
       const isApproved = lastReg.status === 'onaylandi';
+      const isRejected = lastReg.status === 'reddedildi';
       if (regBtnSpan) {
         if (isApproved) {
           regBtnSpan.innerHTML = `Kayıt / ID Kartı <span style="background:rgba(0,230,118,0.2); color:var(--color-accent-green); padding:1px 6px; border-radius:6px; font-size:0.75rem; font-weight:800; margin-left:4px; font-family:monospace;">${lastReg.id}</span>`;
+        } else if (isRejected) {
+          regBtnSpan.innerHTML = `İşletme Kaydı <span style="background:rgba(239,68,68,0.2); color:var(--color-danger); padding:1px 6px; border-radius:6px; font-size:0.75rem; font-weight:800; margin-left:4px;">❌ Reddedildi</span>`;
         } else {
           regBtnSpan.innerHTML = `Başvuru Durumu <span style="background:rgba(245,158,11,0.2); color:#F59E0B; padding:1px 6px; border-radius:6px; font-size:0.75rem; font-weight:800; margin-left:4px;">⏳ İnceleniyor</span>`;
         }
@@ -32,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (headerCtaSpan) {
         if (isApproved) {
           headerCtaSpan.innerHTML = `İşletme ID: <strong style="color:var(--color-accent-green); font-family:monospace;">${lastReg.id}</strong>`;
+        } else if (isRejected) {
+          headerCtaSpan.innerHTML = `<span style="color:var(--color-danger); font-weight:800;">❌ Tekrar Kayıt Yap</span>`;
         } else {
           headerCtaSpan.innerHTML = `<span style="color:#F59E0B; font-weight:800;">⏳ Onay Bekleniyor</span>`;
         }
@@ -254,8 +259,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                   </div>
                 ` : `
-                  <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:var(--radius-sm); padding:0.75rem 1rem; font-size:0.8rem; color:var(--color-danger);">
-                    ❌ Bu başvuru sistem yöneticisi tarafından onaylanmadı. Detaylar için müşteri hizmetlerimizle iletişime geçebilirsiniz.
+                  <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.4); border-radius:var(--radius-sm); padding:0.9rem 1.1rem;">
+                    <div style="font-size:0.82rem; color:var(--color-danger); font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                      <i data-lucide="x-circle" style="width:16px; height:16px;"></i> BAŞVURUNUZ YÖNETİCİ TARAFINDAN REDDEDİLDİ
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--color-text-main); margin:0 0 10px 0; line-height:1.4;">
+                      Bu işletme başvurusu yönetici tarafından reddedilmiştir. Bilgilerinizi kontrol ederek lütfen <strong>tekrar işletme kaydı yapınız</strong>.
+                    </p>
+                    <button class="pill-btn btn-modal-reapply-app" data-app-id="${app.id}" style="background:linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border:none; color:#fff; font-size:0.8rem; font-weight:800; padding:0.5rem 1rem; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 0 15px rgba(239,68,68,0.3);">
+                      <i data-lucide="refresh-cw" style="width:14px; height:14px;"></i> Tekrar İşletme Kaydı Yap
+                    </button>
                   </div>
                 `}
               </div>
@@ -301,6 +314,15 @@ document.addEventListener('DOMContentLoaded', () => {
       appModalBackdrop.style.display = 'none';
       store.clearLastRegisteredBusiness();
       store.setView('register');
+    });
+
+    // Reapply button event on rejected card
+    appModalBody.querySelectorAll('.btn-modal-reapply-app').forEach(btn => {
+      btn.addEventListener('click', () => {
+        appModalBackdrop.style.display = 'none';
+        store.clearLastRegisteredBusiness();
+        store.setView('register');
+      });
     });
   }
 
@@ -384,6 +406,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Listen to window focus for real-time status updates (e.g. admin approved in another tab)
   window.addEventListener('focus', () => {
     store.fetchRegistrations();
+  });
+
+  // Listen to storage changes across tabs (e.g. admin rejected or approved in another tab/window)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'buyurabi_restaurant_registrations' || e.key === 'buyurabi_last_registered_business') {
+      store.reloadFromLocalStorage();
+    }
   });
 
   // Initial setup

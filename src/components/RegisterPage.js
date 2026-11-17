@@ -406,34 +406,47 @@ export function renderRegisterPage(container) {
 
               return `
                 <div style="text-align:center; padding:0.5rem 0;">
-                  <div style="width:74px; height:74px; background:${isApproved ? 'rgba(0,230,118,0.15)' : 'rgba(245,158,11,0.15)'}; color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; border:2px solid ${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; box-shadow:0 0 35px ${isApproved ? 'rgba(0,230,118,0.35)' : 'rgba(245,158,11,0.35)'};">
-                    <i data-lucide="${isApproved ? 'check-check' : 'clock'}" style="width:42px; height:42px;"></i>
+                  <div style="width:74px; height:74px; background:${isApproved ? 'rgba(0,230,118,0.15)' : (isRejected ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)')}; color:${isApproved ? 'var(--color-accent-green)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')}; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto; border:2px solid ${isApproved ? 'var(--color-accent-green)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')}; box-shadow:0 0 35px ${isApproved ? 'rgba(0,230,118,0.35)' : (isRejected ? 'rgba(239,68,68,0.35)' : 'rgba(245,158,11,0.35)')};">
+                    <i data-lucide="${isApproved ? 'check-check' : (isRejected ? 'x-circle' : 'clock')}" style="width:42px; height:42px;"></i>
                   </div>
 
-                  <h2 class="wizard-title" style="color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; font-size:1.8rem; margin-bottom:0.3rem;">
-                    ${isApproved ? 'Dijital Adisyon Lisansınız Onaylandı! 🎉' : 'İşletme Başvurunuz Alındı! ⏳'}
+                  <h2 class="wizard-title" style="color:${isApproved ? 'var(--color-accent-green)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')}; font-size:1.8rem; margin-bottom:0.3rem;">
+                    ${isApproved ? 'Dijital Adisyon Lisansınız Onaylandı! 🎉' : (isRejected ? 'İşletme Başvurunuz Reddedildi ❌' : 'İşletme Başvurunuz Alındı! ⏳')}
                   </h2>
                   <p class="wizard-subtitle" style="max-width:580px; margin:0 auto 1.2rem auto; font-size:0.95rem;">
                     ${isApproved 
                       ? `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> için yetkili onayı tamamlanmış ve kasa lisans kodunuz aktif edilmiştir.` 
-                      : `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> için başvurunuz alındı. <strong>Admin onayından sonra işletme kodunuz aktif olacaktır.</strong> Durumunuzu sağ üstteki <strong>"Başvurularım"</strong> sekmesinden takip edebilirsiniz.`
+                      : (isRejected
+                        ? `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> başvurusu yönetici tarafından reddedilmiştir. Lütfen bilgilerinizi kontrol ederek tekrar işletme kaydı yapınız.`
+                        : `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> için başvurunuz alındı. <strong>Admin onayından sonra işletme kodunuz aktif olacaktır.</strong> Durumunuzu sağ üstteki <strong>"Başvurularım"</strong> sekmesinden takip edebilirsiniz.`
+                      )
                     }
                   </p>
 
                   <!-- PERSISTENT NOTICE BANNER -->
-                  <div style="background:${isApproved ? 'rgba(0,230,118,0.1)' : 'rgba(245,158,11,0.1)'}; border:1px solid ${isApproved ? 'rgba(0,230,118,0.35)' : 'rgba(245,158,11,0.35)'}; border-radius:var(--radius-md); padding:0.85rem 1.2rem; margin-bottom:1.5rem; text-align:left; display:flex; align-items:center; gap:0.85rem;">
-                    <i data-lucide="${isApproved ? 'shield-check' : 'alert-circle'}" style="width:28px; height:28px; color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; flex-shrink:0;"></i>
+                  <div style="background:${isApproved ? 'rgba(0,230,118,0.1)' : (isRejected ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.1)')}; border:1px solid ${isApproved ? 'rgba(0,230,118,0.35)' : (isRejected ? 'rgba(239,68,68,0.45)' : 'rgba(245,158,11,0.35)')}; border-radius:var(--radius-md); padding:0.85rem 1.2rem; margin-bottom:1.5rem; text-align:left; display:flex; align-items:center; gap:0.85rem;">
+                    <i data-lucide="${isApproved ? 'shield-check' : (isRejected ? 'alert-triangle' : 'alert-circle')}" style="width:28px; height:28px; color:${isApproved ? 'var(--color-accent-green)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')}; flex-shrink:0;"></i>
                     <div style="font-size:0.86rem; color:var(--color-text-main); line-height:1.4;">
                       ${isApproved 
                         ? `<strong style="color:var(--color-accent-green); display:block; margin-bottom:2px;">📌 Lisansınız Onaylandı ve Kullanıma Hazır</strong>Bu işletme kodu ve şifre ile kasanızı, masalarınızı ve garson girişlerinizi hemen başlatabilirsiniz.` 
-                        : `<strong style="color:#F59E0B; display:block; margin-bottom:2px;">📌 Yetkili Onayı Bekleniyor (Kod Kilitli)</strong>Sistem güvenliği için işletme lisans kodları yönetici onayından sonra açılmaktadır. Onay verildiğinde kodunuz otomatik olarak aktifleşecektir.`
+                        : (isRejected
+                          ? `<strong style="color:var(--color-danger); display:block; margin-bottom:2px;">⛔ İşletme Başvurusu Yönetici Tarafından Reddedildi</strong>Bu işletme kaydı yönetici tarafından onaylanmadı. Yeni bir işletme tanımlamak için lütfen aşağıdaki butona tıklayarak <strong>tekrar işletme kaydı yapınız</strong>.`
+                          : `<strong style="color:#F59E0B; display:block; margin-bottom:2px;">📌 Yetkili Onayı Bekleniyor (Kod Kilitli)</strong>Sistem güvenliği için işletme lisans kodları yönetici onayından sonra açılmaktadır. Onay verildiğinde kodunuz otomatik olarak aktifleşecektir.`
+                        )
                       }
                     </div>
                   </div>
 
+                  ${isRejected ? `
+                    <!-- REAPPLY ACTION CARD -->
+                    <button class="btn-primary-hero" id="btn-step5-reapply" style="width:100%; justify-content:center; padding:1.05rem; background:linear-gradient(135deg, #EF4444 0%, #DC2626 100%); margin-bottom:1.2rem; font-size:1rem; font-weight:800; box-shadow:0 0 25px rgba(239,68,68,0.4);">
+                      <i data-lucide="refresh-cw"></i> Tekrar İşletme Kaydı Yap
+                    </button>
+                  ` : ''}
+
                   <!-- CREDENTIALS DISPLAY BOX -->
-                  <div style="background:rgba(0,0,0,0.55); border:1px solid ${isApproved ? 'rgba(0,230,118,0.45)' : 'rgba(245,158,11,0.45)'}; box-shadow:0 0 30px ${isApproved ? 'rgba(0,230,118,0.15)' : 'rgba(245,158,11,0.15)'}; border-radius:var(--radius-lg); padding:1.5rem 1.8rem; margin-bottom:1.5rem; text-align:left; position:relative; overflow:hidden;">
-                    <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:${isApproved ? 'var(--color-accent-green)' : 'linear-gradient(90deg, #F59E0B, #FF6B00)'};"></div>
+                  <div style="background:rgba(0,0,0,0.55); border:1px solid ${isApproved ? 'rgba(0,230,118,0.45)' : (isRejected ? 'rgba(239,68,68,0.45)' : 'rgba(245,158,11,0.45)')}; box-shadow:0 0 30px ${isApproved ? 'rgba(0,230,118,0.15)' : (isRejected ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)')}; border-radius:var(--radius-lg); padding:1.5rem 1.8rem; margin-bottom:1.5rem; text-align:left; position:relative; overflow:hidden;">
+                    <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:${isApproved ? 'var(--color-accent-green)' : (isRejected ? 'var(--color-danger)' : 'linear-gradient(90deg, #F59E0B, #FF6B00)')};"></div>
 
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
                       <div>
@@ -444,30 +457,34 @@ export function renderRegisterPage(container) {
                         <span style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-size:0.75rem; font-weight:800; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
                           ● AKTİF LİSANS ALINDI
                         </span>
+                      ` : (isRejected ? `
+                        <span style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:var(--color-danger); font-size:0.75rem; font-weight:800; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
+                          ❌ BAŞVURU REDDEDİLDİ
+                        </span>
                       ` : `
                         <span style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:#F59E0B; font-size:0.75rem; font-weight:800; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
                           ⏳ YÖNETİCİ ONAYI BEKLENİYOR
                         </span>
-                      `}
+                      `)}
                     </div>
 
                     <!-- 1. FIELD: ISLETME KODU (ID) - ADMIN ONAYLAMADAN VERİLMEZ -->
                     <div style="margin-bottom:1.2rem;">
                       <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
-                        <i data-lucide="${isApproved ? 'hash' : 'lock'}" style="width:15px; height:15px; vertical-align:middle; color:${isApproved ? 'var(--color-primary)' : '#F59E0B'};"></i> 
+                        <i data-lucide="${isApproved ? 'hash' : (isRejected ? 'x-circle' : 'lock')}" style="width:15px; height:15px; vertical-align:middle; color:${isApproved ? 'var(--color-primary)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')};"></i> 
                         İşletme Kodu (ID) - Kasa & Garson Giriş Kodu:
                       </label>
-                      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.06); border:1.5px solid ${isApproved ? 'rgba(255,107,0,0.5)' : 'rgba(245,158,11,0.4)'}; border-radius:var(--radius-md); padding:0.75rem 1.2rem;">
-                        <span id="display-business-id" style="font-family:monospace; font-size:${isApproved ? '1.6rem' : '1.1rem'}; font-weight:900; color:${isApproved ? 'var(--color-primary)' : '#F59E0B'}; letter-spacing:1px; flex:1;">
-                          ${isApproved ? (activeReg.id || 'BYR-0000') : '🔒 Onay Bekleniyor (Admin Onaylayınca Açılacak)'}
+                      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.06); border:1.5px solid ${isApproved ? 'rgba(255,107,0,0.5)' : (isRejected ? 'rgba(239,68,68,0.4)' : 'rgba(245,158,11,0.4)')}; border-radius:var(--radius-md); padding:0.75rem 1.2rem;">
+                        <span id="display-business-id" style="font-family:monospace; font-size:${isApproved ? '1.6rem' : '1.1rem'}; font-weight:900; color:${isApproved ? 'var(--color-primary)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')}; letter-spacing:1px; flex:1;">
+                          ${isApproved ? (activeReg.id || 'BYR-0000') : (isRejected ? '🔒 Reddedildi (Kod Verilmedi)' : '🔒 Onay Bekleniyor (Admin Onaylayınca Açılacak)')}
                         </span>
                         ${isApproved ? `
                           <button id="btn-copy-id" class="pill-btn" style="background:rgba(255,107,0,0.2); border:1px solid rgba(255,107,0,0.5); color:var(--color-primary); font-weight:800; padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
                             <i data-lucide="copy" style="width:15px; height:15px;"></i> <span id="copy-id-text">Kopyala</span>
                           </button>
                         ` : `
-                          <button id="btn-check-my-apps-trigger" class="pill-btn" style="background:rgba(245,158,11,0.2); border:1px solid rgba(245,158,11,0.5); color:#F59E0B; font-weight:800; padding:0.5rem 1rem; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
-                            <i data-lucide="clock" style="width:14px; height:14px;"></i> Durumu Gör
+                          <button id="btn-check-my-apps-trigger" class="pill-btn" style="background:${isRejected ? 'rgba(239,68,68,0.18)' : 'rgba(245,158,11,0.2)'}; border:1px solid ${isRejected ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.5)'}; color:${isRejected ? 'var(--color-danger)' : '#F59E0B'}; font-weight:800; padding:0.5rem 1rem; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
+                            <i data-lucide="${isRejected ? 'clipboard-list' : 'clock'}" style="width:14px; height:14px;"></i> Durumu Gör
                           </button>
                         `}
                       </div>
@@ -476,15 +493,17 @@ export function renderRegisterPage(container) {
                     <!-- 2. FIELD: SIFRE -->
                     <div style="margin-bottom:1.2rem;">
                       <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
-                        <i data-lucide="lock" style="width:15px; height:15px; vertical-align:middle; color:var(--color-accent-green);"></i> Kasa & Sistem Giriş Şifreniz:
+                        <i data-lucide="lock" style="width:15px; height:15px; vertical-align:middle; color:${isApproved ? 'var(--color-accent-green)' : (isRejected ? 'var(--color-danger)' : 'var(--color-text-muted)')};"></i> Kasa & Sistem Giriş Şifreniz:
                       </label>
                       <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:var(--radius-md); padding:0.65rem 1.2rem;">
-                        <span id="display-password" style="font-family:monospace; font-size:1.3rem; font-weight:800; color:#fff; letter-spacing:2px; flex:1;">
-                          ${showPasswordInStep5 ? (formData.password || activeReg.password || '••••••') : '•'.repeat(Math.max((formData.password || activeReg.password || '123456').length, 6))}
+                        <span id="display-password" style="font-family:monospace; font-size:1.3rem; font-weight:800; color:${isRejected ? 'var(--color-text-dim)' : '#fff'}; letter-spacing:2px; flex:1;">
+                          ${isRejected ? '•••••• (Lisans İptal)' : (showPasswordInStep5 ? (formData.password || activeReg.password || '••••••') : '•'.repeat(Math.max((formData.password || activeReg.password || '123456').length, 6)))}
                         </span>
-                        <button id="btn-toggle-show-pass" class="pill-btn" style="background:rgba(255,255,255,0.08); border:var(--border-glass); color:var(--color-text-muted); padding:0.5rem 0.8rem; font-size:0.82rem; cursor:pointer; border-radius:var(--radius-sm);" title="${showPasswordInStep5 ? 'Gizle' : 'Göster'}">
-                          <i data-lucide="${showPasswordInStep5 ? 'eye-off' : 'eye'}" style="width:15px; height:15px;"></i>
-                        </button>
+                        ${!isRejected ? `
+                          <button id="btn-toggle-show-pass" class="pill-btn" style="background:rgba(255,255,255,0.08); border:var(--border-glass); color:var(--color-text-muted); padding:0.5rem 0.8rem; font-size:0.82rem; cursor:pointer; border-radius:var(--radius-sm);" title="${showPasswordInStep5 ? 'Gizle' : 'Göster'}">
+                            <i data-lucide="${showPasswordInStep5 ? 'eye-off' : 'eye'}" style="width:15px; height:15px;"></i>
+                          </button>
+                        ` : ''}
                         ${isApproved ? `
                           <button id="btn-copy-pass" class="pill-btn" style="background:rgba(0,230,118,0.18); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-weight:800; padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
                             <i data-lucide="copy" style="width:15px; height:15px;"></i> <span id="copy-pass-text">Kopyala</span>
@@ -501,7 +520,7 @@ export function renderRegisterPage(container) {
                       <div><span style="color:var(--color-text-muted);">Telefon Numarası:</span> <strong style="color:#fff; display:block;">${activeProfile?.phone || activeReg.phone || 'Belirtilmedi'}</strong></div>
                       <div><span style="color:var(--color-text-muted);">İşletme Türü:</span> <strong style="color:#fff; display:block;">${activeReg.businessType || formData.businessType || 'Restoran'}</strong></div>
                       <div><span style="color:var(--color-text-muted);">Masa Kapasite Planı:</span> <strong style="color:var(--color-accent-green); display:block;">${activeReg.plan || formData.plan || 'Profesyonel'}</strong></div>
-                      <div style="grid-column:1 / -1;"><span style="color:var(--color-text-muted);">Onay Durumu:</span> <strong style="color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; display:block;">${isApproved ? '✅ Onaylandı (Kod Kullanıma Açık)' : '⏳ İncelemede (Yönetici Onayından Sonra Kod Açılacaktır)'}</strong></div>
+                      <div style="grid-column:1 / -1;"><span style="color:var(--color-text-muted);">Onay Durumu:</span> <strong style="color:${isApproved ? 'var(--color-accent-green)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')}; display:block;">${isApproved ? '✅ Onaylandı (Kod Kullanıma Açık)' : (isRejected ? '❌ Yönetici Tarafından Reddedildi (Lütfen Tekrar İşletme Kaydı Yapınız)' : '⏳ İncelemede (Yönetici Onayından Sonra Kod Açılacaktır)')}</strong></div>
                     </div>
 
                     <!-- ACTION BUTTONS ROW -->
@@ -526,8 +545,8 @@ export function renderRegisterPage(container) {
                       <i data-lucide="home"></i> Tanıtım Sayfasına Git
                     </button>
 
-                    <button class="btn-secondary-hero" id="btn-new-registration" style="flex:1; min-width:200px; justify-content:center; border-color:rgba(255,255,255,0.15);">
-                      <i data-lucide="plus-circle"></i> Yeni İşletme Kaydı Yap
+                    <button class="btn-secondary-hero" id="btn-new-registration" style="flex:1; min-width:200px; justify-content:center; border-color:${isRejected ? 'var(--color-danger)' : 'rgba(255,255,255,0.15)'}; color:${isRejected ? '#fff' : ''}; background:${isRejected ? 'rgba(239,68,68,0.15)' : ''};">
+                      <i data-lucide="plus-circle"></i> ${isRejected ? 'Tekrar İşletme Kaydı Yap' : 'Yeni İşletme Kaydı Yap'}
                     </button>
                   </div>
                 </div>
@@ -1056,9 +1075,27 @@ Lütfen bu dosyayı güvenli bir yerde saklayınız.
         store.setView('landing');
       });
 
+      // Reapply if rejected
+      container.querySelector('#btn-step5-reapply')?.addEventListener('click', () => {
+        store.clearLastRegisteredBusiness();
+        registeredBusiness = null;
+        formData = {
+          businessName: '',
+          businessType: 'Restoran & Lokanta',
+          plan: 'Profesyonel Paket (25 Masa - ₺899/ay)',
+          planPrice: 899,
+          city: 'İstanbul / Kadıköy',
+          fullAddress: '',
+          password: store.getUserProfile()?.password || ''
+        };
+        currentStep = store.hasUserProfile() ? 1 : 0;
+        updateView();
+        showToast('🔄 İşletme kayıt formu açıldı. Bilgilerinizi kontrol edip yeniden gönderebilirsiniz.', 'info');
+      });
+
       // 7. Start New Registration under same profile
       container.querySelector('#btn-new-registration')?.addEventListener('click', () => {
-        if (confirm('Farklı bir işletme kaydı yapmak istiyor musunuz? (Mevcut işletme ID kartınız bu ekrandan kaldırılacaktır)')) {
+        const doReset = () => {
           store.clearLastRegisteredBusiness();
           registeredBusiness = null;
           formData = {
@@ -1073,6 +1110,12 @@ Lütfen bu dosyayı güvenli bir yerde saklayınız.
           currentStep = store.hasUserProfile() ? 1 : 0;
           updateView();
           showToast('Yeni işletme kayıt formu açıldı.', 'info');
+        };
+
+        if (isRejected) {
+          doReset();
+        } else if (confirm('Farklı bir işletme kaydı yapmak istiyor musunuz? (Mevcut işletme ID kartınız bu ekrandan kaldırılacaktır)')) {
+          doReset();
         }
       });
     }

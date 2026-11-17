@@ -3,30 +3,56 @@ import { store } from '../state/store.js';
 export function renderLandingPage(container) {
   const lastReg = store.getLastRegisteredBusiness();
   const isApproved = lastReg && lastReg.status === 'onaylandi';
-  const isPending = lastReg && lastReg.status !== 'onaylandi' && lastReg.status !== 'reddedildi';
+  const isRejected = lastReg && lastReg.status === 'reddedildi';
+  const isPending = lastReg && !isApproved && !isRejected;
 
   container.innerHTML = `
     <!-- REGISTERED USER ID BANNER (IF REGISTERED) -->
     ${lastReg && lastReg.id ? `
-      <div style="background:${isApproved ? 'rgba(0,230,118,0.1)' : 'rgba(245,158,11,0.1)'}; border:1px solid ${isApproved ? 'rgba(0,230,118,0.35)' : 'rgba(245,158,11,0.35)'}; border-radius:var(--radius-md); padding:0.9rem 1.4rem; margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
-        <div style="display:flex; align-items:center; gap:0.85rem;">
-          <div style="width:40px; height:40px; border-radius:50%; background:${isApproved ? 'rgba(0,230,118,0.2)' : 'rgba(245,158,11,0.2)'}; color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; display:flex; align-items:center; justify-content:center;">
-            <i data-lucide="${isApproved ? 'badge-check' : 'clock'}" style="width:22px; height:22px;"></i>
+      ${isRejected ? `
+        <div style="background:rgba(239,68,68,0.12); border:1.5px solid rgba(239,68,68,0.5); border-radius:var(--radius-md); padding:1rem 1.4rem; margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 20px rgba(239,68,68,0.2);">
+          <div style="display:flex; align-items:center; gap:0.9rem;">
+            <div style="width:44px; height:44px; border-radius:50%; background:rgba(239,68,68,0.22); color:var(--color-danger); display:flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid rgba(239,68,68,0.4);">
+              <i data-lucide="x-circle" style="width:24px; height:24px;"></i>
+            </div>
+            <div>
+              <div style="font-size:0.78rem; color:var(--color-danger); font-weight:800; letter-spacing:0.5px;">❌ BAŞVURU DURUMU: YÖNETİCİ TARAFINDAN REDDEDİLDİ</div>
+              <strong style="font-size:1.1rem; color:#fff;">${lastReg.businessName}</strong>
+              <div style="font-size:0.86rem; color:rgba(255,255,255,0.85); margin-top:2px;">
+                İşletme başvurunuz yönetici tarafından reddedilmiştir. Lütfen bilgilerinizi kontrol ederek <strong>tekrar işletme kaydı yapınız</strong>.
+              </div>
+            </div>
           </div>
-          <div>
-            <div style="font-size:0.8rem; color:var(--color-text-muted);">${isApproved ? 'Sistemde Kayıtlı Adisyon İşletmeniz:' : 'İncelenmekte Olan İşletme Başvurunuz:'}</div>
-            <strong style="font-size:1.05rem; color:#fff;">${lastReg.businessName}</strong>
-            ${isApproved ? `
-              <span style="font-family:monospace; background:rgba(255,107,0,0.2); color:var(--color-primary); font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.92rem;">KOD: ${lastReg.id}</span>
-            ` : `
-              <span style="font-family:monospace; background:rgba(245,158,11,0.2); color:#F59E0B; font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.85rem;">⏳ YÖNETİCİ ONAYI BEKLENİYOR</span>
-            `}
+          <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+            <button id="btn-banner-reapply" class="pill-btn" style="background:linear-gradient(135deg, #EF4444 0%, #DC2626 100%); border:none; color:#fff; font-weight:800; padding:0.65rem 1.3rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm); box-shadow:0 0 15px rgba(239,68,68,0.4);">
+              <i data-lucide="refresh-cw" style="width:16px; height:16px;"></i> Tekrar İşletme Kaydı Yap
+            </button>
+            <button id="btn-banner-view-id" class="pill-btn" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:var(--color-text-muted); font-weight:700; padding:0.65rem 1rem; cursor:pointer; font-size:0.82rem; border-radius:var(--radius-sm);">
+              Başvurularım
+            </button>
           </div>
         </div>
-        <button id="btn-banner-view-id" class="pill-btn" style="background:${isApproved ? 'var(--color-primary-gradient)' : 'rgba(245,158,11,0.2)'}; border:${isApproved ? 'none' : '1px solid rgba(245,158,11,0.5)'}; color:${isApproved ? '#fff' : '#F59E0B'}; font-weight:800; padding:0.6rem 1.2rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm); box-shadow:${isApproved ? 'var(--shadow-glow)' : 'none'};">
-          <i data-lucide="${isApproved ? 'id-card' : 'clipboard-list'}" style="width:16px; height:16px;"></i> ${isApproved ? 'Giriş Kartımı Aç' : 'Başvuru Durumunu Gör'}
-        </button>
-      </div>
+      ` : `
+        <div style="background:${isApproved ? 'rgba(0,230,118,0.1)' : 'rgba(245,158,11,0.1)'}; border:1px solid ${isApproved ? 'rgba(0,230,118,0.35)' : 'rgba(245,158,11,0.35)'}; border-radius:var(--radius-md); padding:0.9rem 1.4rem; margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+          <div style="display:flex; align-items:center; gap:0.85rem;">
+            <div style="width:40px; height:40px; border-radius:50%; background:${isApproved ? 'rgba(0,230,118,0.2)' : 'rgba(245,158,11,0.2)'}; color:${isApproved ? 'var(--color-accent-green)' : '#F59E0B'}; display:flex; align-items:center; justify-content:center;">
+              <i data-lucide="${isApproved ? 'badge-check' : 'clock'}" style="width:22px; height:22px;"></i>
+            </div>
+            <div>
+              <div style="font-size:0.8rem; color:var(--color-text-muted);">${isApproved ? 'Sistemde Kayıtlı Adisyon İşletmeniz:' : 'İncelenmekte Olan İşletme Başvurunuz:'}</div>
+              <strong style="font-size:1.05rem; color:#fff;">${lastReg.businessName}</strong>
+              ${isApproved ? `
+                <span style="font-family:monospace; background:rgba(255,107,0,0.2); color:var(--color-primary); font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.92rem;">KOD: ${lastReg.id}</span>
+              ` : `
+                <span style="font-family:monospace; background:rgba(245,158,11,0.2); color:#F59E0B; font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.85rem;">⏳ YÖNETİCİ ONAYI BEKLENİYOR</span>
+              `}
+            </div>
+          </div>
+          <button id="btn-banner-view-id" class="pill-btn" style="background:${isApproved ? 'var(--color-primary-gradient)' : 'rgba(245,158,11,0.2)'}; border:${isApproved ? 'none' : '1px solid rgba(245,158,11,0.5)'}; color:${isApproved ? '#fff' : '#F59E0B'}; font-weight:800; padding:0.6rem 1.2rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm); box-shadow:${isApproved ? 'var(--shadow-glow)' : 'none'};">
+            <i data-lucide="${isApproved ? 'id-card' : 'clipboard-list'}" style="width:16px; height:16px;"></i> ${isApproved ? 'Giriş Kartımı Aç' : 'Başvuru Durumunu Gör'}
+          </button>
+        </div>
+      `}
     ` : ''}
 
     <!-- HERO SECTION -->
@@ -46,9 +72,9 @@ export function renderLandingPage(container) {
         </p>
 
         <div class="hero-btn-group">
-          <button class="btn-primary-hero" id="landing-btn-register-now">
-            <i data-lucide="${lastReg ? 'id-card' : 'store'}"></i>
-            <span>${lastReg ? 'İşletme / ID Kartımı Aç' : 'Hemen Kayıt Ol & Satın Al'}</span>
+          <button class="btn-primary-hero" id="landing-btn-register-now" style="${isRejected ? 'background:linear-gradient(135deg, #EF4444 0%, #DC2626 100%); box-shadow:0 0 20px rgba(239,68,68,0.35);' : ''}">
+            <i data-lucide="${isApproved ? 'id-card' : (isRejected ? 'refresh-cw' : (lastReg ? 'clipboard-list' : 'store'))}"></i>
+            <span>${isApproved ? 'İşletme / ID Kartımı Aç' : (isRejected ? 'Tekrar İşletme Kaydı Yap' : (lastReg ? 'Başvuru Durumunu Takip Et' : 'Hemen Kayıt Ol & Satın Al'))}</span>
           </button>
 
           <button class="btn-secondary-hero" id="landing-btn-learn-more">
@@ -419,6 +445,14 @@ export function renderLandingPage(container) {
 
   // Navigation Links
   document.getElementById('landing-btn-register-now')?.addEventListener('click', () => {
+    if (isRejected) {
+      store.clearLastRegisteredBusiness();
+    }
+    store.setView('register');
+  });
+
+  document.getElementById('btn-banner-reapply')?.addEventListener('click', () => {
+    store.clearLastRegisteredBusiness();
     store.setView('register');
   });
 
