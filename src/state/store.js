@@ -190,6 +190,20 @@ class AppStore {
     this.adminUnlocked = sessionStorage.getItem('buyurabi_admin_session') === 'true';
     this.adminPassword = '123456';
 
+    // Pricing & Capacity Plans (Admin editable)
+    const savedPricing = localStorage.getItem('buyurabi_pricing_plans');
+    this.pricingPlans = savedPricing ? JSON.parse(savedPricing) : this.getDefaultPricingPlans();
+
+    // Cross-tab Synchronization: Listen to changes in other tabs
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'buyurabi_restaurant_registrations' || e.key === 'buyurabi_last_registered_business' || e.key === 'buyurabi_pricing_plans') {
+          this.loadFromStorage();
+          this.notify();
+        }
+      });
+    }
+
     if (this.supabaseConnected) {
       this.initSupabase();
     }
@@ -214,6 +228,7 @@ class AppStore {
       localStorage.setItem('buyurabi_restaurant_orders', JSON.stringify(this.orders));
       localStorage.setItem('buyurabi_support_call_notes', JSON.stringify(this.supportNotes));
       localStorage.setItem('buyurabi_user_profiles_list', JSON.stringify(this.profiles));
+      localStorage.setItem('buyurabi_pricing_plans', JSON.stringify(this.pricingPlans));
       if (this.userProfile) {
         localStorage.setItem('buyurabi_user_profile', JSON.stringify(this.userProfile));
       } else {
@@ -227,6 +242,102 @@ class AppStore {
     } catch (e) {
       console.warn('LocalStorage save error:', e);
     }
+  }
+
+  loadFromStorage() {
+    try {
+      const savedRegs = localStorage.getItem('buyurabi_restaurant_registrations');
+      if (savedRegs) this.registrations = JSON.parse(savedRegs);
+
+      const savedLast = localStorage.getItem('buyurabi_last_registered_business');
+      if (savedLast) this.lastRegisteredBusiness = JSON.parse(savedLast);
+
+      const savedPricing = localStorage.getItem('buyurabi_pricing_plans');
+      if (savedPricing) this.pricingPlans = JSON.parse(savedPricing);
+    } catch (e) {
+      console.warn('loadFromStorage error:', e);
+    }
+  }
+
+  // --- Pricing Plans Methods ---
+  getDefaultPricingPlans() {
+    return [
+      {
+        id: 'starter',
+        name: 'Başlangıç Paketi',
+        badge: '10 MASA KAPASİTESİ',
+        icon: '🥉',
+        price: 499,
+        capacity: '10 Masa',
+        description: 'Küçük kafeler, butik lokantalar ve tek salonlu işletmeler için ideal adisyon çözümü.',
+        isPopular: false,
+        features: [
+          '10 Masaya Kadar Masa Ekleme',
+          'Masada QR ile Garson Çağırma',
+          'Garson QR ile Telefon Girişi & Sipariş Ekleme',
+          'Masalar ve Ücretleri Kasa Ekranı',
+          'Yan Panelde Açılan Adisyon & Nakit/Kart Tahsilat',
+          'Günlük Kasa Raporu'
+        ]
+      },
+      {
+        id: 'pro',
+        name: 'Profesyonel Paket',
+        badge: '25 MASA KAPASİTESİ',
+        icon: '🥈',
+        price: 899,
+        capacity: '25 Masa',
+        description: 'Orta ölçekli restoranlar, kebapçılar ve yoğun çalışan mutfaklar için tam teşekküllü otomasyon.',
+        isPopular: true,
+        features: [
+          '25 Masaya Kadar Masa Ekleme',
+          'Ciro Gizleme Butonu',
+          'Mutfak Sıcak Sayfası (Aşçı Hazırlık)',
+          'Sipariş Görme Açma/Kapama & Sipariş Silme',
+          'Menü Fiyat Ayarlama',
+          'Sınırsız Garson Tanımlama & QR Giriş',
+          'Fiş / Fatura Çıkarma',
+          'Günlük Kasa & Haftalık Ciro Raporu'
+        ]
+      },
+      {
+        id: 'enterprise',
+        name: 'Kurumsal Paket',
+        badge: 'SINIRSIZ MASA KAPASİTESİ',
+        icon: '🥇',
+        price: 1499,
+        capacity: 'Sınırsız Masa',
+        description: 'Büyük restoranlar, çok salonlu mekanlar ve zincir işletmeler için sınırsız güç.',
+        isPopular: false,
+        features: [
+          'Sınırsız Masa Ekleme',
+          'Özel Masalara Fiyat Ayarlaması (VIP/Loca)',
+          'Günlük En Çok Satılanlar Analizi',
+          'Alınan Ücretler & Tahsilat Dökümü',
+          'Çoklu Kasa & Şube Entegrasyonu',
+          'Termal Yazıcı ve Fatura Entegrasyonu',
+          '7/24 Öncelikli Telefon & Canlı Destek'
+        ]
+      }
+    ];
+  }
+
+  getPricingPlans() {
+    return this.pricingPlans || this.getDefaultPricingPlans();
+  }
+
+  savePricingPlans(newPlans) {
+    this.pricingPlans = newPlans;
+    this.saveState();
+    this.notify();
+    return true;
+  }
+
+  resetPricingPlans() {
+    this.pricingPlans = this.getDefaultPricingPlans();
+    this.saveState();
+    this.notify();
+    return true;
   }
 
   setView(viewName) {
@@ -639,6 +750,14 @@ class AppStore {
 
       if (data) {
         this.registrations = data.map(item => this.fromDbRow(item));
+        // Keep lastRegisteredBusiness in sync with fresh database status
+        if (this.lastRegisteredBusiness) {
+          const matched = this.registrations.find(r => r.id === this.lastRegisteredBusiness.id);
+          if (matched) {
+            this.lastRegisteredBusiness = { ...this.lastRegisteredBusiness, ...matched };
+          }
+        }
+        this.saveState();
         this.notify();
       }
     } catch (err) {
