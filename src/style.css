@@ -650,6 +650,12 @@ body {
   transition: var(--transition-fast);
 }
 
+select.form-input option {
+  background: #0E131F;
+  color: #fff;
+  padding: 6px;
+}
+
 .form-input:focus {
   outline: none;
   border-color: var(--color-primary);

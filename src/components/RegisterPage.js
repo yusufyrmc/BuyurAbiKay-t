@@ -1,4 +1,5 @@
 import { store } from '../state/store.js';
+import { TURKEY_CITIES, getDistrictsByCity } from '../data/turkeyLocations.js';
 
 export function renderRegisterPage(container) {
   const savedLastReg = store.getLastRegisteredBusiness();
@@ -33,12 +34,26 @@ export function renderRegisterPage(container) {
     } catch (e) {}
   }
 
+  let initialCity = 'İstanbul';
+  let initialDistrict = 'Kadıköy';
+  if (savedLastReg?.city) {
+    if (savedLastReg.city.includes(' / ')) {
+      const parts = savedLastReg.city.split(' / ');
+      initialCity = parts[0]?.trim() || 'İstanbul';
+      initialDistrict = parts[1]?.trim() || (getDistrictsByCity(initialCity)[0] || '');
+    } else {
+      initialCity = savedLastReg.city.trim();
+      initialDistrict = savedLastReg.district || (getDistrictsByCity(initialCity)[0] || '');
+    }
+  }
+
   let formData = {
     businessName: savedLastReg?.businessName || '',
     businessType: savedLastReg?.businessType || 'Restoran & Lokanta',
     plan: parsedPreSelect?.plan || savedLastReg?.plan || defaultPlanTitle,
     planPrice: parsedPreSelect?.price || savedLastReg?.planPrice || defaultPlanPrice,
-    city: savedLastReg?.city || 'İstanbul / Kadıköy',
+    city: initialCity,
+    district: initialDistrict,
     fullAddress: savedLastReg?.fullAddress || '',
     password: savedLastReg?.password || savedProfile?.password || ''
   };
@@ -310,29 +325,45 @@ export function renderRegisterPage(container) {
 
           <!-- STEP 2: LOCATION & FULL ADDRESS -->
           ${currentStep === 2 ? `
-            <h2 class="wizard-title">Konum ve Açık Adres</h2>
-            <p class="wizard-subtitle">İşletmenizin bulunduğu şehir, ilçe ve açık adres bilgileri.</p>
+            <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
+              <div style="width:40px; height:40px; background:rgba(0,229,255,0.15); color:var(--color-accent-cyan); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center;">
+                <i data-lucide="map-pin" style="width:24px; height:24px;"></i>
+              </div>
+              <h2 class="wizard-title" style="margin:0;">İşletme Konumu & Açık Adres</h2>
+            </div>
+            <p class="wizard-subtitle">Restoranınızın bulunduğu ili (81 İl) ve ilçeyi seçin, açık adresinizi girin.</p>
 
-            <div class="form-field">
-              <label class="form-label"><i data-lucide="map-pin"></i> Şehir ve İlçe</label>
-              <select id="reg-city" class="form-input">
-                <option value="İstanbul / Kadıköy" ${formData.city === 'İstanbul / Kadıköy' ? 'selected' : ''}>İstanbul / Kadıköy</option>
-                <option value="İstanbul / Beşiktaş" ${formData.city === 'İstanbul / Beşiktaş' ? 'selected' : ''}>İstanbul / Beşiktaş</option>
-                <option value="İstanbul / Şişli" ${formData.city === 'İstanbul / Şişli' ? 'selected' : ''}>İstanbul / Şişli</option>
-                <option value="Ankara / Çankaya" ${formData.city === 'Ankara / Çankaya' ? 'selected' : ''}>Ankara / Çankaya</option>
-                <option value="İzmir / Konak" ${formData.city === 'İzmir / Konak' ? 'selected' : ''}>İzmir / Konak</option>
-                <option value="Bursa / Nilüfer" ${formData.city === 'Bursa / Nilüfer' ? 'selected' : ''}>Bursa / Nilüfer</option>
-                <option value="Antalya / Muratpaşa" ${formData.city === 'Antalya / Muratpaşa' ? 'selected' : ''}>Antalya / Muratpaşa</option>
-              </select>
+            <div class="form-group-row">
+              <div class="form-field">
+                <label class="form-label"><i data-lucide="map"></i> İl / Şehir Seçin *</label>
+                <select id="reg-city" class="form-input corporate-input">
+                  <option value="" disabled ${!formData.city ? 'selected' : ''}>-- İl Seçiniz (81 İl) --</option>
+                  ${TURKEY_CITIES.map(c => `
+                    <option value="${c}" ${formData.city === c ? 'selected' : ''}>${c}</option>
+                  `).join('')}
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"><i data-lucide="navigation"></i> İlçe Seçin *</label>
+                <select id="reg-district" class="form-input corporate-input" ${!formData.city ? 'disabled' : ''}>
+                  <option value="" disabled ${!formData.district ? 'selected' : ''}>-- İlçe Seçiniz --</option>
+                  ${getDistrictsByCity(formData.city).map(d => `
+                    <option value="${d}" ${formData.district === d ? 'selected' : ''}>${d}</option>
+                  `).join('')}
+                </select>
+              </div>
             </div>
 
             <div class="form-field">
-              <label class="form-label"><i data-lucide="navigation"></i> Açık Adres</label>
-              <textarea id="reg-fulladdress" class="form-input" rows="3" placeholder="Mahalle, Cadde/Sokak, Bina No, Kapı No ve Tarif bilgisi...">${formData.fullAddress}</textarea>
+              <label class="form-label"><i data-lucide="home"></i> Açık Adres (Cadde, Sokak, Kapı No, Tarif) *</label>
+              <textarea id="reg-fulladdress" class="form-input corporate-input" rows="3" placeholder="Örn: Caferağa Mah. Moda Cad. No:84/A (Tiyatronun karşısı)">${formData.fullAddress}</textarea>
             </div>
 
             <div style="display:flex; gap:1rem; margin-top:1.5rem;">
-              <button class="btn-secondary-hero" id="btn-step2-prev">Geri</button>
+              <button class="btn-secondary-hero" id="btn-step2-prev">
+                <i data-lucide="arrow-left"></i> İşletme Bilgileri
+              </button>
               <button class="btn-primary-hero" id="btn-step2-next" style="flex:1; justify-content:center;">
                 Kasa Şifresi Adımına Geç <i data-lucide="arrow-right"></i>
               </button>
@@ -604,7 +635,7 @@ export function renderRegisterPage(container) {
                 <div><strong>Yetkili Profil:</strong> <span>${activeProfile?.fullName || profileData.fullName || 'Ad Soyad'} (${activeProfile?.role || profileData.role})</span></div>
                 <div><strong>Masa Kapasitesi:</strong> <span style="color:var(--color-accent-green); font-weight:800;" id="badge-disp-plan">${formData.plan || registeredBusiness?.plan}</span></div>
                 <div><strong>Telefon:</strong> <span>${activeProfile?.phone || profileData.phone || '0555 *** ** **'}</span></div>
-                <div><strong>Şehir:</strong> <span id="badge-disp-city">${formData.city || registeredBusiness?.city}</span></div>
+                <div><strong>Konum:</strong> <span id="badge-disp-city">${formData.city ? `${formData.city} / ${formData.district || ''}` : (registeredBusiness?.city || 'Şehir Seçilmedi')}</span></div>
                 <div><strong>Durum:</strong> <span style="color:${(registeredBusiness?.status === 'onaylandi') ? 'var(--color-accent-green)' : '#F59E0B'}; font-weight:800;">${(registeredBusiness?.status === 'onaylandi') ? '✓ ONAYLANDI & AKTİF' : (currentStep === 5 ? '⏳ YÖNETİCİ ONAYI BEKLENİYOR' : '⏳ BAŞVURU ALINIYOR')}</span></div>
               `}
             </div>
@@ -848,15 +879,39 @@ export function renderRegisterPage(container) {
       });
     }
 
-    // STEP 2: LOCATION
+    // STEP 2: LOCATION (81 CITIES + DISTRICTS)
     if (currentStep === 2) {
       const citySelect = container.querySelector('#reg-city');
+      const districtSelect = container.querySelector('#reg-district');
       const addrInput = container.querySelector('#reg-fulladdress');
 
-      citySelect?.addEventListener('change', (e) => {
-        formData.city = e.target.value;
+      const updateBadgeLoc = () => {
         const disp = container.querySelector('#badge-disp-city');
-        if (disp) disp.textContent = formData.city;
+        if (disp) {
+          const locText = [formData.city, formData.district].filter(Boolean).join(' / ');
+          disp.textContent = locText || 'Konum belirtilmedi';
+        }
+      };
+
+      citySelect?.addEventListener('change', (e) => {
+        const selectedCity = e.target.value;
+        formData.city = selectedCity;
+        const districts = getDistrictsByCity(selectedCity);
+        formData.district = districts[0] || '';
+
+        if (districtSelect) {
+          districtSelect.disabled = false;
+          districtSelect.innerHTML = `
+            <option value="" disabled>-- İlçe Seçiniz --</option>
+            ${districts.map(d => `<option value="${d}" ${formData.district === d ? 'selected' : ''}>${d}</option>`).join('')}
+          `;
+        }
+        updateBadgeLoc();
+      });
+
+      districtSelect?.addEventListener('change', (e) => {
+        formData.district = e.target.value;
+        updateBadgeLoc();
       });
 
       addrInput?.addEventListener('input', (e) => {
@@ -869,8 +924,16 @@ export function renderRegisterPage(container) {
       });
 
       container.querySelector('#btn-step2-next')?.addEventListener('click', () => {
+        if (!formData.city) {
+          showToast('Lütfen işletmenizin bulunduğu ili (şehri) seçiniz!', 'error');
+          return;
+        }
+        if (!formData.district) {
+          showToast('Lütfen işletmenizin bulunduğu ilçeyi seçiniz!', 'error');
+          return;
+        }
         if (!formData.fullAddress || !formData.fullAddress.trim()) {
-          showToast('Lütfen Açık Adres alanını doldurun!', 'error');
+          showToast('Lütfen açık adres alanını (mahalle, cadde, no vb.) doldurunuz!', 'error');
           return;
         }
         currentStep = 3;
@@ -930,7 +993,8 @@ export function renderRegisterPage(container) {
           plan: formData.plan,
           planPrice: formData.planPrice,
           phone: profile.phone || formData.phone || '',
-          city: formData.city,
+          city: `${formData.city} / ${formData.district || ''}`,
+          district: formData.district || '',
           fullAddress: formData.fullAddress,
           password: formData.password || profile.password || ''
         });
@@ -1084,7 +1148,8 @@ Lütfen bu dosyayı güvenli bir yerde saklayınız.
           businessType: 'Restoran & Lokanta',
           plan: 'Profesyonel Paket (25 Masa - ₺899/ay)',
           planPrice: 899,
-          city: 'İstanbul / Kadıköy',
+          city: 'İstanbul',
+          district: 'Kadıköy',
           fullAddress: '',
           password: store.getUserProfile()?.password || ''
         };
@@ -1103,7 +1168,8 @@ Lütfen bu dosyayı güvenli bir yerde saklayınız.
             businessType: 'Restoran & Lokanta',
             plan: 'Profesyonel Paket (25 Masa - ₺899/ay)',
             planPrice: 899,
-            city: 'İstanbul / Kadıköy',
+            city: 'İstanbul',
+            district: 'Kadıköy',
             fullAddress: '',
             password: store.getUserProfile()?.password || ''
           };
