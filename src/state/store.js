@@ -273,7 +273,56 @@ class AppStore {
     return this.pricingPlans || DEFAULT_PLANS;
   }
 
-  savePricingPlans(newPlans) {
+  async fetchPricingPlans() {
+    if (!this.supabaseConnected || !supabase) return this.pricingPlans;
+    try {
+      const { data, error } = await supabase
+        .from('support_notes')
+        .select('*')
+        .eq('id', 'SYSTEM_PRICING_PLANS')
+        .maybeSingle();
+
+      if (error) {
+        console.warn('Supabase fetchPricingPlans error:', error.message);
+        return this.pricingPlans;
+      }
+
+      if (data && data.text) {
+        try {
+          const parsed = JSON.parse(data.text);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const currentStr = JSON.stringify(this.pricingPlans);
+            const newStr = JSON.stringify(parsed);
+            if (currentStr !== newStr) {
+              this.pricingPlans = parsed;
+              localStorage.setItem('buyurabi_pricing_plans', newStr);
+              this.notify();
+            }
+          }
+        } catch (parseErr) {
+          console.warn('Failed to parse remote pricing plans JSON:', parseErr);
+        }
+      }
+    } catch (err) {
+      console.warn('fetchPricingPlans error:', err);
+    }
+    return this.pricingPlans;
+  }
+
+  reloadPricingPlans() {
+    try {
+      const saved = localStorage.getItem('buyurabi_pricing_plans');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.pricingPlans = parsed;
+          this.notify();
+        }
+      }
+    } catch (e) {}
+  }
+
+  async savePricingPlans(newPlans) {
     this.pricingPlans = newPlans;
     try {
       localStorage.setItem('buyurabi_pricing_plans', JSON.stringify(newPlans));
@@ -281,15 +330,35 @@ class AppStore {
       console.warn('Failed to save plans to localStorage:', e);
     }
     this.notify();
+
+    // Persist to Supabase cloud for real-time mobile and multi-device sync
+    if (this.supabaseConnected && supabase) {
+      try {
+        const payload = {
+          id: 'SYSTEM_PRICING_PLANS',
+          business_id: 'SYSTEM',
+          agent: 'Admin Panel',
+          category: 'pricing_plans',
+          text: JSON.stringify(newPlans),
+          created_at: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+          timestamp: Date.now()
+        };
+        const { error } = await supabase.from('support_notes').upsert([payload], { onConflict: 'id' });
+        if (error) {
+          console.warn('Supabase savePricingPlans upsert error:', error.message);
+        } else {
+          console.log('✅ Paketler Supabase buluta başarıyla kaydedildi & Realtime ile tüm cihazlara iletildi.');
+        }
+      } catch (err) {
+        console.error('Supabase savePricingPlans error:', err);
+      }
+    }
     return true;
   }
 
   resetPricingPlans() {
     this.pricingPlans = JSON.parse(JSON.stringify(DEFAULT_PLANS));
-    try {
-      localStorage.setItem('buyurabi_pricing_plans', JSON.stringify(this.pricingPlans));
-    } catch (e) {}
-    this.notify();
+    this.savePricingPlans(this.pricingPlans);
     return this.pricingPlans;
   }
 
@@ -372,6 +441,7 @@ class AppStore {
   async initSupabase() {
     try {
       await Promise.all([
+        this.fetchPricingPlans(),
         this.fetchRegistrations(),
         this.fetchOrders(),
         this.fetchSupportNotes(),
@@ -408,8 +478,9 @@ class AppStore {
           'postgres_changes',
           { event: '*', schema: 'public', table: 'support_notes' },
           () => {
-            console.log('Realtime update on support_notes table');
+            console.log('Realtime update on support_notes table (including pricing plans)');
             this.fetchSupportNotes();
+            this.fetchPricingPlans();
           }
         )
         .on(
@@ -1239,7 +1310,29 @@ class AppStore {
       }
 
       if (data) {
-        this.supportNotes = data.map(item => this.fromNoteDbRow(item));
+        // Extract system pricing plans if present
+        const pricingRow = data.find(item => item.id === 'SYSTEM_PRICING_PLANS' || item.category === 'pricing_plans');
+        if (pricingRow && pricingRow.text) {
+          try {
+            const parsed = JSON.parse(pricingRow.text);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              const currentStr = JSON.stringify(this.pricingPlans);
+              const newStr = JSON.stringify(parsed);
+              if (currentStr !== newStr) {
+                this.pricingPlans = parsed;
+                localStorage.setItem('buyurabi_pricing_plans', newStr);
+              }
+            }
+          } catch (e) {
+            console.warn('Parsing pricing row error:', e);
+          }
+        }
+
+        // Filter out system configuration rows from user-facing support call notes
+        this.supportNotes = data
+          .filter(item => item.id !== 'SYSTEM_PRICING_PLANS' && item.category !== 'pricing_plans')
+          .map(item => this.fromNoteDbRow(item));
+
         this.notify();
       }
     } catch (err) {

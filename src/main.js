@@ -60,6 +60,17 @@ document.addEventListener('DOMContentLoaded', () => {
       updateNavLabels();
       return;
     }
+
+    // If it's a forced reactive update and user is actively typing in register form, don't interrupt typing
+    if (force && targetView === 'register' && currentActiveView === 'register') {
+      const activeEl = document.activeElement;
+      const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA') && viewSections.register?.contains(activeEl);
+      if (isTyping) {
+        updateNavLabels();
+        return;
+      }
+    }
+
     currentActiveView = targetView;
 
     Object.keys(viewSections).forEach(viewKey => {
@@ -403,15 +414,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Listen to window focus for real-time status updates (e.g. admin approved in another tab)
-  window.addEventListener('focus', () => {
+  // Mobile / Tab wake-up and background resume listeners
+  const handleAppWakeUp = () => {
+    store.fetchPricingPlans();
     store.fetchRegistrations();
+    store.fetchOrders();
+    store.fetchProfiles();
+  };
+
+  window.addEventListener('focus', handleAppWakeUp);
+  window.addEventListener('online', handleAppWakeUp);
+  window.addEventListener('pageshow', handleAppWakeUp);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      handleAppWakeUp();
+    }
   });
 
-  // Listen to storage changes across tabs (e.g. admin rejected or approved in another tab/window)
+  // Mobile / multi-device backup sync poll (every 15s when active tab is visible)
+  setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      store.fetchPricingPlans();
+    }
+  }, 15000);
+
+  // Listen to storage changes across tabs (e.g. admin edited plans or approvals in another tab/window)
   window.addEventListener('storage', (e) => {
     if (e.key === 'buyurabi_restaurant_registrations' || e.key === 'buyurabi_last_registered_business') {
       store.reloadFromLocalStorage();
+    }
+    if (e.key === 'buyurabi_pricing_plans') {
+      store.reloadPricingPlans();
     }
   });
 

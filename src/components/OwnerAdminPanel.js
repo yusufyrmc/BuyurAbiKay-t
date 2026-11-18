@@ -60,7 +60,72 @@ export function renderOwnerAdminPanel(container) {
     return list;
   }
 
+  function normalizeQuery(str) {
+    if (!str) return '';
+    return str.toString().toLowerCase().replace(/[^a-z0-9ğüşıöç]/gi, '');
+  }
+
+  function findBusiness(query) {
+    if (!query) return null;
+    const raw = query.trim();
+    const rawUpper = raw.toUpperCase();
+    const rawLower = raw.toLowerCase();
+    const norm = normalizeQuery(raw);
+
+    // 1. Exact match on ID (e.g. "REG-1001", "BYR-1001")
+    let match = store.registrations.find(r => r.id.toUpperCase() === rawUpper);
+    if (match) return match;
+
+    // 2. Normalized ID match (e.g. "reg1001", "reg 1001", "byr1001")
+    match = store.registrations.find(r => normalizeQuery(r.id) === norm);
+    if (match) return match;
+
+    // 3. Digits-only match (e.g. user typed "1001", matches "REG-1001" or "BYR-1001")
+    const digits = raw.replace(/\D/g, '');
+    if (digits && digits.length >= 2) {
+      match = store.registrations.find(r => {
+        const rDigits = r.id.replace(/\D/g, '');
+        return rDigits === digits || rDigits.endsWith(digits);
+      });
+      if (match) return match;
+    }
+
+    // 4. Exact business name match
+    match = store.registrations.find(r => r.businessName.toLowerCase() === rawLower);
+    if (match) return match;
+
+    // 5. Business name contains query
+    match = store.registrations.find(r => r.businessName.toLowerCase().includes(rawLower));
+    if (match) return match;
+
+    // 6. Check existing orders for businessId or businessName
+    const orderMatch = store.orders.find(o => 
+      o.businessId.toUpperCase() === rawUpper || 
+      normalizeQuery(o.businessId) === norm ||
+      (digits && digits.length >= 2 && o.businessId.replace(/\D/g, '').endsWith(digits)) ||
+      o.businessName.toLowerCase().includes(rawLower)
+    );
+    if (orderMatch) {
+      const regFromOrder = store.registrations.find(r => r.id === orderMatch.businessId);
+      if (regFromOrder) return regFromOrder;
+      return {
+        id: orderMatch.businessId,
+        businessName: orderMatch.businessName,
+        businessType: 'Restoran',
+        city: 'Belirtilmedi',
+        status: 'onaylandi'
+      };
+    }
+
+    return null;
+  }
+
   function updateView() {
+    const activeEl = document.activeElement;
+    const focusedId = activeEl && container.contains(activeEl) ? activeEl.id : null;
+    const selStart = activeEl && typeof activeEl.selectionStart === 'number' ? activeEl.selectionStart : null;
+    const selEnd = activeEl && typeof activeEl.selectionEnd === 'number' ? activeEl.selectionEnd : null;
+
     // 1. PASSWORD PROTECTION LOCK SCREEN (Default: 123456)
     if (!store.adminUnlocked) {
       if (callTimerInterval) clearInterval(callTimerInterval);
@@ -391,13 +456,16 @@ export function renderOwnerAdminPanel(container) {
                     </p>
 
                     <!-- DIRECT BUSINESS ID INPUT BOX -->
-                    <div style="max-width:580px; margin:0 auto 1.8rem auto; display:flex; gap:0.6rem; flex-wrap:wrap;">
-                      <div style="position:relative; flex:1; min-width:240px;">
-                        <input type="text" id="input-direct-business-id" class="form-input" placeholder="İşletme ID'si Girin (Örn: REG-1001, REG-1002, BYR-0001)..." value="${orderBusinessInputText}" style="height:52px; font-size:1.05rem; font-weight:800; font-family:monospace; padding-left:1.2rem; border-color:var(--color-primary); letter-spacing:1px; text-transform:uppercase;">
+                    <div style="max-width:620px; margin:0 auto 1.8rem auto; position:relative;">
+                      <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+                        <div style="position:relative; flex:1; min-width:240px;">
+                          <input type="text" id="input-direct-business-id" class="form-input" placeholder="İşletme ID veya Adı (Örn: 1001, REG-1001, Gaziantep)..." value="${orderBusinessInputText}" style="height:52px; font-size:1.05rem; font-weight:800; font-family:monospace; padding-left:1.2rem; border-color:var(--color-primary); letter-spacing:1px; text-transform:uppercase;" autocomplete="off">
+                        </div>
+                        <button id="btn-submit-direct-business-id" class="btn-primary-hero" style="height:52px; padding:0 1.8rem; font-size:1rem; font-weight:800; cursor:pointer;">
+                          <i data-lucide="arrow-right-circle"></i> <span>İşletmeyi & Masaları Aç</span>
+                        </button>
                       </div>
-                      <button id="btn-submit-direct-business-id" class="btn-primary-hero" style="height:52px; padding:0 1.8rem; font-size:1rem; font-weight:800; cursor:pointer;">
-                        <i data-lucide="arrow-right-circle"></i> <span>İşletmeyi & Masaları Aç</span>
-                      </button>
+                      <div id="direct-id-suggestions-box" style="display:none; position:absolute; top:58px; left:0; right:0; background:#0e131f; border:1px solid var(--color-primary); border-radius:var(--radius-md); box-shadow:0 12px 35px rgba(0,0,0,0.85); z-index:100; overflow:hidden; max-height:260px; overflow-y:auto; text-align:left;"></div>
                     </div>
 
                     <!-- TÜM RESTORANLARI BİR ARADA GÖR BUTONU -->
@@ -512,7 +580,7 @@ export function renderOwnerAdminPanel(container) {
 
                     <div style="display:flex; align-items:center; gap:0.5rem;">
                       <span style="font-size:0.8rem; color:var(--color-text-muted); font-weight:700;">Hızlı ID Değiştir:</span>
-                      <input type="text" id="input-quick-switch-id" class="form-input" placeholder="Örn: REG-1002" style="width:130px; height:36px; padding:0 0.6rem; font-size:0.82rem; font-family:monospace; text-transform:uppercase;">
+                      <input type="text" id="input-quick-switch-id" class="form-input" placeholder="Örn: 1002 veya REG-1002" style="width:160px; height:36px; padding:0 0.6rem; font-size:0.82rem; font-family:monospace; text-transform:uppercase;" autocomplete="off">
                       <button id="btn-quick-switch-id" class="pill-btn" style="background:var(--color-primary); color:#fff; font-weight:800; font-size:0.8rem; padding:0.5rem 0.8rem; cursor:pointer;">Aç</button>
                     </div>
 
@@ -1546,37 +1614,95 @@ export function renderOwnerAdminPanel(container) {
     });
 
     // --- ORDERS TAB EVENTS ---
-    // Direct Business ID Submit
-    const handleDirectBizSubmit = () => {
-      const inputEl = container.querySelector('#input-direct-business-id');
-      const rawVal = inputEl ? inputEl.value : '';
-      const cleanVal = rawVal.trim().toUpperCase();
-      if (!cleanVal) {
-        showToast('⚠️ Lütfen bir İşletme ID\'si (Örn: REG-1001) giriniz.', 'error');
+    // Direct Business ID Autocomplete & Submit
+    const inputDirectEl = container.querySelector('#input-direct-business-id');
+    const suggestionsBox = container.querySelector('#direct-id-suggestions-box');
+
+    const updateDirectSuggestions = () => {
+      if (!inputDirectEl || !suggestionsBox) return;
+      const q = inputDirectEl.value.trim().toLowerCase();
+      if (!q) {
+        suggestionsBox.style.display = 'none';
+        suggestionsBox.innerHTML = '';
         return;
       }
-      orderBusinessInputText = cleanVal;
-      // Search in registrations
-      const found = store.registrations.find(r => r.id.toUpperCase() === cleanVal || r.businessName.toUpperCase().includes(cleanVal));
+      const qDigits = q.replace(/\D/g, '');
+      const matches = store.registrations.filter(r => {
+        const idLower = r.id.toLowerCase();
+        const idDigits = r.id.replace(/\D/g, '');
+        const nameLower = r.businessName.toLowerCase();
+        return idLower.includes(q) || 
+               nameLower.includes(q) || 
+               (qDigits.length >= 2 && (idDigits === qDigits || idDigits.endsWith(qDigits)));
+      });
+
+      if (matches.length === 0) {
+        suggestionsBox.innerHTML = `
+          <div style="padding:0.75rem 1rem; color:var(--color-text-dim); font-size:0.82rem;">
+            ⚠️ "${inputDirectEl.value}" ile eşleşen kayıtlı işletme bulunamadı.
+          </div>
+        `;
+        suggestionsBox.style.display = 'block';
+        return;
+      }
+
+      suggestionsBox.innerHTML = matches.map(r => `
+        <div class="direct-id-suggestion-item" data-biz-id="${r.id}" style="padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.06); cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:background 0.15s ease;">
+          <div>
+            <strong style="color:#fff; font-size:0.92rem; display:block;">${r.businessName}</strong>
+            <span style="font-size:0.75rem; color:var(--color-text-muted);">${r.businessType || 'Restoran'} • ${r.city}</span>
+          </div>
+          <span style="font-family:monospace; font-weight:900; color:var(--color-primary); background:rgba(255,107,0,0.15); padding:3px 8px; border-radius:6px; font-size:0.85rem;">
+            ${r.id}
+          </span>
+        </div>
+      `).join('');
+      suggestionsBox.style.display = 'block';
+
+      suggestionsBox.querySelectorAll('.direct-id-suggestion-item').forEach(item => {
+        item.addEventListener('mouseenter', () => item.style.background = 'rgba(255,107,0,0.15)');
+        item.addEventListener('mouseleave', () => item.style.background = 'transparent');
+        item.addEventListener('click', (e) => {
+          const bizId = e.currentTarget.dataset.bizId;
+          const biz = store.registrations.find(r => r.id === bizId);
+          orderSelectedBusinessId = bizId;
+          orderBusinessInputText = bizId;
+          suggestionsBox.style.display = 'none';
+          showToast(`⚡ ${biz ? biz.businessName : bizId} masaları & kazancı açıldı.`, 'success');
+          updateView();
+        });
+      });
+    };
+
+    inputDirectEl?.addEventListener('input', updateDirectSuggestions);
+    inputDirectEl?.addEventListener('focus', updateDirectSuggestions);
+    document.addEventListener('click', (e) => {
+      if (suggestionsBox && !suggestionsBox.contains(e.target) && e.target !== inputDirectEl) {
+        suggestionsBox.style.display = 'none';
+      }
+    });
+
+    const handleDirectBizSubmit = () => {
+      const rawVal = inputDirectEl ? inputDirectEl.value.trim() : '';
+      if (!rawVal) {
+        showToast('⚠️ Lütfen bir İşletme ID\'si (Örn: 1001 veya REG-1001) ya da restoran adı giriniz.', 'error');
+        return;
+      }
+      
+      const found = findBusiness(rawVal);
       if (found) {
         orderSelectedBusinessId = found.id;
+        orderBusinessInputText = found.id;
+        if (suggestionsBox) suggestionsBox.style.display = 'none';
         showToast(`⚡ ${found.businessName} (${found.id}) masaları & kazancı açıldı.`, 'success');
+        updateView();
       } else {
-        // Check in orders
-        const orderMatch = store.orders.find(o => o.businessId.toUpperCase() === cleanVal);
-        if (orderMatch) {
-          orderSelectedBusinessId = orderMatch.businessId;
-          showToast(`⚡ ${orderMatch.businessName} (${orderSelectedBusinessId}) masaları açıldı.`, 'success');
-        } else {
-          orderSelectedBusinessId = cleanVal;
-          showToast(`⚡ ${cleanVal} kodlu işletme açıldı. Test siparişi ekleyebilirsiniz.`, 'info');
-        }
+        showToast(`⚠️ "${rawVal}" bulunamadı! Lütfen geçerli bir ID (Örn: REG-1001 veya 1001) girin ya da aşağıdaki listeden bir işletmeye tıklayın.`, 'error');
       }
-      updateView();
     };
 
     container.querySelector('#btn-submit-direct-business-id')?.addEventListener('click', handleDirectBizSubmit);
-    container.querySelector('#input-direct-business-id')?.addEventListener('keydown', (e) => {
+    inputDirectEl?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleDirectBizSubmit();
     });
 
@@ -1607,13 +1733,20 @@ export function renderOwnerAdminPanel(container) {
       updateView();
     });
 
-    // Quick Switch ID
+    // Quick Switch ID with smart findBusiness
     const handleQuickSwitch = () => {
-      const val = container.querySelector('#input-quick-switch-id')?.value?.trim().toUpperCase();
-      if (val) {
-        orderSelectedBusinessId = val;
-        showToast(`⚡ ${val} işletmesine geçildi.`, 'info');
+      const val = container.querySelector('#input-quick-switch-id')?.value?.trim();
+      if (!val) {
+        showToast('⚠️ Lütfen bir İşletme ID\'si (Örn: 1002 veya REG-1002) giriniz.', 'error');
+        return;
+      }
+      const found = findBusiness(val);
+      if (found) {
+        orderSelectedBusinessId = found.id;
+        showToast(`⚡ ${found.businessName} (${found.id}) işletmesine geçildi.`, 'info');
         updateView();
+      } else {
+        showToast(`⚠️ "${val}" ID veya adına sahip bir işletme bulunamadı!`, 'error');
       }
     };
     container.querySelector('#btn-quick-switch-id')?.addEventListener('click', handleQuickSwitch);
@@ -1755,18 +1888,26 @@ export function renderOwnerAdminPanel(container) {
     });
 
     // --- SUPPORT CONSOLE EVENTS ---
-    // Search input
+    // Search input with smart findBusiness
     container.querySelector('#input-support-search')?.addEventListener('input', (e) => {
-      supportSearchQuery = e.target.value.toLowerCase().trim();
-      if (supportSearchQuery) {
-        const matched = store.registrations.find(r =>
-          r.id.toLowerCase().includes(supportSearchQuery) ||
-          r.businessName.toLowerCase().includes(supportSearchQuery) ||
-          r.fullName.toLowerCase().includes(supportSearchQuery) ||
-          r.phone.includes(supportSearchQuery)
-        );
-        if (matched) {
-          supportSelectedBusinessId = matched.id;
+      supportSearchQuery = e.target.value;
+      const q = supportSearchQuery.trim();
+      if (q) {
+        const found = findBusiness(q);
+        if (found) {
+          supportSelectedBusinessId = found.id;
+        } else {
+          // Fallback search across fields
+          const qLow = q.toLowerCase();
+          const matched = store.registrations.find(r =>
+            r.id.toLowerCase().includes(qLow) ||
+            r.businessName.toLowerCase().includes(qLow) ||
+            r.fullName.toLowerCase().includes(qLow) ||
+            r.phone.includes(q)
+          );
+          if (matched) {
+            supportSelectedBusinessId = matched.id;
+          }
         }
       }
       updateView();
@@ -2011,6 +2152,17 @@ export function renderOwnerAdminPanel(container) {
         updateView();
       }
     });
+
+    // Restore focus and selection on re-render to prevent typing jitter / blur
+    if (focusedId) {
+      const restoredEl = container.querySelector('#' + focusedId);
+      if (restoredEl) {
+        restoredEl.focus();
+        if (selStart !== null && selEnd !== null) {
+          try { restoredEl.setSelectionRange(selStart, selEnd); } catch (e) {}
+        }
+      }
+    }
   }
 
   // Helper to render compact order card inside kanban column

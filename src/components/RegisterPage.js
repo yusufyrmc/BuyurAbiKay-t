@@ -5,10 +5,10 @@ export function renderRegisterPage(container) {
   const savedLastReg = store.getLastRegisteredBusiness();
   const savedProfile = store.getUserProfile();
 
-  // If business already registered: step 5. If profile exists: step 1. Else: step 0 (profile creation).
-  let currentStep = savedLastReg ? 5 : (savedProfile ? 1 : 0);
+  // If business already registered: step 4 (Success/Status). If profile exists: step 1. Else: step 0 (profile creation).
+  let currentStep = savedLastReg ? 4 : (savedProfile ? 1 : 0);
   let registeredBusiness = savedLastReg || null;
-  let showPasswordInStep5 = false;
+  let showPasswordInStep4 = false;
   let profileMode = 'create'; // 'create' | 'login'
 
   let profileData = {
@@ -78,9 +78,8 @@ export function renderRegisterPage(container) {
 
   function getStepProgressPercent() {
     if (currentStep === 0) return 0;
-    if (currentStep === 1) return 25;
-    if (currentStep === 2) return 50;
-    if (currentStep === 3) return 75;
+    if (currentStep === 1) return 33;
+    if (currentStep === 2) return 66;
     return 100;
   }
 
@@ -91,7 +90,7 @@ export function renderRegisterPage(container) {
       <div class="register-container-layout">
         <!-- LEFT: WIZARD FORM -->
         <div class="register-wizard-card">
-          <!-- Step Progress Node Header (5 Steps: Profil, İşletme, Adres, Şifre, Doğrulama) -->
+          <!-- Step Progress Node Header (4 Steps: Profil, İşletme, Adres, Şifre & Kayıt) -->
           <div class="step-indicator-bar">
             <div class="step-progress-line" style="width: ${getStepProgressPercent()}%;"></div>
             
@@ -104,16 +103,13 @@ export function renderRegisterPage(container) {
             <div class="step-node ${currentStep === 2 ? 'active' : (currentStep > 2 ? 'completed' : '')}" title="3. Konum & Adres">
               ${currentStep > 2 ? '✓' : '3'}
             </div>
-            <div class="step-node ${currentStep === 3 ? 'active' : (currentStep > 3 ? 'completed' : '')}" title="4. Kasa Şifresi">
+            <div class="step-node ${currentStep === 3 ? 'active' : (currentStep > 3 ? 'completed' : '')}" title="4. Kasa Şifresi & Kayıt">
               ${currentStep > 3 ? '✓' : '4'}
-            </div>
-            <div class="step-node ${currentStep >= 4 ? 'completed' : ''}" title="5. Doğrulama">
-              ${currentStep >= 4 ? '✓' : '5'}
             </div>
           </div>
 
-          <!-- ACTIVE PROFILE BANNER (WHEN PROFILE EXISTS & IN BUSINESS STEPS 1-4) -->
-          ${activeProfile && currentStep >= 1 && currentStep < 5 ? `
+          <!-- ACTIVE PROFILE BANNER (WHEN PROFILE EXISTS & IN BUSINESS STEPS 1-3) -->
+          ${activeProfile && currentStep >= 1 && currentStep < 4 ? `
             <div class="active-profile-banner">
               <div style="display:flex; align-items:center; gap:0.75rem;">
                 <div class="profile-avatar-mini">
@@ -408,39 +404,14 @@ export function renderRegisterPage(container) {
 
             <div class="wizard-btn-row">
               <button class="btn-secondary-hero" id="btn-step3-prev">Geri</button>
-              <button class="btn-primary-hero" id="btn-step3-next" style="flex:1; justify-content:center;">
-                SMS Doğrulaması Gönder <i data-lucide="send"></i>
-              </button>
-            </div>
-          ` : ''}
-
-          <!-- STEP 4: SMS OTP VERIFICATION -->
-          ${currentStep === 4 ? `
-            <div style="text-align:center; padding:1rem 0;">
-              <div style="width:68px; height:68px; background:var(--color-primary-light); color:var(--color-primary); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.2rem auto;">
-                <i data-lucide="smartphone" style="width:36px; height:36px;"></i>
-              </div>
-
-              <h2 class="wizard-title">SMS Doğrulama Kodu</h2>
-              <p class="wizard-subtitle"><strong>${profileData.phone || '0555 123 45 67'}</strong> numaralı telefonunuza gönderilen 6 haneli doğrulama kodunu girin.</p>
-
-              <div class="otp-container-row">
-                <input type="text" maxlength="1" class="form-input otp-pin" value="7">
-                <input type="text" maxlength="1" class="form-input otp-pin" value="4">
-                <input type="text" maxlength="1" class="form-input otp-pin" value="2">
-                <input type="text" maxlength="1" class="form-input otp-pin" value="9">
-                <input type="text" maxlength="1" class="form-input otp-pin" value="0">
-                <input type="text" maxlength="1" class="form-input otp-pin" value="8">
-              </div>
-
-              <button class="btn-primary-hero" id="btn-verify-otp" style="width:100%; justify-content:center;">
+              <button class="btn-primary-hero" id="btn-step3-submit" style="flex:1; justify-content:center;">
                 <i data-lucide="check-circle-2"></i> İşletme Kaydını Tamamla & Başla
               </button>
             </div>
           ` : ''}
 
-          <!-- STEP 5: SUCCESS EKRANI & GİRİŞ BİLGİLERİ (ADMİN ONAY KONTROLLÜ) -->
-          ${currentStep === 5 ? `
+          <!-- STEP 4: SUCCESS EKRANI & GİRİŞ BİLGİLERİ (ADMİN ONAY KONTROLLÜ) -->
+          ${currentStep === 4 ? `
             ${(() => {
               const activeReg = registeredBusiness || store.getLastRegisteredBusiness() || {};
               const isApproved = activeReg.status === 'onaylandi';
@@ -540,11 +511,11 @@ export function renderRegisterPage(container) {
                       </label>
                       <div class="step5-code-row" style="border:1px solid rgba(255,255,255,0.15);">
                         <span id="display-password" style="font-family:monospace; font-size:1.3rem; font-weight:800; color:${isRejected ? 'var(--color-text-dim)' : '#fff'}; letter-spacing:2px; flex:1;">
-                          ${isRejected ? '•••••• (Lisans İptal)' : (showPasswordInStep5 ? (formData.password || activeReg.password || '••••••') : '•'.repeat(Math.max((formData.password || activeReg.password || '123456').length, 6)))}
+                          ${isRejected ? '•••••• (Lisans İptal)' : (showPasswordInStep4 ? (formData.password || activeReg.password || '••••••') : '•'.repeat(Math.max((formData.password || activeReg.password || '123456').length, 6)))}
                         </span>
                         ${!isRejected ? `
-                          <button id="btn-toggle-show-pass" class="pill-btn" style="background:rgba(255,255,255,0.08); border:var(--border-glass); color:var(--color-text-muted); padding:0.5rem 0.8rem; font-size:0.82rem; cursor:pointer; border-radius:var(--radius-sm);" title="${showPasswordInStep5 ? 'Gizle' : 'Göster'}">
-                            <i data-lucide="${showPasswordInStep5 ? 'eye-off' : 'eye'}" style="width:15px; height:15px;"></i>
+                          <button id="btn-toggle-show-pass" class="pill-btn" style="background:rgba(255,255,255,0.08); border:var(--border-glass); color:var(--color-text-muted); padding:0.5rem 0.8rem; font-size:0.82rem; cursor:pointer; border-radius:var(--radius-sm);" title="${showPasswordInStep4 ? 'Gizle' : 'Göster'}">
+                            <i data-lucide="${showPasswordInStep4 ? 'eye-off' : 'eye'}" style="width:15px; height:15px;"></i>
                           </button>
                         ` : ''}
                         ${isApproved ? `
@@ -973,20 +944,20 @@ export function renderRegisterPage(container) {
         updateView();
       });
 
-      container.querySelector('#btn-step3-next')?.addEventListener('click', () => {
+      // DIRECT SUBMIT (SMS verification removed)
+      container.querySelector('#btn-step3-submit')?.addEventListener('click', async () => {
         if (!formData.password || formData.password.length < 6) {
           showToast('Lütfen en az 6 karakterli bir kasa şifresi belirleyin!', 'error');
           return;
         }
-        currentStep = 4;
-        updateView();
-      });
-    }
 
-    // STEP 4: SMS OTP VERIFICATION & FINAL SUBMIT
-    if (currentStep === 4) {
-      container.querySelector('#btn-verify-otp')?.addEventListener('click', async () => {
-        const btn = container.querySelector('#btn-verify-otp');
+        const termsChecked = container.querySelector('#reg-terms')?.checked;
+        if (!termsChecked) {
+          showToast('Lütfen BuyurAbi kullanım sözleşmesini onaylayın!', 'error');
+          return;
+        }
+
+        const btn = container.querySelector('#btn-step3-submit');
         if (btn) {
           btn.disabled = true;
           btn.innerHTML = '⏳ İşletme Kaydediliyor...';
@@ -1022,15 +993,15 @@ export function renderRegisterPage(container) {
         }
 
         registeredBusiness = res.reg;
-        currentStep = 5;
+        currentStep = 4;
         updateView();
         triggerConfetti();
         showToast('🎉 İşletme başvurunuz başarıyla alındı! Yönetici onayından sonra işletme kodunuz aktif olacaktır.', 'success');
       });
     }
 
-    // STEP 5: SUCCESS CREDENTIALS
-    if (currentStep === 5) {
+    // STEP 4: SUCCESS CREDENTIALS & LICENSING (was STEP 5)
+    if (currentStep === 4) {
       const activeReg = registeredBusiness || store.getLastRegisteredBusiness() || {};
       const activeId = activeReg.id || 'BYR-0000';
       const isApproved = activeReg.status === 'onaylandi';
@@ -1068,7 +1039,7 @@ export function renderRegisterPage(container) {
 
       // 2. Toggle Show/Hide Password
       container.querySelector('#btn-toggle-show-pass')?.addEventListener('click', () => {
-        showPasswordInStep5 = !showPasswordInStep5;
+        showPasswordInStep4 = !showPasswordInStep4;
         updateView();
       });
 
