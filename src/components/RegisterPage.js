@@ -306,14 +306,26 @@ export function renderRegisterPage(container) {
                       <div style="font-size:1.2rem; margin-bottom:4px;">${medal}</div>
                       <strong style="font-size:0.88rem; color:#fff; display:block;">${plan.name}</strong>
                       <span style="font-size:0.75rem; color:var(--color-text-muted); display:block; margin:2px 0;">${plan.badge || ''}</span>
-                      <span style="font-size:0.95rem; font-weight:800; color:${priceColor};">₺${Number(plan.price).toLocaleString('tr-TR')} <span style="font-size:0.7rem; color:var(--color-text-muted);">${plan.period || '/ay'}</span></span>
+                      <div style="margin-top:4px;">
+                        ${plan.hasDiscount && plan.originalPrice > plan.price ? `
+                          <div style="display:flex; align-items:center; gap:4px; margin-bottom:2px;">
+                            <span style="font-size:0.72rem; color:var(--color-text-dim); text-decoration:line-through; font-weight:700;">
+                              ₺${Number(plan.originalPrice).toLocaleString('tr-TR')}
+                            </span>
+                            <span style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:var(--color-danger); font-size:0.6rem; font-weight:800; padding:1px 5px; border-radius:6px;">
+                              ${plan.discountBadge || 'İNDİRİM'}
+                            </span>
+                          </div>
+                        ` : ''}
+                        <span style="font-size:0.95rem; font-weight:800; color:${priceColor};">₺${Number(plan.price).toLocaleString('tr-TR')} <span style="font-size:0.7rem; color:var(--color-text-muted);">${plan.period || '/ay'}</span></span>
+                      </div>
                     </div>
                   `;
                 }).join('')}
               </div>
             </div>
 
-            <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+            <div class="wizard-btn-row">
               <button class="btn-secondary-hero" id="btn-step1-prev-profile">
                 <i data-lucide="arrow-left"></i> Profil Bilgilerim
               </button>
@@ -360,7 +372,7 @@ export function renderRegisterPage(container) {
               <textarea id="reg-fulladdress" class="form-input corporate-input" rows="3" placeholder="Örn: Caferağa Mah. Moda Cad. No:84/A (Tiyatronun karşısı)">${formData.fullAddress}</textarea>
             </div>
 
-            <div style="display:flex; gap:1rem; margin-top:1.5rem;">
+            <div class="wizard-btn-row">
               <button class="btn-secondary-hero" id="btn-step2-prev">
                 <i data-lucide="arrow-left"></i> İşletme Bilgileri
               </button>
@@ -394,7 +406,7 @@ export function renderRegisterPage(container) {
               </label>
             </div>
 
-            <div style="display:flex; gap:1rem;">
+            <div class="wizard-btn-row">
               <button class="btn-secondary-hero" id="btn-step3-prev">Geri</button>
               <button class="btn-primary-hero" id="btn-step3-next" style="flex:1; justify-content:center;">
                 SMS Doğrulaması Gönder <i data-lucide="send"></i>
@@ -412,13 +424,13 @@ export function renderRegisterPage(container) {
               <h2 class="wizard-title">SMS Doğrulama Kodu</h2>
               <p class="wizard-subtitle"><strong>${profileData.phone || '0555 123 45 67'}</strong> numaralı telefonunuza gönderilen 6 haneli doğrulama kodunu girin.</p>
 
-              <div style="display:flex; justify-content:center; gap:0.6rem; margin:2rem 0;">
-                <input type="text" maxlength="1" class="form-input otp-pin" style="width:48px; height:54px; text-align:center; font-size:1.4rem; font-weight:800;" value="7">
-                <input type="text" maxlength="1" class="form-input otp-pin" style="width:48px; height:54px; text-align:center; font-size:1.4rem; font-weight:800;" value="4">
-                <input type="text" maxlength="1" class="form-input otp-pin" style="width:48px; height:54px; text-align:center; font-size:1.4rem; font-weight:800;" value="2">
-                <input type="text" maxlength="1" class="form-input otp-pin" style="width:48px; height:54px; text-align:center; font-size:1.4rem; font-weight:800;" value="9">
-                <input type="text" maxlength="1" class="form-input otp-pin" style="width:48px; height:54px; text-align:center; font-size:1.4rem; font-weight:800;" value="0">
-                <input type="text" maxlength="1" class="form-input otp-pin" style="width:48px; height:54px; text-align:center; font-size:1.4rem; font-weight:800;" value="8">
+              <div class="otp-container-row">
+                <input type="text" maxlength="1" class="form-input otp-pin" value="7">
+                <input type="text" maxlength="1" class="form-input otp-pin" value="4">
+                <input type="text" maxlength="1" class="form-input otp-pin" value="2">
+                <input type="text" maxlength="1" class="form-input otp-pin" value="9">
+                <input type="text" maxlength="1" class="form-input otp-pin" value="0">
+                <input type="text" maxlength="1" class="form-input otp-pin" value="8">
               </div>
 
               <button class="btn-primary-hero" id="btn-verify-otp" style="width:100%; justify-content:center;">
@@ -476,7 +488,7 @@ export function renderRegisterPage(container) {
                   ` : ''}
 
                   <!-- CREDENTIALS DISPLAY BOX -->
-                  <div style="background:rgba(0,0,0,0.55); border:1px solid ${isApproved ? 'rgba(0,230,118,0.45)' : (isRejected ? 'rgba(239,68,68,0.45)' : 'rgba(245,158,11,0.45)')}; box-shadow:0 0 30px ${isApproved ? 'rgba(0,230,118,0.15)' : (isRejected ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)')}; border-radius:var(--radius-lg); padding:1.5rem 1.8rem; margin-bottom:1.5rem; text-align:left; position:relative; overflow:hidden;">
+                  <div class="step5-credentials-box" style="border:1px solid ${isApproved ? 'rgba(0,230,118,0.45)' : (isRejected ? 'rgba(239,68,68,0.45)' : 'rgba(245,158,11,0.45)')}; box-shadow:0 0 30px ${isApproved ? 'rgba(0,230,118,0.15)' : (isRejected ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)')};">
                     <div style="position:absolute; top:0; left:0; width:100%; height:4px; background:${isApproved ? 'var(--color-accent-green)' : (isRejected ? 'var(--color-danger)' : 'linear-gradient(90deg, #F59E0B, #FF6B00)')};"></div>
 
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
@@ -505,7 +517,7 @@ export function renderRegisterPage(container) {
                         <i data-lucide="${isApproved ? 'hash' : (isRejected ? 'x-circle' : 'lock')}" style="width:15px; height:15px; vertical-align:middle; color:${isApproved ? 'var(--color-primary)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')};"></i> 
                         İşletme Kodu (ID) - Kasa & Garson Giriş Kodu:
                       </label>
-                      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.06); border:1.5px solid ${isApproved ? 'rgba(255,107,0,0.5)' : (isRejected ? 'rgba(239,68,68,0.4)' : 'rgba(245,158,11,0.4)')}; border-radius:var(--radius-md); padding:0.75rem 1.2rem;">
+                      <div class="step5-code-row" style="border:1.5px solid ${isApproved ? 'rgba(255,107,0,0.5)' : (isRejected ? 'rgba(239,68,68,0.4)' : 'rgba(245,158,11,0.4)')};">
                         <span id="display-business-id" style="font-family:monospace; font-size:${isApproved ? '1.6rem' : '1.1rem'}; font-weight:900; color:${isApproved ? 'var(--color-primary)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')}; letter-spacing:1px; flex:1;">
                           ${isApproved ? (activeReg.id || 'BYR-0000') : (isRejected ? '🔒 Reddedildi (Kod Verilmedi)' : '🔒 Onay Bekleniyor (Admin Onaylayınca Açılacak)')}
                         </span>
@@ -526,7 +538,7 @@ export function renderRegisterPage(container) {
                       <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
                         <i data-lucide="lock" style="width:15px; height:15px; vertical-align:middle; color:${isApproved ? 'var(--color-accent-green)' : (isRejected ? 'var(--color-danger)' : 'var(--color-text-muted)')};"></i> Kasa & Sistem Giriş Şifreniz:
                       </label>
-                      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); border-radius:var(--radius-md); padding:0.65rem 1.2rem;">
+                      <div class="step5-code-row" style="border:1px solid rgba(255,255,255,0.15);">
                         <span id="display-password" style="font-family:monospace; font-size:1.3rem; font-weight:800; color:${isRejected ? 'var(--color-text-dim)' : '#fff'}; letter-spacing:2px; flex:1;">
                           ${isRejected ? '•••••• (Lisans İptal)' : (showPasswordInStep5 ? (formData.password || activeReg.password || '••••••') : '•'.repeat(Math.max((formData.password || activeReg.password || '123456').length, 6)))}
                         </span>
@@ -544,7 +556,7 @@ export function renderRegisterPage(container) {
                     </div>
 
                     <!-- 3. DETAILS SUMMARY TABLE WITH PROFILE INFO -->
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:var(--radius-md); padding:0.85rem 1.1rem; margin-bottom:1.2rem; font-size:0.83rem;">
+                    <div class="step5-summary-grid">
                       <div><span style="color:var(--color-text-muted);">Yetkili Ad Soyad:</span> <strong style="color:#fff; display:block;">${activeProfile?.fullName || activeReg.fullName || 'Belirtilmedi'}</strong></div>
                       <div><span style="color:var(--color-text-muted);">Yetkili Rolü:</span> <strong style="color:var(--color-primary); display:block;">${activeProfile?.role || 'İşletme Sahibi'}</strong></div>
                       <div><span style="color:var(--color-text-muted);">E-posta Adresi:</span> <strong style="color:#fff; display:block;">${activeProfile?.email || 'Belirtilmedi'}</strong></div>
@@ -555,7 +567,7 @@ export function renderRegisterPage(container) {
                     </div>
 
                     <!-- ACTION BUTTONS ROW -->
-                    <div style="display:grid; grid-template-columns:${isApproved ? '1fr 1fr' : '1fr'}; gap:0.75rem;">
+                    <div class="step5-bottom-nav" style="display:grid; grid-template-columns:${isApproved ? '1fr 1fr' : '1fr'}; gap:0.75rem;">
                       <button id="btn-view-applications-trigger" class="pill-btn" style="justify-content:center; background:rgba(255,107,0,0.15); border:1px solid var(--color-primary); color:#fff; padding:0.75rem; border-radius:var(--radius-md); font-weight:700; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
                         <i data-lucide="clipboard-list" style="width:16px; height:16px; color:var(--color-primary);"></i>
                         <span>Başvurularım Ekranında Takip Et</span>
@@ -571,7 +583,7 @@ export function renderRegisterPage(container) {
                   </div>
 
                   <!-- BOTTOM NAVIGATION & ACTIONS -->
-                  <div style="display:flex; gap:0.85rem; justify-content:center; flex-wrap:wrap;">
+                  <div class="step5-bottom-nav">
                     <button class="btn-primary-hero" id="btn-finish-go-home" style="flex:1; min-width:200px; justify-content:center;">
                       <i data-lucide="home"></i> Tanıtım Sayfasına Git
                     </button>

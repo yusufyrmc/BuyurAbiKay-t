@@ -17,6 +17,9 @@ export const DEFAULT_PLANS = [
       'Günlük Kasa Raporu'
     ],
     popular: false,
+    hasDiscount: false,
+    originalPrice: 650,
+    discountBadge: '%23 İNDİRİM',
     capacity: 10
   },
   {
@@ -24,6 +27,9 @@ export const DEFAULT_PLANS = [
     name: 'Profesyonel Paket',
     badge: '25 MASA KAPASİTESİ',
     price: 899,
+    originalPrice: 1199,
+    hasDiscount: true,
+    discountBadge: '🔥 %25 İNDİRİM',
     period: '/ay',
     description: 'Orta ölçekli restoranlar, kebapçılar ve yoğun çalışan mutfaklar için tam teşekküllü otomasyon.',
     features: [
@@ -44,6 +50,9 @@ export const DEFAULT_PLANS = [
     name: 'Kurumsal Paket',
     badge: 'SINIRSIZ MASA KAPASİTESİ',
     price: 1499,
+    originalPrice: 1899,
+    hasDiscount: false,
+    discountBadge: '%21 İNDİRİM',
     period: '/ay',
     description: 'Büyük restoranlar, çok salonlu mekanlar ve zincir işletmeler için sınırsız güç.',
     features: [
@@ -281,6 +290,24 @@ class AppStore {
       localStorage.setItem('buyurabi_pricing_plans', JSON.stringify(this.pricingPlans));
     } catch (e) {}
     this.notify();
+    return this.pricingPlans;
+  }
+
+  addPricingPlan(newPlan) {
+    if (!this.pricingPlans) this.pricingPlans = JSON.parse(JSON.stringify(DEFAULT_PLANS));
+    this.pricingPlans.push(newPlan);
+    this.savePricingPlans(this.pricingPlans);
+    return this.pricingPlans;
+  }
+
+  deletePricingPlan(indexOrId) {
+    if (!this.pricingPlans) this.pricingPlans = JSON.parse(JSON.stringify(DEFAULT_PLANS));
+    if (typeof indexOrId === 'number') {
+      this.pricingPlans.splice(indexOrId, 1);
+    } else {
+      this.pricingPlans = this.pricingPlans.filter(p => p.id !== indexOrId);
+    }
+    this.savePricingPlans(this.pricingPlans);
     return this.pricingPlans;
   }
 

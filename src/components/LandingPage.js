@@ -83,7 +83,7 @@ export function renderLandingPage(container) {
           </button>
         </div>
 
-        <div style="display:flex; gap:2.5rem; padding-top:1.5rem; border-top:var(--border-glass);">
+        <div class="hero-stats-row">
           <div>
             <h4 style="font-family:var(--font-heading); font-size:1.8rem; font-weight:900; color:var(--color-accent-green);">0 TL</h4>
             <p style="font-size:0.85rem; color:var(--color-text-muted);">Kağıt Adisyon Masrafı</p>
@@ -226,7 +226,7 @@ export function renderLandingPage(container) {
         </p>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1.5rem;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap:1.5rem;">
         <div class="workflow-step-card">
           <div class="feat-icon-box">
             <i data-lucide="bell-ring" style="width:28px; height:28px;"></i>
@@ -382,7 +382,7 @@ export function renderLandingPage(container) {
         </p>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap:1.5rem;">
         ${store.getPricingPlans().map((plan, idx) => {
           const medal = idx === 0 ? '🥉' : (idx === 1 ? '🥈' : '🥇');
           const isPop = !!plan.popular;
@@ -408,8 +408,20 @@ export function renderLandingPage(container) {
                   </span>
                 </div>
                 <h3 style="font-family:var(--font-heading); font-size:1.3rem; font-weight:800; color:#fff;">${plan.name}</h3>
-                <div style="font-size:1.8rem; font-weight:900; color:${priceColor}; margin:0.8rem 0;">
-                  ₺${Number(plan.price).toLocaleString('tr-TR')} <span style="font-size:0.85rem; color:var(--color-text-muted); font-weight:500;">${plan.period || '/ay'}</span>
+                <div style="margin:0.8rem 0;">
+                  ${plan.hasDiscount && plan.originalPrice > plan.price ? `
+                    <div style="display:flex; align-items:center; gap:0.55rem; margin-bottom:4px;">
+                      <span style="font-size:1.1rem; color:var(--color-text-dim); text-decoration:line-through; font-weight:700;">
+                        ₺${Number(plan.originalPrice).toLocaleString('tr-TR')}
+                      </span>
+                      <span style="background:linear-gradient(135deg, #EF4444 0%, #DC2626 100%); color:#fff; font-size:0.72rem; font-weight:900; padding:2px 8px; border-radius:10px; box-shadow:0 0 10px rgba(239,68,68,0.4); letter-spacing:0.4px;">
+                        ${plan.discountBadge || ('%' + Math.round(((plan.originalPrice - plan.price) / plan.originalPrice) * 100) + ' İNDİRİM')}
+                      </span>
+                    </div>
+                  ` : ''}
+                  <div style="font-size:1.85rem; font-weight:900; color:${priceColor}; line-height:1.1;">
+                    ₺${Number(plan.price).toLocaleString('tr-TR')} <span style="font-size:0.85rem; color:var(--color-text-muted); font-weight:500;">${plan.period || '/ay'}</span>
+                  </div>
                 </div>
                 <p style="font-size:0.84rem; color:var(--color-text-muted); line-height:1.5; margin-bottom:1.2rem;">
                   ${plan.description || ''}
@@ -428,7 +440,7 @@ export function renderLandingPage(container) {
     </div>
 
     <!-- REGISTER PROMO BANNER -->
-    <div style="background:linear-gradient(135deg, rgba(255,107,0,0.2) 0%, rgba(14,19,31,0.95) 100%); border:2px solid var(--color-primary); border-radius:var(--radius-lg); padding:3.2rem 2rem; text-align:center; box-shadow:var(--shadow-glow); margin:3.5rem 0;">
+    <div class="landing-bottom-promo">
       <h2 style="font-family:var(--font-heading); font-size:2.4rem; font-weight:900; color:#fff; margin-bottom:0.8rem;">
         Restoranınızı Dijital Adisyonla Güçlendirin!
       </h2>
