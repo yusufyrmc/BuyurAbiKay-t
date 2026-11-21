@@ -42,7 +42,7 @@ export function renderLandingPage(container) {
               <div style="font-size:0.8rem; color:var(--color-text-muted);">${isApproved ? 'Sistemde Kayıtlı Adisyon İşletmeniz:' : 'İncelenmekte Olan İşletme Başvurunuz:'}</div>
               <strong style="font-size:1.05rem; color:#fff;">${lastReg.businessName}</strong>
               ${isApproved ? `
-                <span style="font-family:monospace; background:rgba(255,107,0,0.2); color:var(--color-primary); font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.92rem;">KOD: ${lastReg.id}</span>
+                <span style="font-family:monospace; background:rgba(0,230,118,0.18); color:var(--color-accent-green); font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.85rem;">📧 Gmail ile Giriş Aktif</span>
               ` : `
                 <span style="font-family:monospace; background:rgba(245,158,11,0.2); color:#F59E0B; font-weight:800; padding:2px 8px; border-radius:6px; margin-left:8px; font-size:0.85rem;">⏳ YÖNETİCİ ONAYI BEKLENİYOR</span>
               `}
@@ -205,7 +205,7 @@ export function renderLandingPage(container) {
             ✓ Bulut Tabanlı & Kurulum Gerektirmez
           </div>
           <div style="font-size:0.74rem; color:var(--color-text-muted);">
-            Tablet, telefon ve bilgisayardan anında çalışır. Kaydolun, işletme kodunuzla hemen kullanmaya başlayın.
+            Tablet, telefon ve bilgisayardan anında çalışır. Gmail ile kaydolun, onaydan sonra hemen kullanmaya başlayın.
           </div>
         </div>
 

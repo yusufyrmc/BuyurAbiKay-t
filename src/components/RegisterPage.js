@@ -162,8 +162,9 @@ export function renderRegisterPage(container) {
                   </div>
 
                   <div class="form-field">
-                    <label class="form-label"><i data-lucide="mail"></i> Kurumsal E-posta Adresi *</label>
-                    <input type="email" id="reg-profile-email" class="form-input corporate-input" placeholder="yetkili@restoran.com" value="${profileData.email}">
+                    <label class="form-label"><i data-lucide="mail"></i> Kurumsal Gmail / E-posta Adresi *</label>
+                    <input type="email" id="reg-profile-email" class="form-input corporate-input" placeholder="ahmet@gmail.com" value="${profileData.email}">
+                    <div style="font-size:0.75rem; color:var(--color-text-muted); margin-top:4px;">Programa giriş yapmak ve yönetici onayı almak için Gmail adresinizi girin.</div>
                   </div>
                 </div>
 
@@ -234,8 +235,8 @@ export function renderRegisterPage(container) {
                 </div>
 
                 <div class="form-field" style="margin-bottom:1.2rem;">
-                  <label class="form-label"><i data-lucide="mail"></i> Kayıtlı E-posta veya Cep Telefonu</label>
-                  <input type="text" id="login-profile-id" class="form-input corporate-input" placeholder="ahmet@gmail.com veya 0555 123 45 67" value="${profileData.email || profileData.phone}">
+                  <label class="form-label"><i data-lucide="mail"></i> Kayıtlı Gmail / E-posta Adresi</label>
+                  <input type="text" id="login-profile-id" class="form-input corporate-input" placeholder="ahmet@gmail.com" value="${profileData.email || profileData.phone}">
                 </div>
 
                 <div class="form-field" style="margin-bottom:1.5rem;">
@@ -429,10 +430,10 @@ export function renderRegisterPage(container) {
                   </h2>
                   <p class="wizard-subtitle" style="max-width:580px; margin:0 auto 1.2rem auto; font-size:0.95rem;">
                     ${isApproved 
-                      ? `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> için yetkili onayı tamamlanmış ve kasa lisans kodunuz aktif edilmiştir.` 
+                      ? `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> için yetkili onayı tamamlanmış ve programa Gmail ile giriş yetkisi aktif edilmiştir.` 
                       : (isRejected
                         ? `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> başvurusu yönetici tarafından reddedilmiştir. Lütfen bilgilerinizi kontrol ederek tekrar işletme kaydı yapınız.`
-                        : `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> için başvurunuz alındı. <strong>Admin onayından sonra işletme kodunuz aktif olacaktır.</strong> Durumunuzu sağ üstteki <strong>"Başvurularım"</strong> sekmesinden takip edebilirsiniz.`
+                        : `<strong>${activeReg.businessName || 'İşletmeniz'}</strong> için başvurunuz alındı. <strong>Admin onayından sonra programa Gmail ile girişiniz aktif olacaktır.</strong> Durumunuzu sağ üstteki <strong>"Başvurularım"</strong> sekmesinden takip edebilirsiniz.`
                       )
                     }
                   </p>
@@ -442,10 +443,10 @@ export function renderRegisterPage(container) {
                     <i data-lucide="${isApproved ? 'shield-check' : (isRejected ? 'alert-triangle' : 'alert-circle')}" style="width:28px; height:28px; color:${isApproved ? 'var(--color-accent-green)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')}; flex-shrink:0;"></i>
                     <div style="font-size:0.86rem; color:var(--color-text-main); line-height:1.4;">
                       ${isApproved 
-                        ? `<strong style="color:var(--color-accent-green); display:block; margin-bottom:2px;">📌 Lisansınız Onaylandı ve Kullanıma Hazır</strong>Bu işletme kodu ve şifre ile kasanızı, masalarınızı ve garson girişlerinizi hemen başlatabilirsiniz.` 
+                        ? `<strong style="color:var(--color-accent-green); display:block; margin-bottom:2px;">📌 Lisansınız Onaylandı ve Kullanıma Hazır</strong>Kayıtlı Gmail adresiniz ve şifreniz ile programı, salon masalarınızı ve garson girişlerinizi hemen başlatabilirsiniz.` 
                         : (isRejected
                           ? `<strong style="color:var(--color-danger); display:block; margin-bottom:2px;">⛔ İşletme Başvurusu Yönetici Tarafından Reddedildi</strong>Bu işletme kaydı yönetici tarafından onaylanmadı. Yeni bir işletme tanımlamak için lütfen aşağıdaki butona tıklayarak <strong>tekrar işletme kaydı yapınız</strong>.`
-                          : `<strong style="color:#F59E0B; display:block; margin-bottom:2px;">📌 Yetkili Onayı Bekleniyor (Kod Kilitli)</strong>Sistem güvenliği için işletme lisans kodları yönetici onayından sonra açılmaktadır. Onay verildiğinde kodunuz otomatik olarak aktifleşecektir.`
+                          : `<strong style="color:#F59E0B; display:block; margin-bottom:2px;">📌 Yetkili Onayı Bekleniyor (Giriş Kilitli)</strong>Sistem güvenliği için programa giriş yetkisi yönetici onayından sonra açılmaktadır. Onay verildiğinde Gmail adresinizle programa anında giriş yapabilirsiniz.`
                         )
                       }
                     </div>
@@ -464,12 +465,12 @@ export function renderRegisterPage(container) {
 
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
                       <div>
-                        <span style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--color-text-muted); font-weight:800;">DİJİTAL ADİSYON İŞLETME KARTI</span>
+                        <span style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--color-text-muted); font-weight:800;">DİJİTAL ADİSYON PROGRAM GİRİŞ KARTI</span>
                         <h4 style="font-size:1.2rem; color:#fff; margin:2px 0 0 0; font-weight:800;">${activeReg.businessName || formData.businessName}</h4>
                       </div>
                       ${isApproved ? `
                         <span style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.4); color:var(--color-accent-green); font-size:0.75rem; font-weight:800; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
-                          ● AKTİF LİSANS ALINDI
+                          ● PROGRAMA GİRİŞ AÇIK
                         </span>
                       ` : (isRejected ? `
                         <span style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); color:var(--color-danger); font-size:0.75rem; font-weight:800; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:5px;">
@@ -482,19 +483,19 @@ export function renderRegisterPage(container) {
                       `)}
                     </div>
 
-                    <!-- 1. FIELD: ISLETME KODU (ID) - ADMIN ONAYLAMADAN VERİLMEZ -->
+                    <!-- 1. FIELD: PROGRAM GIRIS HESABI (GMAIL) -->
                     <div style="margin-bottom:1.2rem;">
                       <label style="display:block; font-size:0.82rem; color:var(--color-text-muted); font-weight:700; margin-bottom:0.4rem;">
-                        <i data-lucide="${isApproved ? 'hash' : (isRejected ? 'x-circle' : 'lock')}" style="width:15px; height:15px; vertical-align:middle; color:${isApproved ? 'var(--color-primary)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')};"></i> 
-                        İşletme Kodu (ID) - Kasa & Garson Giriş Kodu:
+                        <i data-lucide="${isApproved ? 'mail' : (isRejected ? 'x-circle' : 'lock')}" style="width:15px; height:15px; vertical-align:middle; color:${isApproved ? 'var(--color-primary)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')};"></i> 
+                        Program Giriş Hesabı (Gmail):
                       </label>
                       <div class="step5-code-row" style="border:1.5px solid ${isApproved ? 'rgba(255,107,0,0.5)' : (isRejected ? 'rgba(239,68,68,0.4)' : 'rgba(245,158,11,0.4)')};">
-                        <span id="display-business-id" style="font-family:monospace; font-size:${isApproved ? '1.6rem' : '1.1rem'}; font-weight:900; color:${isApproved ? 'var(--color-primary)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')}; letter-spacing:1px; flex:1;">
-                          ${isApproved ? (activeReg.id || 'BYR-0000') : (isRejected ? '🔒 Reddedildi (Kod Verilmedi)' : '🔒 Onay Bekleniyor (Admin Onaylayınca Açılacak)')}
+                        <span id="display-business-id" style="font-family:monospace; font-size:${isApproved ? '1.35rem' : '1.05rem'}; font-weight:900; color:${isApproved ? 'var(--color-primary)' : (isRejected ? 'var(--color-danger)' : '#F59E0B')}; letter-spacing:0.5px; flex:1;">
+                          ${activeReg.email || activeReg.ownerEmail || profileData.email || 'ornek@gmail.com'} ${!isApproved && !isRejected ? ' (🔒 Onay Bekleniyor)' : ''}
                         </span>
                         ${isApproved ? `
                           <button id="btn-copy-id" class="pill-btn" style="background:rgba(255,107,0,0.2); border:1px solid rgba(255,107,0,0.5); color:var(--color-primary); font-weight:800; padding:0.5rem 1rem; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
-                            <i data-lucide="copy" style="width:15px; height:15px;"></i> <span id="copy-id-text">Kopyala</span>
+                            <i data-lucide="copy" style="width:15px; height:15px;"></i> <span id="copy-id-text">Gmail'i Kopyala</span>
                           </button>
                         ` : `
                           <button id="btn-check-my-apps-trigger" class="pill-btn" style="background:${isRejected ? 'rgba(239,68,68,0.18)' : 'rgba(245,158,11,0.2)'}; border:1px solid ${isRejected ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.5)'}; color:${isRejected ? 'var(--color-danger)' : '#F59E0B'}; font-weight:800; padding:0.5rem 1rem; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px; border-radius:var(--radius-sm);">
@@ -1021,18 +1022,20 @@ export function renderRegisterPage(container) {
       container.querySelector('#btn-view-applications-trigger')?.addEventListener('click', openApps);
       container.querySelector('#btn-check-my-apps-trigger')?.addEventListener('click', openApps);
 
-      // 1. Copy Business ID (Only if approved)
+      const activeGmail = activeReg.email || activeReg.ownerEmail || profileData.email || 'ornek@gmail.com';
+
+      // 1. Copy Business Gmail (Only if approved)
       container.querySelector('#btn-copy-id')?.addEventListener('click', () => {
         if (!isApproved) {
-          showToast('⏳ İşletme kodunuz yönetici onayından sonra açılacaktır!', 'info');
+          showToast('⏳ Gmail ile girişiniz yönetici onayından sonra açılacaktır!', 'info');
           return;
         }
-        navigator.clipboard.writeText(activeId).then(() => {
+        navigator.clipboard.writeText(activeGmail).then(() => {
           const btnText = container.querySelector('#copy-id-text');
           if (btnText) btnText.textContent = 'Kopyalandı! ✓';
-          showToast(`📋 İşletme Kodu (${activeId}) panoya kopyalandı!`, 'success');
+          showToast(`📋 Giriş Gmail Adresi (${activeGmail}) panoya kopyalandı!`, 'success');
           setTimeout(() => {
-            if (btnText) btnText.textContent = 'Kopyala';
+            if (btnText) btnText.textContent = 'Gmail\'i Kopyala';
           }, 2500);
         });
       });
@@ -1059,20 +1062,19 @@ export function renderRegisterPage(container) {
       container.querySelector('#btn-copy-all')?.addEventListener('click', () => {
         const allInfo = `=== BUYURABİ DİJİTAL ADİSYON GİRİŞ BİLGİLERİ ===
 İşletme Adı: ${formData.businessName || activeReg.businessName || ''}
-İşletme Kodu (ID): ${activeId}
+Program Girişi (Gmail): ${activeGmail}
 Kasa Giriş Şifresi: ${activePass}
 Bağlı Yetkili: ${currentProf.fullName || activeReg.fullName || ''} (${currentProf.role || 'İşletme Sahibi'})
-E-posta: ${currentProf.email || ''}
-Telefon: ${currentProf.phone || activeReg.phone || ''}
+İletişim Telefonu: ${currentProf.phone || activeReg.phone || ''}
 İşletme Türü: ${formData.businessType || activeReg.businessType || ''}
 Masa Kapasite Planı: ${formData.plan || activeReg.plan || ''}
 Konum: ${formData.city || activeReg.city || ''} - ${formData.fullAddress || activeReg.fullAddress || ''}
-Durum: Aktif Dijital Adisyon Lisansı Alındı`;
+Giriş Durumu: ${isApproved ? 'Program Kullanıma Açık' : 'Yönetici Onayı Bekleniyor'}`;
 
         navigator.clipboard.writeText(allInfo).then(() => {
           const copyAllText = container.querySelector('#copy-all-text');
           if (copyAllText) copyAllText.textContent = 'Tüm Bilgiler Kopyalandı! ✓';
-          showToast('✅ Tüm dijital adisyon işletme giriş bilgileri panoya kopyalandı!', 'success');
+          showToast('✅ Program giriş bilgileri panoya kopyalandı!', 'success');
           setTimeout(() => {
             if (copyAllText) copyAllText.textContent = 'Tüm Bilgileri Kopyala';
           }, 3000);
@@ -1082,34 +1084,33 @@ Durum: Aktif Dijital Adisyon Lisansı Alındı`;
       // 5. Download TXT File
       container.querySelector('#btn-download-txt')?.addEventListener('click', () => {
         const txtContent = `=====================================================
-BUYURABİ DİJİTAL ADİSYON & RESTORAN KASA BİLGİ KARTI
+BUYURABİ DİJİTAL ADİSYON & RESTORAN PROGRAM GİRİŞ KARTI
 =====================================================
 İşletme Adı        : ${formData.businessName || activeReg.businessName || ''}
-İşletme Kodu (ID)  : ${activeId}
+Program Girişi     : Gmail ile Giriş
+Kayıtlı Gmail      : ${activeGmail}
 Kasa Giriş Parolası: ${activePass}
 Yetkili Kişi       : ${currentProf.fullName || activeReg.fullName || ''}
 Yetkili Rolü       : ${currentProf.role || 'İşletme Sahibi'}
-E-posta Adresi     : ${currentProf.email || ''}
 Telefon No         : ${currentProf.phone || activeReg.phone || ''}
 İşletme Türü       : ${formData.businessType || activeReg.businessType || ''}
 Masa Kapasite Planı: ${formData.plan || activeReg.plan || ''}
 Açık Adres         : ${formData.city || activeReg.city || ''} / ${formData.fullAddress || activeReg.fullAddress || ''}
-Lisans Durumu      : Aktif Dijital Adisyon Lisansı
+Giriş Durumu       : ${isApproved ? 'Aktif - Programa Giriş Açık' : 'Yönetici Onayı Bekleniyor'}
 Kayıt Tarihi       : ${new Date().toLocaleString('tr-TR')}
 =====================================================
 ÖNEMLİ NOT:
-Bu işletme kodu (ID) ve şifre; kasanızı, salon masalarınızı
-yönetmek, garsonların QR ile telefonlarından sisteme giriş
-yapmasını sağlamak, mutfak (sıcak) ekranını açmak ve kasa
-tahsilatlarını (nakit/kart) yürütmek için kullanılacaktır.
-Lütfen bu dosyayı güvenli bir yerde saklayınız.
+BuyurAbi Kasa ve Adisyon programına giriş yapmak için yukarıdaki
+kayıtlı Gmail adresinizi ve belirlediğiniz şifrenizi kullanınız.
+Yönetici onayından sonra tüm masalar ve kasa ekranı açılacaktır.
+Lütfen bu bilgileri güvenli bir yerde saklayınız.
 =====================================================`;
 
         const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `BuyurAbi_${activeId}_Giris_Bilgileri.txt`;
+        a.download = `BuyurAbi_${activeGmail}_Giris_Bilgileri.txt`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

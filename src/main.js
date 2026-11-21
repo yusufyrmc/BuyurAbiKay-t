@@ -20,21 +20,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const profile = store.getUserProfile();
     const regBtnSpan = document.querySelector('#nav-register-btn span');
     const headerCtaSpan = document.querySelector('#btn-header-cta span');
-    if (lastReg && lastReg.id) {
+    if (lastReg && (lastReg.email || lastReg.ownerEmail || lastReg.id)) {
       const isApproved = lastReg.status === 'onaylandi';
       const isRejected = lastReg.status === 'reddedildi';
+      const userGmail = lastReg.email || lastReg.ownerEmail || lastReg.id;
       if (regBtnSpan) {
         if (isApproved) {
-          regBtnSpan.innerHTML = `Kayıt / ID Kartı <span style="background:rgba(0,230,118,0.2); color:var(--color-accent-green); padding:1px 6px; border-radius:6px; font-size:0.75rem; font-weight:800; margin-left:4px; font-family:monospace;">${lastReg.id}</span>`;
+          regBtnSpan.innerHTML = `Giriş Hesabı <span style="background:rgba(0,230,118,0.2); color:var(--color-accent-green); padding:1px 6px; border-radius:6px; font-size:0.75rem; font-weight:800; margin-left:4px; font-family:monospace;">📧 ${userGmail}</span>`;
         } else if (isRejected) {
           regBtnSpan.innerHTML = `İşletme Kaydı <span style="background:rgba(239,68,68,0.2); color:var(--color-danger); padding:1px 6px; border-radius:6px; font-size:0.75rem; font-weight:800; margin-left:4px;">❌ Reddedildi</span>`;
         } else {
-          regBtnSpan.innerHTML = `Başvuru Durumu <span style="background:rgba(245,158,11,0.2); color:#F59E0B; padding:1px 6px; border-radius:6px; font-size:0.75rem; font-weight:800; margin-left:4px;">⏳ İnceleniyor</span>`;
+          regBtnSpan.innerHTML = `Başvuru Durumu <span style="background:rgba(245,158,11,0.2); color:#F59E0B; padding:1px 6px; border-radius:6px; font-size:0.75rem; font-weight:800; margin-left:4px;">⏳ Onay Bekleniyor</span>`;
         }
       }
       if (headerCtaSpan) {
         if (isApproved) {
-          headerCtaSpan.innerHTML = `İşletme ID: <strong style="color:var(--color-accent-green); font-family:monospace;">${lastReg.id}</strong>`;
+          headerCtaSpan.innerHTML = `Giriş: <strong style="color:var(--color-accent-green); font-family:monospace;">📧 ${userGmail}</strong>`;
         } else if (isRejected) {
           headerCtaSpan.innerHTML = `<span style="color:var(--color-danger); font-weight:800;">❌ Tekrar Kayıt Yap</span>`;
         } else {
@@ -236,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   <div><span style="color:var(--color-text-dim);">Yetkili Telefon:</span> <strong style="color:#fff; display:block;">${app.phone}</strong></div>
                 </div>
 
-                <!-- CODE AND ACCESS STATUS (ADMIN ONAYLAMADAN VERİLMEZ) -->
+                <!-- GMAIL & ACCESS STATUS (ADMIN ONAYLAMADAN GİRİŞ AÇILMAZ) -->
                 ${isApproved ? `
                   <div style="background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.35); border-radius:var(--radius-sm); padding:0.85rem 1rem;">
                     <div style="font-size:0.75rem; color:var(--color-accent-green); font-weight:800; margin-bottom:6px; display:flex; align-items:center; gap:5px;">
@@ -244,15 +245,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div style="display:flex; align-items:center; justify-content:space-between; gap:0.6rem; flex-wrap:wrap;">
                       <div>
-                        <span style="font-size:0.72rem; color:var(--color-text-muted); display:block;">İşletme Giriş Kodu (ID):</span>
-                        <strong style="font-family:monospace; font-size:1.3rem; color:var(--color-primary); letter-spacing:1.5px;">${app.id}</strong>
+                        <span style="font-size:0.72rem; color:var(--color-text-muted); display:block;">Program Giriş Hesabı (Gmail):</span>
+                        <strong style="font-family:monospace; font-size:1.15rem; color:var(--color-primary); letter-spacing:0.5px;">${app.email || app.ownerEmail || app.id}</strong>
                       </div>
                       <div style="display:flex; gap:0.5rem;">
-                        <button class="pill-btn btn-copy-app-code" data-code="${app.id}" style="background:rgba(255,107,0,0.2); border:1px solid rgba(255,107,0,0.5); color:var(--color-primary); padding:0.4rem 0.8rem; font-size:0.78rem; font-weight:800; border-radius:var(--radius-sm); cursor:pointer;">
-                          <i data-lucide="copy" style="width:13px; height:13px;"></i> Kodu Kopyala
+                        <button class="pill-btn btn-copy-app-code" data-code="${app.email || app.ownerEmail || app.id}" style="background:rgba(255,107,0,0.2); border:1px solid rgba(255,107,0,0.5); color:var(--color-primary); padding:0.4rem 0.8rem; font-size:0.78rem; font-weight:800; border-radius:var(--radius-sm); cursor:pointer;">
+                          <i data-lucide="copy" style="width:13px; height:13px;"></i> Gmail'i Kopyala
                         </button>
                         <button class="pill-btn btn-show-app-details" data-app-id="${app.id}" style="background:var(--color-primary-gradient); color:#fff; padding:0.4rem 0.8rem; font-size:0.78rem; font-weight:800; border:none; border-radius:var(--radius-sm); cursor:pointer;">
-                          Kasa Kartını Aç
+                          Giriş Kartını Aç
                         </button>
                       </div>
                     </div>
@@ -263,10 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
                       <i data-lucide="alert-circle" style="width:14px; height:14px;"></i> BAŞVURUNUZ İNCELEME AŞAMASINDA
                     </div>
                     <p style="font-size:0.78rem; color:var(--color-text-muted); margin:0 0 6px 0; line-height:1.4;">
-                      Sistem güvenliği ve restoran doğrulaması için başvurunuz yönetici onayından geçmektedir. <strong>Yönetici onaylayana kadar işletme kodu kilitli kalır.</strong>
+                      Sistem güvenliği için restoran başvurunuz yönetici onayından geçmektedir. <strong>Yönetici onaylayana kadar programa giriş açılamaz.</strong>
                     </p>
                     <div style="display:flex; align-items:center; gap:0.5rem; background:rgba(0,0,0,0.4); padding:0.4rem 0.8rem; border-radius:6px; font-size:0.8rem; color:var(--color-text-dim);">
-                      <i data-lucide="lock" style="width:13px; height:13px; color:#F59E0B;"></i> İşletme Kodu: <span style="font-family:monospace; color:#F59E0B; font-weight:800;">🔒 Yönetici Onayı Bekleniyor</span>
+                      <i data-lucide="lock" style="width:13px; height:13px; color:#F59E0B;"></i> Giriş Gmail: <span style="font-family:monospace; color:#F59E0B; font-weight:800;">${app.email || app.ownerEmail || 'Kayıtlı E-posta'} (🔒 Yönetici Onayı Bekleniyor)</span>
                     </div>
                   </div>
                 ` : `
@@ -300,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
           e.currentTarget.innerHTML = '<i data-lucide="check" style="width:13px; height:13px;"></i> Kopyalandı!';
           if (window.lucide) window.lucide.createIcons();
           setTimeout(() => {
-            btn.innerHTML = '<i data-lucide="copy" style="width:13px; height:13px;"></i> Kodu Kopyala';
+            btn.innerHTML = '<i data-lucide="copy" style="width:13px; height:13px;"></i> Gmail\'i Kopyala';
             if (window.lucide) window.lucide.createIcons();
           }, 2000);
         });

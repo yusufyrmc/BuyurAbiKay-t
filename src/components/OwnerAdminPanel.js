@@ -72,15 +72,32 @@ export function renderOwnerAdminPanel(container) {
     const rawLower = raw.toLowerCase();
     const norm = normalizeQuery(raw);
 
-    // 1. Exact match on ID (e.g. "REG-1001", "BYR-1001")
-    let match = store.registrations.find(r => r.id.toUpperCase() === rawUpper);
+    // 1. Match by exact Gmail / Email (e.g. "ahmet@gmail.com")
+    let match = store.registrations.find(r => 
+      (r.ownerEmail && r.ownerEmail.toLowerCase() === rawLower) ||
+      (r.email && r.email.toLowerCase() === rawLower)
+    );
     if (match) return match;
 
-    // 2. Normalized ID match (e.g. "reg1001", "reg 1001", "byr1001")
-    match = store.registrations.find(r => normalizeQuery(r.id) === norm);
+    // 2. Match by Gmail prefix / part (e.g. user types "ahmet" or "ahmet@" or "gaziantep")
+    match = store.registrations.find(r => {
+      const email = (r.email || r.ownerEmail || '').toLowerCase();
+      return email.includes(rawLower);
+    });
     if (match) return match;
 
-    // 3. Digits-only match (e.g. user typed "1001", matches "REG-1001" or "BYR-1001")
+    // 3. Exact business name match
+    match = store.registrations.find(r => r.businessName.toLowerCase() === rawLower);
+    if (match) return match;
+
+    // 4. Business name contains query
+    match = store.registrations.find(r => r.businessName.toLowerCase().includes(rawLower));
+    if (match) return match;
+
+    // 5. Match by ID (legacy fallback: "REG-1001", "BYR-1001", digits)
+    match = store.registrations.find(r => r.id.toUpperCase() === rawUpper || normalizeQuery(r.id) === norm);
+    if (match) return match;
+
     const digits = raw.replace(/\D/g, '');
     if (digits && digits.length >= 2) {
       match = store.registrations.find(r => {
@@ -90,19 +107,10 @@ export function renderOwnerAdminPanel(container) {
       if (match) return match;
     }
 
-    // 4. Exact business name match
-    match = store.registrations.find(r => r.businessName.toLowerCase() === rawLower);
-    if (match) return match;
-
-    // 5. Business name contains query
-    match = store.registrations.find(r => r.businessName.toLowerCase().includes(rawLower));
-    if (match) return match;
-
-    // 6. Check existing orders for businessId or businessName
+    // 6. Check existing orders for businessId, email or businessName
     const orderMatch = store.orders.find(o => 
       o.businessId.toUpperCase() === rawUpper || 
       normalizeQuery(o.businessId) === norm ||
-      (digits && digits.length >= 2 && o.businessId.replace(/\D/g, '').endsWith(digits)) ||
       o.businessName.toLowerCase().includes(rawLower)
     );
     if (orderMatch) {
@@ -111,6 +119,8 @@ export function renderOwnerAdminPanel(container) {
       return {
         id: orderMatch.businessId,
         businessName: orderMatch.businessName,
+        email: orderMatch.businessId.toLowerCase() + '@gmail.com',
+        ownerEmail: orderMatch.businessId.toLowerCase() + '@gmail.com',
         businessType: 'Restoran',
         city: 'Belirtilmedi',
         status: 'onaylandi'
@@ -452,17 +462,17 @@ export function renderOwnerAdminPanel(container) {
                       Canlı Sipariş Masası & İşletme Takip Ekranı
                     </h2>
                     <p style="color:var(--color-text-muted); font-size:0.98rem; max-width:680px; margin:0 auto 1.8rem auto; line-height:1.6;">
-                      İncelemek istediğiniz <strong>İşletme ID'sini</strong> girerek veya aşağıdaki listeden işletmeye tıklayarak <strong>o işletmenin ne kadar kazandığını</strong> ve <strong>hangi masaya hangi siparişin gittiğini</strong> anında canlı olarak görüntüleyin.
+                      İncelemek istediğiniz işletmenin <strong>Gmail adresini</strong> (veya adını) girerek ya da aşağıdaki listeden seçerek <strong>o işletmenin ne kadar kazandığını</strong> ve <strong>hangi masaya hangi siparişin gittiğini</strong> anında canlı olarak görüntüleyin.
                     </p>
 
-                    <!-- DIRECT BUSINESS ID INPUT BOX -->
+                    <!-- DIRECT BUSINESS ID / GMAIL INPUT BOX -->
                     <div style="max-width:620px; margin:0 auto 1.8rem auto; position:relative;">
                       <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
                         <div style="position:relative; flex:1; min-width:240px;">
-                          <input type="text" id="input-direct-business-id" class="form-input" placeholder="İşletme ID veya Adı (Örn: 1001, REG-1001, Gaziantep)..." value="${orderBusinessInputText}" style="height:52px; font-size:1.05rem; font-weight:800; font-family:monospace; padding-left:1.2rem; border-color:var(--color-primary); letter-spacing:1px; text-transform:uppercase;" autocomplete="off">
+                          <input type="text" id="input-direct-business-id" class="form-input" placeholder="İşletmenin Gmail Adresi (Örn: ahmet@gmail.com, mehmet@citirpide.com)..." value="${orderBusinessInputText}" style="height:52px; font-size:1rem; font-weight:700; font-family:monospace; padding-left:1.2rem; border-color:var(--color-primary); letter-spacing:0.5px;" autocomplete="off">
                         </div>
                         <button id="btn-submit-direct-business-id" class="btn-primary-hero" style="height:52px; padding:0 1.8rem; font-size:1rem; font-weight:800; cursor:pointer;">
-                          <i data-lucide="arrow-right-circle"></i> <span>İşletmeyi & Masaları Aç</span>
+                          <i data-lucide="arrow-right-circle"></i> <span>Gmail ile Masaları Aç</span>
                         </button>
                       </div>
                       <div id="direct-id-suggestions-box" style="display:none; position:absolute; top:58px; left:0; right:0; background:#0e131f; border:1px solid var(--color-primary); border-radius:var(--radius-md); box-shadow:0 12px 35px rgba(0,0,0,0.85); z-index:100; overflow:hidden; max-height:260px; overflow-y:auto; text-align:left;"></div>
@@ -502,8 +512,8 @@ export function renderOwnerAdminPanel(container) {
                             <div>
                               <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
                                 <div>
-                                  <span style="font-family:monospace; font-size:0.8rem; font-weight:800; background:rgba(255,107,0,0.15); color:var(--color-primary); padding:3px 8px; border-radius:4px; border:1px solid rgba(255,107,0,0.3);">
-                                    ${r.id}
+                                  <span style="font-family:monospace; font-size:0.8rem; font-weight:800; background:rgba(0,229,255,0.12); color:var(--color-accent-cyan); padding:3px 8px; border-radius:4px; border:1px solid rgba(0,229,255,0.3);">
+                                    📧 ${r.email || r.ownerEmail || r.id}
                                   </span>
                                   <h4 style="font-family:var(--font-heading); font-size:1.2rem; font-weight:800; color:#fff; margin:6px 0 2px 0;">
                                     ${r.businessName}
@@ -575,19 +585,19 @@ export function renderOwnerAdminPanel(container) {
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; margin-bottom:1.5rem; background:var(--color-bg-card); padding:1rem 1.4rem; border-radius:var(--radius-md); border:var(--border-glass);">
                   <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
                     <button id="btn-back-to-biz-selection" class="btn-secondary-hero" style="padding:0.55rem 1rem; font-size:0.85rem;">
-                      <i data-lucide="arrow-left"></i> Farklı İşletme ID'si Gir / Listeye Dön
+                      <i data-lucide="arrow-left"></i> Farklı Gmail Gir / Listeye Dön
                     </button>
 
                     <div style="display:flex; align-items:center; gap:0.5rem;">
-                      <span style="font-size:0.8rem; color:var(--color-text-muted); font-weight:700;">Hızlı ID Değiştir:</span>
-                      <input type="text" id="input-quick-switch-id" class="form-input" placeholder="Örn: 1002 veya REG-1002" style="width:160px; height:36px; padding:0 0.6rem; font-size:0.82rem; font-family:monospace; text-transform:uppercase;" autocomplete="off">
+                      <span style="font-size:0.8rem; color:var(--color-text-muted); font-weight:700;">Hızlı Gmail Değiştir:</span>
+                      <input type="text" id="input-quick-switch-id" class="form-input" placeholder="Örn: ahmet@gmail.com" style="width:190px; height:36px; padding:0 0.6rem; font-size:0.82rem; font-family:monospace;" autocomplete="off">
                       <button id="btn-quick-switch-id" class="pill-btn" style="background:var(--color-primary); color:#fff; font-weight:800; font-size:0.8rem; padding:0.5rem 0.8rem; cursor:pointer;">Aç</button>
                     </div>
 
                     <select id="select-quick-biz-dropdown" class="form-input" style="padding:0.4rem 0.6rem; font-size:0.82rem; height:36px; width:auto; min-width:180px;">
                       <option value="all" ${isAllView ? 'selected' : ''}>-- Tüm Restoranlar --</option>
                       ${store.registrations.map(r => `
-                        <option value="${r.id}" ${orderSelectedBusinessId === r.id ? 'selected' : ''}>${r.businessName} (${r.id})</option>
+                        <option value="${r.id}" ${orderSelectedBusinessId === r.id ? 'selected' : ''}>${r.businessName} (📧 ${r.email || r.ownerEmail || r.id})</option>
                       `).join('')}
                     </select>
                   </div>
@@ -608,8 +618,8 @@ export function renderOwnerAdminPanel(container) {
                   <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.4rem; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:1rem; flex-wrap:wrap; gap:1rem;">
                     <div>
                       <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
-                        <span style="font-family:monospace; font-size:1.1rem; font-weight:900; background:rgba(255,107,0,0.2); color:var(--color-primary); padding:4px 10px; border-radius:6px; border:1px solid rgba(255,107,0,0.4);">
-                          ID: ${isAllView ? 'TÜMÜ' : selectedBusiness.id}
+                        <span style="font-family:monospace; font-size:1rem; font-weight:900; background:rgba(0,229,255,0.15); color:var(--color-accent-cyan); padding:4px 10px; border-radius:6px; border:1px solid rgba(0,229,255,0.35);">
+                          📧 Gmail: ${isAllView ? 'TÜMÜ' : (selectedBusiness.email || selectedBusiness.ownerEmail || selectedBusiness.id)}
                         </span>
                         <h2 style="font-family:var(--font-heading); font-size:1.8rem; font-weight:900; color:#fff; margin:0;">
                           ${isAllView ? 'Tüm İşletmeler Canlı Sipariş Akışı' : selectedBusiness.businessName}
@@ -898,7 +908,7 @@ export function renderOwnerAdminPanel(container) {
                     🎧 Çağrı Konsolu & Canlı Teşhis Masası
                   </h3>
                   <p style="color:var(--color-text-muted); font-size:0.84rem; margin:0;">
-                    Arayan restoran sahibinin ID'sini, adını veya telefonunu girerek tüm teknik ve sipariş detaylarına anında ulaşın.
+                    Arayan restoran sahibinin Gmail adresini, adını veya telefonunu girerek tüm teknik ve sipariş detaylarına anında ulaşın.
                   </p>
                 </div>
 
@@ -912,7 +922,7 @@ export function renderOwnerAdminPanel(container) {
 
               <!-- Search Input for Support -->
               <div style="margin-bottom:1rem;">
-                <input type="text" id="input-support-search" class="form-input" placeholder="🔍 İşletme ID (Örn: REG-1001, BYR-1001), Restoran Adı, Telefon veya Yetkili Adı yazın..." value="${supportSearchQuery}" style="padding-left:1.2rem; font-size:0.95rem; height:46px;">
+                <input type="text" id="input-support-search" class="form-input" placeholder="🔍 İşletmenin Gmail Adresi (Örn: ahmet@gmail.com), Restoran Adı veya Telefon yazın..." value="${supportSearchQuery}" style="padding-left:1.2rem; font-size:0.95rem; height:46px;">
               </div>
 
               <!-- Quick Business Selector Pills -->
@@ -920,7 +930,7 @@ export function renderOwnerAdminPanel(container) {
                 <span style="font-size:0.75rem; color:var(--color-text-dim); font-weight:700;">Hızlı Seçim:</span>
                 ${store.registrations.map(r => `
                   <button class="pill-btn btn-select-support-business ${supportSelectedBusinessId === r.id ? 'active' : ''}" data-biz-id="${r.id}" style="padding:0.35rem 0.8rem; font-size:0.78rem;">
-                    ${r.businessName} <span style="font-family:monospace; opacity:0.8; margin-left:4px;">(${r.id})</span>
+                    ${r.businessName} <span style="font-family:monospace; opacity:0.85; margin-left:4px;">(📧 ${r.email || r.ownerEmail || r.id})</span>
                   </button>
                 `).join('')}
               </div>
@@ -943,8 +953,8 @@ export function renderOwnerAdminPanel(container) {
 
                   <div style="display:flex; flex-direction:column; gap:0.65rem; font-size:0.83rem; margin-bottom:1.2rem;">
                     <div style="display:flex; justify-content:space-between; background:rgba(0,0,0,0.3); padding:0.55rem 0.8rem; border-radius:6px;">
-                      <span style="color:var(--color-text-muted);">İşletme Kodu (ID):</span>
-                      <strong style="color:var(--color-primary); font-family:monospace; font-size:1.05rem; letter-spacing:1px;">${selectedSupportBusiness.id}</strong>
+                      <span style="color:var(--color-text-muted);">Giriş Gmail Adresi:</span>
+                      <strong style="color:var(--color-primary); font-family:monospace; font-size:1rem; letter-spacing:0.5px;">📧 ${selectedSupportBusiness.email || selectedSupportBusiness.ownerEmail || selectedSupportBusiness.id}</strong>
                     </div>
 
                     <div style="display:flex; justify-content:space-between; background:rgba(0,0,0,0.3); padding:0.55rem 0.8rem; border-radius:6px; align-items:center;">
@@ -1225,7 +1235,7 @@ export function renderOwnerAdminPanel(container) {
                     </div>
 
                     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:0.65rem; background:rgba(0,0,0,0.3); padding:0.8rem; border-radius:var(--radius-md); font-size:0.82rem;">
-                      <div><span style="color:var(--color-text-muted); display:block; font-size:0.72rem;">İşletme Kodu (ID):</span><strong style="color:var(--color-primary); font-family:monospace; font-size:1rem; letter-spacing:1px;">${reg.id}</strong></div>
+                      <div><span style="color:var(--color-text-muted); display:block; font-size:0.72rem;">Giriş Gmail Adresi:</span><strong style="color:var(--color-primary); font-family:monospace; font-size:0.95rem; letter-spacing:0.5px;">📧 ${reg.email || reg.ownerEmail || reg.id}</strong></div>
                       <div><span style="color:var(--color-text-muted); display:block; font-size:0.72rem;">Giriş Şifresi:</span><strong style="color:#fff; font-family:monospace; font-size:0.92rem;">${reg.password || '••••••'}</strong></div>
                       <div><span style="color:var(--color-text-muted); display:block; font-size:0.72rem;">Yetkili Ad Soyad:</span><strong style="color:#fff;">${reg.fullName}</strong></div>
                       <div><span style="color:var(--color-text-muted); display:block; font-size:0.72rem;">Cep Telefonu:</span><strong style="color:var(--color-accent-green);">${reg.phone}</strong></div>
@@ -1652,8 +1662,8 @@ export function renderOwnerAdminPanel(container) {
             <strong style="color:#fff; font-size:0.92rem; display:block;">${r.businessName}</strong>
             <span style="font-size:0.75rem; color:var(--color-text-muted);">${r.businessType || 'Restoran'} • ${r.city}</span>
           </div>
-          <span style="font-family:monospace; font-weight:900; color:var(--color-primary); background:rgba(255,107,0,0.15); padding:3px 8px; border-radius:6px; font-size:0.85rem;">
-            ${r.id}
+          <span style="font-family:monospace; font-weight:800; color:var(--color-primary); background:rgba(255,107,0,0.15); padding:3px 10px; border-radius:6px; font-size:0.85rem;">
+            📧 ${r.email || r.ownerEmail || r.id}
           </span>
         </div>
       `).join('');
@@ -1666,7 +1676,7 @@ export function renderOwnerAdminPanel(container) {
           const bizId = e.currentTarget.dataset.bizId;
           const biz = store.registrations.find(r => r.id === bizId);
           orderSelectedBusinessId = bizId;
-          orderBusinessInputText = bizId;
+          orderBusinessInputText = biz ? (biz.email || biz.ownerEmail || biz.id) : bizId;
           suggestionsBox.style.display = 'none';
           showToast(`⚡ ${biz ? biz.businessName : bizId} masaları & kazancı açıldı.`, 'success');
           updateView();
@@ -1685,19 +1695,19 @@ export function renderOwnerAdminPanel(container) {
     const handleDirectBizSubmit = () => {
       const rawVal = inputDirectEl ? inputDirectEl.value.trim() : '';
       if (!rawVal) {
-        showToast('⚠️ Lütfen bir İşletme ID\'si (Örn: 1001 veya REG-1001) ya da restoran adı giriniz.', 'error');
+        showToast('⚠️ Lütfen bir Gmail adresi (Örn: ahmet@gmail.com) veya restoran adı giriniz.', 'error');
         return;
       }
       
       const found = findBusiness(rawVal);
       if (found) {
         orderSelectedBusinessId = found.id;
-        orderBusinessInputText = found.id;
+        orderBusinessInputText = found.email || found.ownerEmail || found.id;
         if (suggestionsBox) suggestionsBox.style.display = 'none';
-        showToast(`⚡ ${found.businessName} (${found.id}) masaları & kazancı açıldı.`, 'success');
+        showToast(`⚡ ${found.businessName} (📧 ${found.email || found.ownerEmail || found.id}) masaları açıldı.`, 'success');
         updateView();
       } else {
-        showToast(`⚠️ "${rawVal}" bulunamadı! Lütfen geçerli bir ID (Örn: REG-1001 veya 1001) girin ya da aşağıdaki listeden bir işletmeye tıklayın.`, 'error');
+        showToast(`⚠️ "${rawVal}" bulunamadı! Lütfen geçerli bir Gmail adresi (Örn: ahmet@gmail.com) girin ya da aşağıdaki listeden bir işletmeye tıklayın.`, 'error');
       }
     };
 
@@ -1737,16 +1747,17 @@ export function renderOwnerAdminPanel(container) {
     const handleQuickSwitch = () => {
       const val = container.querySelector('#input-quick-switch-id')?.value?.trim();
       if (!val) {
-        showToast('⚠️ Lütfen bir İşletme ID\'si (Örn: 1002 veya REG-1002) giriniz.', 'error');
+        showToast('⚠️ Lütfen bir Gmail adresi (Örn: ahmet@gmail.com) giriniz.', 'error');
         return;
       }
       const found = findBusiness(val);
       if (found) {
         orderSelectedBusinessId = found.id;
-        showToast(`⚡ ${found.businessName} (${found.id}) işletmesine geçildi.`, 'info');
+        const displayMail = found.email || found.ownerEmail || found.id;
+        showToast(`⚡ ${found.businessName} (📧 ${displayMail}) masaları açıldı.`, 'info');
         updateView();
       } else {
-        showToast(`⚠️ "${val}" ID veya adına sahip bir işletme bulunamadı!`, 'error');
+        showToast(`⚠️ "${val}" Gmail adresine veya adına sahip bir işletme bulunamadı!`, 'error');
       }
     };
     container.querySelector('#btn-quick-switch-id')?.addEventListener('click', handleQuickSwitch);
@@ -1931,13 +1942,15 @@ export function renderOwnerAdminPanel(container) {
 
     // Send SMS simulation
     container.querySelector('#btn-support-send-sms')?.addEventListener('click', () => {
-      showToast(`📲 ${selectedSupportBusiness?.phone} numarasına şifre ve ID SMS'i gönderildi!`, 'success');
+      const email = selectedSupportBusiness?.email || selectedSupportBusiness?.ownerEmail || selectedSupportBusiness?.id;
+      showToast(`📲 ${selectedSupportBusiness?.phone} numarasına giriş Gmail bilgisi (${email}) ve şifresi iletildi!`, 'success');
     });
 
     // Open WhatsApp simulation
     container.querySelector('#btn-support-open-whatsapp')?.addEventListener('click', () => {
       const cleanPhone = (selectedSupportBusiness?.phone || '').replace(/[^0-9]/g, '');
-      const msg = encodeURIComponent(`Merhaba ${selectedSupportBusiness?.fullName}, BuyurAbi Destek ekibiyiz. İşletme Kodunuz: ${selectedSupportBusiness?.id}. Menü linkiniz: https://buyurabi.com/menu/${selectedSupportBusiness?.id}`);
+      const email = selectedSupportBusiness?.email || selectedSupportBusiness?.ownerEmail || selectedSupportBusiness?.id;
+      const msg = encodeURIComponent(`Merhaba ${selectedSupportBusiness?.fullName}, BuyurAbi Destek ekibiyiz. Programa giriş Gmail adresiniz: ${email}. Giriş şifreniz: ${selectedSupportBusiness?.password || '123456'}.`);
       window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
       showToast('💬 WhatsApp destek sohbeti açıldı.', 'info');
     });

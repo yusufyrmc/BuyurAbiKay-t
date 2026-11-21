@@ -93,6 +93,7 @@ class AppStore {
         createdAt: '10 dk önce',
         timestamp: Date.now() - 10 * 60 * 1000,
         ownerEmail: 'ahmet@gaziantepsofrasi.com',
+        email: 'ahmet@gaziantepsofrasi.com',
         ownerRole: 'İşletme Sahibi'
       },
       {
@@ -110,6 +111,7 @@ class AppStore {
         createdAt: '2 saat önce',
         timestamp: Date.now() - 120 * 60 * 1000,
         ownerEmail: 'selin@modakafe.com',
+        email: 'selin@modakafe.com',
         ownerRole: 'Restoran Müdürü'
       },
       {
@@ -127,6 +129,7 @@ class AppStore {
         createdAt: '45 dk önce',
         timestamp: Date.now() - 45 * 60 * 1000,
         ownerEmail: 'mehmet@citirpide.com',
+        email: 'mehmet@citirpide.com',
         ownerRole: 'İşletme Sahibi'
       }
     ];
@@ -760,6 +763,7 @@ class AppStore {
       createdAt: item.created_at || 'Yeni',
       timestamp: Number(item.timestamp || Date.now()),
       ownerEmail: item.owner_email || '',
+      email: item.owner_email || '',
       ownerRole: item.owner_role || 'İşletme Sahibi'
     };
   }
